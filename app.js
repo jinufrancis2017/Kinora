@@ -1,47 +1,19 @@
-const config = window.KINORA_CONFIG || {};
-const configured = Boolean(config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase);
-const db = configured ? window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY) : null;
-const list = document.getElementById("articleList");
-const count = document.getElementById("articleCount");
-const editor = document.getElementById("editorPanel");
-const message = document.getElementById("formMessage");
-
-function showArticles(items) {
-  count.textContent = `${items.length} PUBLISHED ${items.length === 1 ? "ARTICLE" : "ARTICLES"}`;
-  if (!items.length) return;
-  list.innerHTML = items.map(a => `<article class="article-card"><span class="tag">${escapeHtml(a.category || "ARTICLE")}</span><h3>${escapeHtml(a.title)}</h3><p>${escapeHtml(a.summary || "")}</p></article>`).join("");
-}
-function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-}
-async function loadArticles() {
-  if (!db) return;
-  const {data,error} = await db.from("articles").select("id,title,summary,category").eq("status","published").order("created_at",{ascending:false});
-  if (error) { console.error(error); return; }
-  showArticles(data || []);
-}
-document.getElementById("newArticleBtn").addEventListener("click", () => { editor.classList.remove("hidden"); editor.scrollIntoView({behavior:"smooth"}); });
-document.getElementById("closeEditor").addEventListener("click", () => editor.classList.add("hidden"));
-document.getElementById("searchForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const q = document.getElementById("searchInput").value.trim().toLowerCase();
-  document.querySelectorAll(".article-card").forEach(card => card.hidden = !card.innerText.toLowerCase().includes(q));
-});
-document.getElementById("articleForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const payload = {
-    title: document.getElementById("title").value.trim(),
-    summary: document.getElementById("summary").value.trim(),
-    content: document.getElementById("content").value.trim(),
-    sources: document.getElementById("sources").value.trim(),
-    status: "draft"
-  };
-  if (!db) {
-    message.textContent = "The interface is ready. Connect Supabase to save submissions and publish articles.";
-    return;
-  }
-  const {error} = await db.from("articles").insert(payload);
-  message.textContent = error ? `Could not submit: ${error.message}` : "Submitted as a draft for moderator review.";
-  if (!error) e.target.reset();
-});
-loadArticles();
+const c=window.KINORA_CONFIG||{};
+const ready=!!(window.supabase&&c.SUPABASE_URL&&c.SUPABASE_ANON_KEY&&c.SUPABASE_ANON_KEY!=="PASTE_YOUR_SUPABASE_PUBLIC_ANON_KEY_HERE");
+const sb=ready?window.supabase.createClient(c.SUPABASE_URL,c.SUPABASE_ANON_KEY):null;
+const $=id=>document.getElementById(id);let user=null,mode="signup";
+function msg(t){$("authMessage").textContent=t}
+function render(u){user=u||null;$("signedOut").classList.toggle("hidden",!!u);$("signedIn").classList.toggle("hidden",!u);$("accountToggle").textContent=u?"My account":"Account";if(u)$("userEmail").textContent=u.email}
+function panel(){ $("accountPanel").classList.remove("hidden");$("accountPanel").scrollIntoView({behavior:"smooth"})}
+function setMode(m){mode=m;let s=m==="signup";$("authHeading").textContent=s?"Join KINORA":"Welcome back";$("nameWrap").classList.toggle("hidden",!s);$("authSubmit").textContent=s?"Create account":"Log in";$("showSignup").classList.toggle("active",s);$("showLogin").classList.toggle("active",!s);msg("")}
+function esc(v){return String(v??"").replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[x]))}
+async function load(){if(!sb)return;let {data,error}=await sb.from("articles").select("title,summary,category").eq("status","published").order("created_at",{ascending:false});if(error){console.error(error);return} $("articleCount").textContent=`${data.length} PUBLISHED ARTICLES`;if(data.length)$("articleList").innerHTML=data.map(a=>`<article class="article"><small>${esc(a.category)}</small><h3>${esc(a.title)}</h3><p>${esc(a.summary)}</p></article>`).join("")}
+$("accountToggle").onclick=panel;$("closeAccount").onclick=()=>$("accountPanel").classList.add("hidden");
+$("showSignup").onclick=()=>setMode("signup");$("showLogin").onclick=()=>setMode("login");
+$("authForm").onsubmit=async e=>{e.preventDefault();if(!sb){msg("Add the Supabase public anon/publishable key in config.js first.");return}let email=$("email").value.trim(),password=$("password").value;$("authSubmit").disabled=true;try{if(mode==="signup"){let name=$("displayName").value.trim();if(!name)throw Error("Enter a display name.");let {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:name},emailRedirectTo:c.SITE_URL}});if(error)throw error;msg(data.session?"Account created and signed in.":"Account created! Check your email, confirm your address, then log in here.")}else{let {error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;msg("Login successful.")}}catch(e){msg(e.message||"Something went wrong.")}finally{$("authSubmit").disabled=false}};
+$("logoutBtn").onclick=async()=>{let {error}=await sb.auth.signOut();msg(error?error.message:"Logged out.")};
+$("newArticleBtn").onclick=()=>{if(!sb){panel();msg("Connect the Supabase public key first.");return}if(!user){panel();msg("Create an account or log in before submitting.");return}$("editorPanel").classList.remove("hidden");$("editorPanel").scrollIntoView({behavior:"smooth"})};
+$("closeEditor").onclick=()=>$("editorPanel").classList.add("hidden");
+$("articleForm").onsubmit=async e=>{e.preventDefault();if(!user){$("formMessage").textContent="Please log in first.";return}let b=e.submitter;if(b)b.disabled=true;let {error}=await sb.from("articles").insert({title:$("title").value.trim(),summary:$("summary").value.trim(),content:$("content").value.trim(),sources:$("sources").value.trim(),status:"draft",created_by:user.id});if(b)b.disabled=false;$("formMessage").textContent=error?error.message:"Draft saved. It remains unpublished.";if(!error)e.target.reset()};
+$("searchForm").onsubmit=e=>{e.preventDefault();let q=$("searchInput").value.toLowerCase();document.querySelectorAll(".article").forEach(a=>a.hidden=!a.innerText.toLowerCase().includes(q))};
+(async()=>{if(!sb){msg("Add your Supabase public key in config.js to activate accounts.");return}let {data:{session}}=await sb.auth.getSession();render(session?.user);sb.auth.onAuthStateChange((_e,s)=>render(s?.user));await load()})();

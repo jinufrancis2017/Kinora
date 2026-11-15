@@ -1,61 +1,12 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111827">
-  <meta name="description" content="KINORA — The Open Encyclopedia">
-  <title>KINORA — The Open Encyclopedia</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css">
-</head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b0d12"><title>KINORA — The Open Encyclopedia</title><link rel="stylesheet" href="styles.css"></head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="#"><span class="brand-mark">K</span><span>KINORA<small>THE OPEN ENCYCLOPEDIA</small></span></a>
-    <button id="menuBtn" class="icon-btn" aria-label="Open menu">☰</button>
-  </header>
-  <main>
-    <section class="hero">
-      <p class="eyebrow">KNOWLEDGE, OPEN TO EVERYONE</p>
-      <h1>Explore what<br><em>the world knows.</em></h1>
-      <p class="hero-copy">A growing encyclopedia built by curious people, careful editors and shared knowledge.</p>
-      <form id="searchForm" class="search">
-        <input id="searchInput" type="search" placeholder="Search KINORA…" aria-label="Search articles">
-        <button type="submit">Search</button>
-      </form>
-      <div class="hero-links"><a href="#featured">Explore articles</a><a href="#contribute">Contribute to KINORA</a></div>
-    </section>
-
-    <section id="featured" class="section">
-      <div class="section-head"><div><p class="eyebrow">START EXPLORING</p><h2>Featured knowledge</h2></div><span class="count" id="articleCount">0 ARTICLES</span></div>
-      <div id="articleList" class="article-grid">
-        <article class="article-card"><span class="tag">WELCOME</span><h3>Knowledge begins here</h3><p>KINORA is being rebuilt. Published articles will appear here.</p></article>
-      </div>
-    </section>
-
-    <section id="contribute" class="contribute">
-      <p class="eyebrow">MAKE KNOWLEDGE BETTER</p>
-      <h2>Have something<br>worth sharing?</h2>
-      <p>Suggest an article or improve an existing one. Submissions are reviewed before publication.</p>
-      <button id="newArticleBtn" class="primary">Suggest an article <span>↗</span></button>
-    </section>
-
-    <section id="editorPanel" class="editor hidden">
-      <div class="section-head"><div><p class="eyebrow">CONTRIBUTE</p><h2>Suggest an article</h2></div><button id="closeEditor" class="icon-btn" aria-label="Close">✕</button></div>
-      <form id="articleForm">
-        <label>Article title<input id="title" required maxlength="120" placeholder="e.g. The Secret Life of Trees"></label>
-        <label>Short description<textarea id="summary" required maxlength="400" rows="3" placeholder="What is this article about?"></textarea></label>
-        <label>Article content<textarea id="content" required rows="8" placeholder="Write a neutral, well-sourced introduction…"></textarea></label>
-        <label>Sources / references<textarea id="sources" rows="3" placeholder="Add URLs or bibliographic references"></textarea></label>
-        <button class="primary" type="submit">Submit for review</button>
-        <p class="fine">Submissions remain drafts until reviewed by a KINORA moderator.</p>
-      </form>
-      <p id="formMessage" role="status"></p>
-    </section>
-  </main>
-  <footer><span class="brand-foot">KINORA</span><span>Knowledge belongs to everyone.</span><span>© KINORA</span></footer>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
-  <script src="app.js"></script>
-</body>
-</html>
+<header class="topbar"><a class="brand" href="#"><b>K</b><span>KINORA<small>THE OPEN ENCYCLOPEDIA</small></span></a><button id="accountToggle" class="outline">Account</button></header>
+<main>
+<section class="hero"><p class="eyebrow">KNOWLEDGE, OPEN TO EVERYONE</p><h1>Explore what<br><em>the world knows.</em></h1><p class="muted">A growing encyclopedia built by curious people, careful editors and shared knowledge.</p><form id="searchForm" class="search"><input id="searchInput" type="search" placeholder="Search KINORA…"><button>Search</button></form><p><a href="#featured">Explore articles</a>　<a href="#contribute">Contribute</a></p></section>
+<section id="featured" class="section"><p class="eyebrow">START EXPLORING</p><div class="section-head"><h2>Featured knowledge</h2><span id="articleCount" class="muted">0 ARTICLES</span></div><div id="articleList" class="cards"><article class="article"><h3>Knowledge begins here</h3><p>Published KINORA articles will appear here.</p></article></div></section>
+<section id="accountPanel" class="panel hidden"><div class="section-head"><h2 id="authHeading">Join KINORA</h2><button id="closeAccount" class="outline">Close</button></div><div id="signedOut"><div class="switches"><button id="showSignup" class="active">Create account</button><button id="showLogin">Log in</button></div><form id="authForm"><label id="nameWrap">Display name<input id="displayName" maxlength="60" placeholder="Your editor name"></label><label>Email<input id="email" type="email" autocomplete="email" required></label><label>Password<input id="password" type="password" minlength="8" required></label><button id="authSubmit" class="primary">Create account</button><p class="small">Email confirmation is enabled. Check your inbox after registration.</p></form></div><div id="signedIn" class="hidden"><p id="userEmail"></p><button id="logoutBtn" class="outline">Log out</button></div><p id="authMessage" class="message"></p></section>
+<section id="contribute" class="callout"><p class="eyebrow">MAKE KNOWLEDGE BETTER</p><h2>Have something worth sharing?</h2><p class="muted">Suggest an article. Submissions stay unpublished until reviewed.</p><button id="newArticleBtn" class="primary">Suggest an article ↗</button></section>
+<section id="editorPanel" class="panel hidden"><div class="section-head"><h2>Suggest an article</h2><button id="closeEditor" class="outline">Close</button></div><form id="articleForm"><label>Article title<input id="title" required maxlength="120"></label><label>Short description<textarea id="summary" required maxlength="400" rows="3"></textarea></label><label>Article content<textarea id="content" required rows="7"></textarea></label><label>Sources / references<textarea id="sources" rows="3"></textarea></label><button class="primary">Submit draft</button></form><p id="formMessage" class="message"></p></section>
+</main><footer><b>KINORA</b><span>Knowledge belongs to everyone.</span></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="app.js"></script></body></html>
