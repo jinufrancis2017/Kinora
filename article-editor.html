@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Create article — KINORA</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+.editor{max-width:850px;margin:35px auto;padding:20px}
+.editor h1{font-size:32px}
+.field{display:grid;gap:7px;margin:15px 0}
+.field label,.block label{font-size:13px;color:var(--muted)}
+input,textarea,.editable{
+width:100%;padding:12px;border-radius:9px;
+border:1px solid var(--line);background:var(--panel);
+color:var(--white);font:inherit;
+}
+textarea{resize:vertical}
+.block{background:var(--panel);border:1px solid var(--line);
+border-radius:13px;padding:16px;margin:18px 0}
+.block-head{display:flex;justify-content:space-between;align-items:center}
+.block-fields{display:grid;gap:12px;margin-top:15px}
+.editable{min-height:110px;line-height:1.6}
+.toolbar{display:flex;gap:7px;flex-wrap:wrap;margin:7px 0}
+.toolbar button,.small-btn{
+background:transparent;border:1px solid var(--line);
+color:var(--white);padding:8px 11px;border-radius:7px
+}
+.danger{color:#ff8585}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.actions button{padding:12px 17px;border-radius:9px}
+.status{color:var(--accent);font-size:13px;margin-top:12px}
+.preview{border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:25px}
+.preview h2{margin-top:25px}
+</style>
+</head>
+<body>
+<header class="topbar">
+<a class="brand" href="index.html"><b>K</b><span>KINORA<small>THE OPEN ENCYCLOPEDIA</small></span></a>
+<a href="profile.html">My profile</a>
+</header>
+
+<main class="editor">
+<p class="eyebrow">CONTRIBUTE TO KINORA</p>
+<h1>Create an article</h1>
+<p class="muted">Build an article using flexible content blocks.</p>
+
+<div class="field">
+<label for="articleTitle">Article title</label>
+<input id="articleTitle" maxlength="120" placeholder="Enter article title">
+</div>
+
+<div class="field">
+<label for="articleSummary">Short description</label>
+<textarea id="articleSummary" rows="2" maxlength="400" placeholder="Briefly describe this article"></textarea>
+</div>
+
+<div id="blocks"></div>
+
+<button class="outline" id="addBlock" type="button">＋ Add text box</button>
+
+<div class="field">
+<label for="references">References (one source per line)</label>
+<textarea id="references" rows="5" placeholder="https://example.com/source-one&#10;https://example.com/source-two"></textarea>
+</div>
+
+<div class="actions">
+<button class="primary" id="previewButton" type="button">Preview article</button>
+<button class="primary" id="saveButton" type="button">Save as draft</button>
+</div>
+
+<p id="message" class="status" role="status"></p>
+<section id="preview" class="preview" hidden></section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+(() => {
+const cfg=window.KINORA_CONFIG;
+if(!cfg?.SUPABASE_URL || !cfg?.SUPABASE_ANON_KEY){
+document.getElementById("message").textContent="Supabase configuration is missing.";
+return;
+}
+const db=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
+const blocks=document.getElementById("blocks");
+const message=document.getElementById("message");
+let nextId=0;
+
+function makeBlock(order="",heading="",content=""){
+const id=++nextId;
+const card=document.createElement("section");
+card.className="block";
+card.dataset.id=id;
+card.innerHTML=`
+<div class="block-head">
+<strong>Content block ${id}</strong>
+<button type="button" class="small-btn danger delete">Delete</button>
+</div>
+<div class="block-fields">
+<div><label>Box 1 — Order</label>
+<input class="order" type="number" min="1" value="${order || blocks.children.length+1}"></div>
+<div><label>Box 2 — Heading / field name</label>
+<input class="heading" maxlength="100" placeholder="Example: Birth, Career, Occupation" value="${escapeAttr(heading)}"></div>
+<div><label>Box 3 — Explanation / content</label>
+<div class="toolbar">
+<button type="button" data-command="bold"><b>B</b></button>
+<button type="button" data-command="italic"><i>I</i></button>
+<button type="button" data-command="insertUnorderedList">• List</button>
+<button type="button" class="link">Link</button>
+</div>
+<div class="editable" contenteditable="true" role="textbox" aria-multiline="true">${escapeHTML(content)}</div>
+</div></div>`;
+card.querySelector(".delete").addEventListener("click",()=>card.remove());
+card.querySelectorAll("[data-command]").forEach(button=>{
+button.addEventListener("click",()=>{
+const editor=card.querySelector(".editable");
+editor.focus();
+document.execCommand(button.dataset.command,false,null);
+});
+});
+card.querySelector(".link").addEventListener("click",()=>{
+const url=prompt("Enter the link URL:");
+if(url && /^https?:\/\//i.test(url)){
+card.querySelector(".editable").focus();
+document.execCommand("createLink",false,url);
+}
+});
+blocks.appendChild(card);
+}
+
+function escapeHTML(value){
+return String(value).replace(/[&<>"']/g,c=>({
+"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+})[c]);
+}
+function escapeAttr(value){return escapeHTML(value);}
+
+function collectBlocks(){
+return [...blocks.querySelectorAll(".block")]
+.map(card=>({
+order:Number(card.querySelector(".order").value)||999,
+heading:card.querySelector(".heading").value.trim(),
+content:card.querySelector(".editable").innerHTML
+}))
+.sort((a,b)=>a.order-b.order);
+}
+
+document.getElementById("addBlock").addEventListener("click",()=>makeBlock());
+
+document.getElementById("previewButton").addEventListener("click",()=>{
+const title=document.getElementById("articleTitle").value.trim();
+const data=collectBlocks();
+const preview=document.getElementById("preview");
+preview.hidden=false;
+preview.innerHTML=`<h1>${escapeHTML(title || "Untitled article")}</h1>`+
+data.map(b=>`<h2>${escapeHTML(b.heading)}</h2><div>${b.content}</div>`).join("");
+preview.scrollIntoView({behavior:"smooth"});
+});
+
+document.getElementById("saveButton").addEventListener("click",async()=>{
+message.textContent="Checking your account…";
+const {data:{user},error:userError}=await db.auth.getUser();
+if(userError || !user){
+message.textContent="Please log in before saving an article.";
+return;
+}
+const title=document.getElementById("articleTitle").value.trim();
+const summary=document.getElementById("articleSummary").value.trim();
+const data=collectBlocks();
+if(!title || !summary || !data.length || data.some(b=>!b.heading)){
+message.textContent="Please enter a title, description and a heading for every block.";
+return;
+}
+const plainContent=data.map(b=>b.heading+"\n"+b.content.replace(/<[^>]*>/g," ")).join("\n\n");
+const sources=document.getElementById("references").value
+.split("\n").map(s=>s.trim()).filter(Boolean);
+message.textContent="Saving your draft…";
+const {error}=await db.from("articles").insert({
+title,
+summary,
+content:plainContent,
+content_blocks:data,
+sources,
+category:"General",
+status:"draft",
+created_by:user.id
+});
+if(error){
+message.textContent="Could not save: "+error.message;
+return;
+}
+message.textContent="Draft saved! It is not publicly published.";
+});
+makeBlock(1,"Introduction","");
+})();
+</script>
+</body>
+</html>
