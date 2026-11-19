@@ -1,0 +1,234 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Articles — KINORA</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<style>
+:root {
+  color-scheme: dark;
+  --bg:#0b0d12;
+  --panel:#151a24;
+  --line:#30394a;
+  --muted:#9aa3b2;
+  --white:#f4f5f7;
+  --accent:#c9f06b;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--white);
+  font-family:system-ui,-apple-system,sans-serif;
+}
+header{
+  padding:18px 20px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{font-size:21px;font-weight:850;letter-spacing:2px}
+.logo span{color:var(--accent)}
+a{color:inherit;text-decoration:none}
+main{max-width:850px;margin:auto;padding:25px 18px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+h1{font-size:27px;margin:0 0 5px}
+.sub{color:var(--muted);font-size:13px}
+.create{
+  background:var(--accent);color:#10130b;padding:11px 15px;
+  border-radius:9px;font-weight:750;font-size:13px;white-space:nowrap;
+}
+.stats{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:9px;margin:25px 0;
+}
+.stat{
+  background:var(--panel);border:1px solid var(--line);
+  border-radius:12px;padding:14px 10px;
+}
+.stat strong{display:block;font-size:23px}
+.stat span{font-size:11px;color:var(--muted)}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:12px}
+.tab{
+  background:var(--panel);border:1px solid var(--line);
+  color:var(--muted);padding:9px 13px;border-radius:9px;
+  white-space:nowrap;font-size:12px;font-weight:650;
+}
+.tab.active{border-color:var(--accent);color:var(--accent)}
+.article{
+  background:var(--panel);border:1px solid var(--line);
+  border-radius:13px;padding:17px;margin:10px 0;
+}
+.article h3{font-size:16px;margin:0 0 7px}
+.article p{font-size:13px;color:var(--muted);margin:0 0 13px;line-height:1.5}
+.meta{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.status{
+  font-size:11px;padding:5px 9px;border-radius:20px;
+  background:#242b38;color:#cbd2df;
+}
+.status.published{color:#c9f06b;background:#28351b}
+.status.rejected{color:#ff8b8b;background:#382020}
+.status.pending_review{color:#ffd27a;background:#3b3020}
+.status.draft{color:#aab5c7}
+.date{font-size:11px;color:var(--muted)}
+.empty{
+  text-align:center;padding:45px 15px;
+  border:1px dashed var(--line);border-radius:13px;color:var(--muted);
+}
+.empty strong{display:block;color:var(--white);margin-bottom:7px}
+.message{padding:20px;text-align:center;color:var(--muted)}
+.hidden{display:none}
+@media(max-width:420px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  h1{font-size:23px}
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="index.html">KINORA<span>.</span></a>
+  <a href="profile.html" style="font-size:13px;color:var(--muted)">My Profile</a>
+</header>
+
+<main>
+  <div class="top">
+    <div>
+      <h1>My Articles</h1>
+      <div class="sub">Manage your encyclopedia contributions.</div>
+    </div>
+    <a class="create" href="article-editor.html">+ Create</a>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><strong id="total">—</strong><span>Total articles</span></div>
+    <div class="stat"><strong id="drafts">—</strong><span>Drafts</span></div>
+    <div class="stat"><strong id="pending">—</strong><span>Under review</span></div>
+    <div class="stat"><strong id="published">—</strong><span>Published</span></div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-filter="all">All</button>
+    <button class="tab" data-filter="draft">Drafts</button>
+    <button class="tab" data-filter="pending_review">Under review</button>
+    <button class="tab" data-filter="published">Published</button>
+    <button class="tab" data-filter="rejected">Rejected</button>
+  </div>
+
+  <div id="message" class="message">Loading your articles...</div>
+  <div id="articles"></div>
+</main>
+
+<script>
+(async function(){
+  const message = document.getElementById('message');
+  const list = document.getElementById('articles');
+  let allArticles = [];
+  let currentFilter = 'all';
+
+  function showMessage(text){
+    message.textContent = text;
+    message.classList.remove('hidden');
+  }
+
+  function hideMessage(){
+    message.classList.add('hidden');
+  }
+
+  function escapeHTML(value){
+    return String(value ?? '').replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  function render(){
+    const items = currentFilter === 'all'
+      ? allArticles
+      : allArticles.filter(a => a.status === currentFilter);
+
+    list.innerHTML = '';
+
+    if(!items.length){
+      showMessage('No articles in this section yet.');
+      return;
+    }
+
+    hideMessage();
+
+    items.forEach(article => {
+      const card = document.createElement('article');
+      card.className = 'article';
+
+      const title = escapeHTML(article.title || 'Untitled article');
+      const summary = escapeHTML(article.summary || 'No description added.');
+      const status = escapeHTML(article.status || 'draft');
+      const date = article.created_at
+        ? new Date(article.created_at).toLocaleDateString()
+        : '';
+
+      card.innerHTML = `
+        <h3>${title}</h3>
+        <p>${summary}</p>
+        <div class="meta">
+          <span class="status ${status}">${status.replace('_',' ')}</span>
+          <span class="date">Created ${escapeHTML(date)}</span>
+        </div>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  document.querySelectorAll('.tab').forEach(button => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      button.classList.add('active');
+      currentFilter = button.dataset.filter;
+      render();
+    });
+  });
+
+  try{
+    const config = window.KINORA_CONFIG;
+    if(!config || !config.SUPABASE_URL || !config.SUPABASE_ANON_KEY){
+      throw new Error('Supabase configuration was not found. Check config.js.');
+    }
+
+    const client = window.supabase.createClient(
+      config.SUPABASE_URL,
+      config.SUPABASE_ANON_KEY
+    );
+
+    const {data:{session},error:sessionError} = await client.auth.getSession();
+    if(sessionError) throw sessionError;
+
+    if(!session){
+      showMessage('Please log in to view your articles.');
+      setTimeout(() => location.href = 'login.html', 1200);
+      return;
+    }
+
+    const {data,error} = await client
+      .from('articles')
+      .select('id,title,summary,status,created_at,updated_at')
+      .eq('created_by',session.user.id)
+      .order('created_at',{ascending:false});
+
+    if(error) throw error;
+
+    allArticles = data || [];
+
+    document.getElementById('total').textContent = allArticles.length;
+    document.getElementById('drafts').textContent =
+      allArticles.filter(a => a.status === 'draft').length;
+    document.getElementById('pending').textContent =
+      allArticles.filter(a => a.status === 'pending_review').length;
+    document.getElementById('published').textContent =
+      allArticles.filter(a => a.status === 'published').length;
+
+    render();
+  }catch(error){
+    console.error(error);
+    showMessage('Could not load articles: ' + (error.message || 'Unknown error'));
+  }
+})();
+</script>
+</body>
+</html>
