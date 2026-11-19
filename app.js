@@ -1,3 +1,4 @@
+
 (() => {
   const cfg = window.KINORA_CONFIG || {};
   const hasConfig = cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY &&
@@ -94,7 +95,23 @@
     const initials=(username[0]||"K").toUpperCase();
     target.innerHTML=`<section class="profile-hero"><div class="avatar">${esc(initials)}</div><div><p class="eyebrow">KINORA CONTRIBUTOR</p><h1>${esc(username)}</h1><p class="muted">Member since ${new Date(prof?.created_at || user.created_at).toLocaleDateString(undefined,{month:"long",year:"numeric"})}</p></div></section>
       <section class="stats-grid"><div class="stat"><strong>${createdCount ?? 0}</strong><span>Articles created</span></div><div class="stat"><strong>${editedCount}</strong><span>Articles edited</span></div><div class="stat"><strong>${charsAdded.toLocaleString()}</strong><span>Characters added*</span></div><div class="stat"><strong>${revs.length}</strong><span>Recorded revisions</span></div></section>
+      <section class="profile-section"><h2>Account settings</h2><form id="usernameForm" class="form-stack"><label>Change username<input id="newUsername" type="text" minlength="3" maxlength="24" pattern="[A-Za-z0-9_]+" value="${esc(username)}" autocomplete="username" required><small>3–24 characters. Letters, numbers and underscores only.</small></label><button class="button primary" type="submit">Save username</button><p id="usernameMessage" class="form-message" role="status"></p></form></section>
       <section class="profile-section"><h2>Articles you created</h2><div class="profile-list">${(myArticles||[]).length?(myArticles||[]).map(a=>`<div class="profile-article"><strong>${esc(a.title)}</strong><span>${esc(a.status.replace("_"," "))}</span></div>`).join(""):'<div class="panel muted">You haven’t submitted an article yet.</div>'}</div><p class="muted" style="font-size:10px;margin-top:13px">*Character totals are calculated from revision records. Only positive additions are counted; deletions do not subtract from this total.</p></section>`;
+    const usernameForm=$("usernameForm");
+    if(usernameForm) usernameForm.addEventListener("submit",async e=>{
+      e.preventDefault();
+      const nextUsername=$("newUsername").value.trim();
+      if(!/^[A-Za-z0-9_]{3,24}$/.test(nextUsername)){
+        say("usernameMessage","Use 3–24 letters, numbers or underscores.",true); return;
+      }
+      say("usernameMessage","Saving username…");
+      const {error}=await client.from("profiles").update({username:nextUsername}).eq("id",user.id);
+      if(error){
+        say("usernameMessage",error.code==="23505"?"That username is already taken. Try another one.":error.message,true); return;
+      }
+      say("usernameMessage","Username updated successfully.");
+      loadProfile();
+    });
   }
 
   syncNav();
