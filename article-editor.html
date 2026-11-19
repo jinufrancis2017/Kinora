@@ -4,196 +4,367 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Create article — KINORA</title>
+<title>Article Studio — KINORA</title>
 <link rel="stylesheet" href="styles.css">
 <style>
-.editor{max-width:850px;margin:35px auto;padding:20px}
-.editor h1{font-size:32px}
-.field{display:grid;gap:7px;margin:15px 0}
-.field label,.block label{font-size:13px;color:var(--muted)}
-input,textarea,.editable{
-width:100%;padding:12px;border-radius:9px;
-border:1px solid var(--line);background:var(--panel);
-color:var(--white);font:inherit;
+:root {
+  --studio-bg:#0b0d12;
+  --studio-panel:#151a24;
+  --studio-panel2:#1b2230;
+  --studio-line:#30394a;
+  --studio-muted:#9aa3b2;
+  --studio-white:#f4f5f7;
+  --studio-accent:#c9f06b;
 }
-textarea{resize:vertical}
-.block{background:var(--panel);border:1px solid var(--line);
-border-radius:13px;padding:16px;margin:18px 0}
-.block-head{display:flex;justify-content:space-between;align-items:center}
-.block-fields{display:grid;gap:12px;margin-top:15px}
-.editable{min-height:110px;line-height:1.6}
-.toolbar{display:flex;gap:7px;flex-wrap:wrap;margin:7px 0}
-.toolbar button,.small-btn{
-background:transparent;border:1px solid var(--line);
-color:var(--white);padding:8px 11px;border-radius:7px
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--studio-bg);color:var(--studio-white);
+  font-family:system-ui,-apple-system,sans-serif;
 }
-.danger{color:#ff8585}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
-.actions button{padding:12px 17px;border-radius:9px}
-.status{color:var(--accent);font-size:13px;margin-top:12px}
-.preview{border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:25px}
-.preview h2{margin-top:25px}
+.studio-header{
+  position:sticky;top:0;z-index:10;
+  background:rgba(11,13,18,.94);backdrop-filter:blur(15px);
+  border-bottom:1px solid var(--studio-line);
+  padding:13px 18px;display:flex;align-items:center;
+  justify-content:space-between;gap:12px;
+}
+.brand{color:var(--studio-accent);font-size:21px;font-weight:850;
+letter-spacing:-1px;text-decoration:none}
+.brand span{color:white}
+.header-link{color:var(--studio-muted);text-decoration:none;font-size:13px}
+.studio{width:min(760px,100%);margin:auto;padding:30px 18px 70px}
+.eyebrow{font-size:11px;letter-spacing:2px;color:var(--studio-accent);font-weight:750}
+h1{font-size:clamp(29px,7vw,42px);line-height:1.1;letter-spacing:-1.5px;margin:9px 0}
+.sub{color:var(--studio-muted);font-size:14px;line-height:1.6}
+.panel{
+  background:var(--studio-panel);border:1px solid var(--studio-line);
+  border-radius:15px;padding:18px;margin-top:20px;
+}
+.section-title{font-size:15px;font-weight:750;margin:0 0 15px}
+.field{margin:14px 0}
+.field label,.block label{
+  display:block;color:var(--studio-muted);font-size:12px;
+  font-weight:650;margin-bottom:7px
+}
+input,textarea,.editor-content{
+  width:100%;background:var(--studio-panel2);
+  border:1px solid var(--studio-line);border-radius:9px;
+  color:var(--studio-white);font:inherit;font-size:15px;
+  padding:12px 13px;outline:none;
+}
+input:focus,textarea:focus,.editor-content:focus{
+  border-color:var(--studio-accent);
+}
+textarea{resize:vertical;min-height:75px}
+input::placeholder,textarea::placeholder{color:#707b8d}
+.block{
+  background:var(--studio-panel);border:1px solid var(--studio-line);
+  border-radius:15px;padding:16px;margin:13px 0;
+}
+.block-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.block-number{color:var(--studio-accent);font-size:11px;font-weight:800;letter-spacing:1px}
+.block-tools{display:flex;gap:5px}
+.mini{
+  background:var(--studio-panel2);border:1px solid var(--studio-line);
+  color:var(--studio-muted);padding:7px 10px;border-radius:7px;
+  font-size:12px
+}
+.delete{color:#ff8a8a}
+.block .field{margin:14px 0}
+.editor-content{min-height:125px;line-height:1.7}
+.editor-content:empty:before{content:attr(data-placeholder);color:#707b8d}
+.toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px}
+.tool{
+  background:var(--studio-panel2);color:var(--studio-white);
+  border:1px solid var(--studio-line);border-radius:7px;
+  min-width:36px;padding:8px 11px;font-size:13px
+}
+.add{
+  width:100%;padding:15px;border:1px dashed #718348;
+  border-radius:11px;background:rgba(201,240,107,.055);
+  color:var(--studio-accent);font-size:14px;font-weight:700;
+  margin-top:7px
+}
+.primary{
+  background:var(--studio-accent);color:#11170a;
+  border:0;border-radius:9px;padding:13px 17px;
+  font-size:14px;font-weight:750
+}
+.secondary{
+  background:var(--studio-panel2);color:var(--studio-white);
+  border:1px solid var(--studio-line);border-radius:9px;
+  padding:13px 17px;font-size:14px
+}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:19px}
+.status{font-size:13px;color:var(--studio-accent);line-height:1.5}
+.preview{background:#fff;color:#222;border-radius:13px;padding:23px;margin-top:25px;line-height:1.75}
+.preview h1{color:#171717;font-size:30px}
+.preview h2{font-size:21px;border-bottom:1px solid #ddd;padding-bottom:7px;margin-top:25px}
+.preview img{max-width:100%}
+.preview a{color:#2458a6}
+.preview[hidden]{display:none}
+.footer-note{font-size:11px;color:var(--studio-muted);margin-top:22px;line-height:1.6}
+@media(min-width:650px){
+ .studio{padding-top:45px}
+ .panel{padding:23px}
+ .block{padding:20px}
+}
 </style>
 </head>
 <body>
-<header class="topbar">
-<a class="brand" href="index.html"><b>K</b><span>KINORA<small>THE OPEN ENCYCLOPEDIA</small></span></a>
-<a href="profile.html">My profile</a>
+
+<header class="studio-header">
+  <a href="index.html" class="brand">K<span>INORA</span></a>
+  <a href="profile.html" class="header-link">My profile ↗</a>
 </header>
 
-<main class="editor">
-<p class="eyebrow">CONTRIBUTE TO KINORA</p>
-<h1>Create an article</h1>
-<p class="muted">Build an article using flexible content blocks.</p>
+<main class="studio">
+  <p class="eyebrow">KINORA / CONTRIBUTOR STUDIO</p>
+  <h1>Create something<br>worth knowing.</h1>
+  <p class="sub">Build an encyclopedia article. Organise its sections, add sources and preview your work before submitting.</p>
 
-<div class="field">
-<label for="articleTitle">Article title</label>
-<input id="articleTitle" maxlength="120" placeholder="Enter article title">
-</div>
+  <section class="panel">
+    <h2 class="section-title">Article information</h2>
+    <div class="field">
+      <label for="articleTitle">ARTICLE TITLE</label>
+      <input id="articleTitle" maxlength="120" placeholder="e.g. Jinu Francis">
+    </div>
+    <div class="field">
+      <label for="articleSummary">SHORT DESCRIPTION</label>
+      <textarea id="articleSummary" maxlength="400" placeholder="A short introduction to this subject..." rows="2"></textarea>
+    </div>
+  </section>
 
-<div class="field">
-<label for="articleSummary">Short description</label>
-<textarea id="articleSummary" rows="2" maxlength="400" placeholder="Briefly describe this article"></textarea>
-</div>
+  <section style="margin-top:28px">
+    <div class="block-top">
+      <div>
+        <p class="eyebrow">ARTICLE STRUCTURE</p>
+        <h2 style="font-size:21px;margin:4px 0">Content sections</h2>
+      </div>
+      <span id="blockCount" class="block-number">01 SECTION</span>
+    </div>
+    <p class="sub">Arrange your sections in the order readers should see them.</p>
+    <div id="blocks"></div>
+    <button class="add" id="addBlock" type="button">＋ &nbsp; Add content section</button>
+  </section>
 
-<div id="blocks"></div>
+  <section class="panel">
+    <h2 class="section-title">References & sources</h2>
+    <p class="sub">Add one source URL per line. We will connect these to numbered citations in a later update.</p>
+    <div class="field">
+      <label for="references">SOURCE URLS</label>
+      <textarea id="references" rows="4" placeholder="https://example.com/source-one"></textarea>
+    </div>
+  </section>
 
-<button class="outline" id="addBlock" type="button">＋ Add text box</button>
+  <div class="actions">
+    <button class="secondary" id="previewButton" type="button">Preview article</button>
+    <button class="primary" id="saveButton" type="button">Save as draft ↗</button>
+  </div>
+  <p id="message" class="status" role="status"></p>
 
-<div class="field">
-<label for="references">References (one source per line)</label>
-<textarea id="references" rows="5" placeholder="https://example.com/source-one&#10;https://example.com/source-two"></textarea>
-</div>
+  <section id="preview" class="preview" hidden></section>
 
-<div class="actions">
-<button class="primary" id="previewButton" type="button">Preview article</button>
-<button class="primary" id="saveButton" type="button">Save as draft</button>
-</div>
-
-<p id="message" class="status" role="status"></p>
-<section id="preview" class="preview" hidden></section>
+  <p class="footer-note">KINORA CONTRIBUTOR STUDIO · Your saved draft is not publicly published. Articles must follow the review and approval process.</p>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
 (() => {
-const cfg=window.KINORA_CONFIG;
-if(!cfg?.SUPABASE_URL || !cfg?.SUPABASE_ANON_KEY){
-document.getElementById("message").textContent="Supabase configuration is missing.";
-return;
-}
-const db=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
-const blocks=document.getElementById("blocks");
-const message=document.getElementById("message");
-let nextId=0;
+  const cfg=window.KINORA_CONFIG;
+  const message=document.getElementById("message");
+  const blocks=document.getElementById("blocks");
+  const count=document.getElementById("blockCount");
+  const preview=document.getElementById("preview");
 
-function makeBlock(order="",heading="",content=""){
-const id=++nextId;
-const card=document.createElement("section");
-card.className="block";
-card.dataset.id=id;
-card.innerHTML=`
-<div class="block-head">
-<strong>Content block ${id}</strong>
-<button type="button" class="small-btn danger delete">Delete</button>
-</div>
-<div class="block-fields">
-<div><label>Box 1 — Order</label>
-<input class="order" type="number" min="1" value="${order || blocks.children.length+1}"></div>
-<div><label>Box 2 — Heading / field name</label>
-<input class="heading" maxlength="100" placeholder="Example: Birth, Career, Occupation" value="${escapeAttr(heading)}"></div>
-<div><label>Box 3 — Explanation / content</label>
-<div class="toolbar">
-<button type="button" data-command="bold"><b>B</b></button>
-<button type="button" data-command="italic"><i>I</i></button>
-<button type="button" data-command="insertUnorderedList">• List</button>
-<button type="button" class="link">Link</button>
-</div>
-<div class="editable" contenteditable="true" role="textbox" aria-multiline="true">${escapeHTML(content)}</div>
-</div></div>`;
-card.querySelector(".delete").addEventListener("click",()=>card.remove());
-card.querySelectorAll("[data-command]").forEach(button=>{
-button.addEventListener("click",()=>{
-const editor=card.querySelector(".editable");
-editor.focus();
-document.execCommand(button.dataset.command,false,null);
-});
-});
-card.querySelector(".link").addEventListener("click",()=>{
-const url=prompt("Enter the link URL:");
-if(url && /^https?:\/\//i.test(url)){
-card.querySelector(".editable").focus();
-document.execCommand("createLink",false,url);
-}
-});
-blocks.appendChild(card);
-}
+  if(!cfg?.SUPABASE_URL || !cfg?.SUPABASE_ANON_KEY){
+    message.textContent="Supabase configuration is missing. Check config.js.";
+    return;
+  }
 
-function escapeHTML(value){
-return String(value).replace(/[&<>"']/g,c=>({
-"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-})[c]);
-}
-function escapeAttr(value){return escapeHTML(value);}
+  const db=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
+  let nextId=0;
 
-function collectBlocks(){
-return [...blocks.querySelectorAll(".block")]
-.map(card=>({
-order:Number(card.querySelector(".order").value)||999,
-heading:card.querySelector(".heading").value.trim(),
-content:card.querySelector(".editable").innerHTML
-}))
-.sort((a,b)=>a.order-b.order);
-}
+  function escapeHTML(value){
+    return String(value).replace(/[&<>"']/g,c=>({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    })[c]);
+  }
 
-document.getElementById("addBlock").addEventListener("click",()=>makeBlock());
+  function cleanHTML(html){
+    const doc=new DOMParser().parseFromString(html,"text/html");
+    const allowed=["B","STRONG","I","EM","U","P","BR","UL","OL","LI","A","BLOCKQUOTE"];
+    function clean(parent){
+      [...parent.childNodes].forEach(node=>{
+        if(node.nodeType===Node.TEXT_NODE)return;
+        if(node.nodeType!==Node.ELEMENT_NODE){node.remove();return;}
+        if(!allowed.includes(node.tagName)){
+          node.replaceWith(...node.childNodes);
+          return;
+        }
+        if(node.tagName==="A"){
+          const href=node.getAttribute("href")||"";
+          if(!/^https?:\/\//i.test(href)){
+            node.replaceWith(...node.childNodes);
+            return;
+          }
+          [...node.attributes].forEach(a=>node.removeAttribute(a.name));
+          node.setAttribute("href",href);
+          node.setAttribute("rel","noopener noreferrer");
+        }else{
+          [...node.attributes].forEach(a=>node.removeAttribute(a.name));
+        }
+        clean(node);
+      });
+    }
+    clean(doc.body);
+    return doc.body.innerHTML;
+  }
 
-document.getElementById("previewButton").addEventListener("click",()=>{
-const title=document.getElementById("articleTitle").value.trim();
-const data=collectBlocks();
-const preview=document.getElementById("preview");
-preview.hidden=false;
-preview.innerHTML=`<h1>${escapeHTML(title || "Untitled article")}</h1>`+
-data.map(b=>`<h2>${escapeHTML(b.heading)}</h2><div>${b.content}</div>`).join("");
-preview.scrollIntoView({behavior:"smooth"});
-});
+  function updateCount(){
+    const n=blocks.children.length;
+    count.textContent=String(n).padStart(2,"0")+" SECTION"+(n===1?"":"S");
+  }
 
-document.getElementById("saveButton").addEventListener("click",async()=>{
-message.textContent="Checking your account…";
-const {data:{user},error:userError}=await db.auth.getUser();
-if(userError || !user){
-message.textContent="Please log in before saving an article.";
-return;
-}
-const title=document.getElementById("articleTitle").value.trim();
-const summary=document.getElementById("articleSummary").value.trim();
-const data=collectBlocks();
-if(!title || !summary || !data.length || data.some(b=>!b.heading)){
-message.textContent="Please enter a title, description and a heading for every block.";
-return;
-}
-const plainContent=data.map(b=>b.heading+"\n"+b.content.replace(/<[^>]*>/g," ")).join("\n\n");
-const sources=document.getElementById("references").value
-.split("\n").map(s=>s.trim()).filter(Boolean);
-message.textContent="Saving your draft…";
-const {error}=await db.from("articles").insert({
-title,
-summary,
-content:plainContent,
-content_blocks:data,
-sources,
-category:"General",
-status:"draft",
-created_by:user.id
-});
-if(error){
-message.textContent="Could not save: "+error.message;
-return;
-}
-message.textContent="Draft saved! It is not publicly published.";
-});
-makeBlock(1,"Introduction","");
+  function moveBlock(card,direction){
+    const sibling=direction<0?card.previousElementSibling:card.nextElementSibling;
+    if(!sibling)return;
+    if(direction<0)blocks.insertBefore(card,sibling);
+    else blocks.insertBefore(sibling,card);
+    [...blocks.children].forEach((el,i)=>{
+      el.querySelector(".order").value=i+1;
+    });
+  }
+
+  function makeBlock(heading="",content=""){
+    const id=++nextId;
+    const card=document.createElement("article");
+    card.className="block";
+    card.innerHTML=`
+      <div class="block-top">
+        <span class="block-number">SECTION ${String(id).padStart(2,"0")}</span>
+        <div class="block-tools">
+          <button class="mini up" type="button" aria-label="Move up">↑</button>
+          <button class="mini down" type="button" aria-label="Move down">↓</button>
+          <button class="mini delete" type="button">Delete</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>BOX 1 · ORDER</label>
+        <input class="order" type="number" min="1" value="${blocks.children.length+1}">
+      </div>
+      <div class="field">
+        <label>BOX 2 · HEADING / FIELD NAME</label>
+        <input class="heading" maxlength="100" placeholder="e.g. Birth, Career, Occupation" value="${escapeHTML(heading)}">
+      </div>
+      <div class="field">
+        <label>BOX 3 · EXPLANATION / CONTENT</label>
+        <div class="toolbar">
+          <button class="tool" type="button" data-cmd="bold"><b>B</b></button>
+          <button class="tool" type="button" data-cmd="italic"><i>I</i></button>
+          <button class="tool" type="button" data-cmd="insertUnorderedList">• List</button>
+          <button class="tool link" type="button">↗ Link</button>
+        </div>
+        <div class="editor-content" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Write your article section here...">${escapeHTML(content)}</div>
+      </div>`;
+
+    card.querySelector(".delete").addEventListener("click",()=>{
+      card.remove();
+      updateCount();
+    });
+    card.querySelector(".up").addEventListener("click",()=>moveBlock(card,-1));
+    card.querySelector(".down").addEventListener("click",()=>moveBlock(card,1));
+
+    card.querySelectorAll("[data-cmd]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        const editor=card.querySelector(".editor-content");
+        editor.focus();
+        document.execCommand(button.dataset.cmd,false,null);
+      });
+    });
+    card.querySelector(".link").addEventListener("click",()=>{
+      const url=prompt("Enter a complete https:// or http:// URL");
+      if(url && /^https?:\/\//i.test(url)){
+        const editor=card.querySelector(".editor-content");
+        editor.focus();
+        document.execCommand("createLink",false,url);
+      }
+    });
+
+    blocks.appendChild(card);
+    updateCount();
+  }
+
+  function collectBlocks(){
+    return [...blocks.querySelectorAll(".block")]
+      .map(card=>({
+        order:Number(card.querySelector(".order").value)||999,
+        heading:card.querySelector(".heading").value.trim(),
+        content:cleanHTML(card.querySelector(".editor-content").innerHTML)
+      }))
+      .sort((a,b)=>a.order-b.order);
+  }
+
+  document.getElementById("addBlock").addEventListener("click",()=>{
+    makeBlock();
+    blocks.lastElementChild.scrollIntoView({behavior:"smooth",block:"center"});
+  });
+
+  document.getElementById("previewButton").addEventListener("click",()=>{
+    const title=document.getElementById("articleTitle").value.trim();
+    const summary=document.getElementById("articleSummary").value.trim();
+    const data=collectBlocks();
+    preview.hidden=false;
+    preview.innerHTML=`<p style="color:#63743b;font-size:11px;font-weight:bold">KINORA · ARTICLE PREVIEW</p>
+      <h1>${escapeHTML(title||"Untitled article")}</h1>
+      <p>${escapeHTML(summary)}</p>`+
+      data.map(b=>`<h2>${escapeHTML(b.heading)}</h2><div>${b.content}</div>`).join("");
+    preview.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+
+  document.getElementById("saveButton").addEventListener("click",async()=>{
+    const button=document.getElementById("saveButton");
+    button.disabled=true;
+    message.textContent="Checking your account…";
+    try{
+      const {data:{user},error:userError}=await db.auth.getUser();
+      if(userError||!user){
+        message.textContent="Please log in before saving your article.";
+        return;
+      }
+      const title=document.getElementById("articleTitle").value.trim();
+      const summary=document.getElementById("articleSummary").value.trim();
+      const data=collectBlocks();
+      if(!title||!summary||!data.length||data.some(b=>!b.heading)){
+        message.textContent="Please add a title, description and heading for every section.";
+        return;
+      }
+      const content=data.map(b=>b.heading+"\n"+b.content.replace(/<[^>]*>/g," ")).join("\n\n");
+      const sources=document.getElementById("references").value
+        .split("\n").map(s=>s.trim()).filter(Boolean);
+      if(sources.some(s=>!/^https?:\/\//i.test(s))){
+        message.textContent="Each reference must be a complete http:// or https:// URL.";
+        return;
+      }
+      message.textContent="Saving your draft…";
+      const {error}=await db.from("articles").insert({
+        title,summary,content,content_blocks:data,sources,
+        category:"General",status:"draft",created_by:user.id
+      });
+      if(error){
+        message.textContent="Could not save: "+error.message;
+        return;
+      }
+      message.textContent="Draft saved successfully. It is not publicly published.";
+    }catch(error){
+      message.textContent="Something went wrong: "+error.message;
+    }finally{
+      button.disabled=false;
+    }
+  });
+
+  makeBlock("Introduction","");
 })();
 </script>
 </body>
