@@ -23,6 +23,7 @@ input,textarea,select,.visual{width:100%;background:var(--panel2);border:1px sol
 input:focus,textarea:focus,select:focus,.visual:focus{border-color:var(--accent)}
 textarea{resize:vertical;line-height:1.65}
 button{cursor:pointer;font:inherit}
+button:disabled{opacity:.5;cursor:not-allowed}
 .primary{background:var(--accent);color:#10150a;border:0;border-radius:9px;padding:12px 16px;font-weight:800}
 .secondary,.small,.tool{background:var(--panel2);border:1px solid var(--line);color:white;border-radius:8px;padding:9px 12px;font-size:12px}
 .small{padding:7px 10px;color:var(--muted)}
@@ -658,6 +659,7 @@ function renderFilmPreview(f){
 function getPersonData(){
  return {
   kind:"person",version:1,
+  subtitle:val("subtitle"),
   occupation:val("personOccupation"),
   date_of_birth:val("personDob"),
   date_of_death:val("personDod"),
@@ -749,11 +751,13 @@ function renderPreview(){
 }
 $("previewButton").onclick=renderPreview;
 
-/* LOAD AN EXISTING ARTICLE */
+/* LOAD AN EXISTING ARTICLE
+   Any logged-in user can load a published article.
+   Drafts and pending articles remain author-only. */
 async function loadExistingArticle(){
  if(!editingArticleId)return;
 
- message.textContent="Loading your article…";
+ message.textContent="Loading article…";
 
  try{
   const {data:{user},error:userError}=await db.auth.getUser();
@@ -763,15 +767,19 @@ async function loadExistingArticle(){
   const {data:article,error}=await db.from("articles")
    .select("*")
    .eq("id",editingArticleId)
-   .eq("created_by",user.id)
+   .is("deleted_at",null)
    .single();
 
   if(error)throw error;
   if(!article)throw new Error("Article not found.");
 
-  existingArticle=article;
+  // Only published articles are open to all contributors.
+  // Draft, pending and rejected articles remain author-only.
+  if(article.status!=="published"&&article.created_by!==user.id){
+   throw new Error("You can only edit another contributor's published articles.");
+  }
 
-  if(article.deleted_at)throw new Error("This article has been deleted.");
+  existingArticle=article;
 
   const blocks=Array.isArray(article.content_blocks)?article.content_blocks:[];
   const isPerson=article.category==="People";
@@ -839,12 +847,16 @@ async function loadExistingArticle(){
   }
 
   $("pageHeading").textContent="Edit article.";
-  $("pageDescription").textContent="Update your existing KINORA article.";
+  $("pageDescription").textContent=article.status==="published"
+   ?"Collaboratively edit this published KINORA article."
+   :"Update your existing KINORA article.";
   document.title="Edit Article | KINORA";
-  $("saveButton").textContent="Save changes";
-  $("submitButton").textContent="Save changes";
+  $("saveButton").textContent=article.status==="published"?"Save changes":"Save draft";
+  $("submitButton").textContent=article.status==="published"?"Save changes":"Submit for review ↗";
 
-  $("message").textContent="Article loaded successfully. You can now edit it.";
+  message.textContent=article.status==="published"
+   ?"Published article loaded. You can edit and save your changes."
+   :"Your article loaded successfully.";
 
   if(isPerson)loadPersonFilmography();
 
@@ -887,30 +899,40 @@ async function saveArticle(submitForReview){
    body_source:body,
    citations,
    sources:citations.map(c=>c.url).join("\n"),
-   category:isFilm?"Film":"People",
-   created_by:user.id
+   category:isFilm?"Film":"People"
   };
 
   if(editingArticleId){
 
    if(!existingArticle)throw new Error("The existing article has not loaded.");
 
-   // Published articles remain published after saving.
-   // Draft submission still uses the existing review workflow.
+   // Preserve the original creator. Never transfer ownership
+   // to the contributor who is editing the article.
+   payload.created_by=existingArticle.created_by;
+
+   // Published articles stay published after collaborative edits.
+   // Other contributors cannot edit another user's unpublished article.
    if(existingArticle.status==="published"){
     payload.status="published";
-   }else if(existingArticle.status==="draft"&&submitForReview){
-    payload.status="pending";
    }else{
-    payload.status=existingArticle.status;
+    if(existingArticle.created_by!==user.id){
+     throw new Error("Only the original author can edit an unpublished article.");
+    }
+
+    if(existingArticle.status==="draft"&&submitForReview){
+     payload.status="pending";
+    }else{
+     payload.status=existingArticle.status;
+    }
    }
 
    message.textContent="Saving your changes…";
 
+   // No created_by filter here: published articles can be edited
+   // by any authenticated contributor under the new RLS policy.
    const {error:updateError}=await db.from("articles")
     .update(payload)
-    .eq("id",editingArticleId)
-    .eq("created_by",user.id);
+    .eq("id",editingArticleId);
 
    if(updateError)throw updateError;
 
@@ -919,7 +941,7 @@ async function saveArticle(submitForReview){
    if(isPerson)window.__kinoraPersonId=editingArticleId;
 
    message.textContent=existingArticle.status==="published"
-    ?"Changes saved! Your published article has been updated."
+    ?"Changes saved! The published article has been updated."
     :existingArticle.status==="pending"
     ?"Changes saved. Your article remains under review."
     :existingArticle.status==="rejected"
@@ -928,7 +950,9 @@ async function saveArticle(submitForReview){
 
   }else{
 
+   payload.created_by=user.id;
    payload.status="draft";
+
    message.textContent=submitForReview?"Saving and submitting your article…":"Saving your draft…";
 
    const {data:created,error:insertError}=await db.from("articles")
