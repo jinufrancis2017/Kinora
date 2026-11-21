@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -59,7 +58,7 @@ button{cursor:pointer;font:inherit}
 .person-card img{width:100%;height:125px;object-fit:cover;border-radius:7px;background:#eee}
 .person-card strong,.person-card small{display:block}
 .person-card small{color:#555}
-.modal-bg{position:fixed;inset:0;background:#000b;z-index:20;display:none;align-items:center;justify-content:center;padding:15px}
+.person-search{position:relative}.person-results{position:absolute;top:100%;left:0;right:0;z-index:8;background:#202938;border:1px solid var(--line);border-radius:9px;max-height:190px;overflow:auto;box-shadow:0 8px 24px #0008}.person-option{display:flex;align-items:center;gap:9px;width:100%;padding:8px;border:0;border-bottom:1px solid var(--line);background:transparent;color:white;text-align:left}.person-option img{width:34px;height:34px;border-radius:50%;object-fit:cover}.person-option small{display:block;color:var(--muted)}.person-selected{font-size:11px;color:var(--accent);margin-top:5px}.filmography-entry{display:flex;gap:10px;align-items:center;margin:10px 0}.filmography-entry img{width:48px;height:66px;object-fit:cover;border-radius:5px}.person-profile-preview{display:flex;gap:18px;align-items:flex-start}.person-profile-preview img{width:130px;max-height:170px;object-fit:cover;border-radius:8px}.modal-bg{position:fixed;inset:0;background:#000b;z-index:20;display:none;align-items:center;justify-content:center;padding:15px}
 .modal-bg.open{display:flex}.modal{width:min(480px,100%);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
 @media(max-width:520px){main{padding:23px 13px 55px}.panel{padding:14px}.field-grid,.row,.info-row{grid-template-columns:1fr}.data-row{grid-template-columns:1fr 1fr}}
 </style>
@@ -73,7 +72,7 @@ button{cursor:pointer;font:inherit}
 <main>
 <p class="eyebrow">KINORA / CONTRIBUTOR STUDIO</p>
 <h1>Create an article.</h1>
-<p class="muted">Create a standard article or use the dedicated Film article structure.</p>
+<p class="muted">Create a Film or People article. New articles are saved as drafts for review.</p>
 
 <section class="panel">
 <h2>Article information</h2>
@@ -83,11 +82,9 @@ button{cursor:pointer;font:inherit}
 <input id="subtitle" maxlength="200" placeholder="e.g. 2026 Malayalam film">
 <label for="category">ARTICLE TYPE</label>
 <select id="category">
-<option value="General">Standard article</option>
 <option value="Film">Film</option>
+<option value="People">People</option>
 </select>
-<label for="summary">SHORT DESCRIPTION</label>
-<textarea id="summary" rows="2" maxlength="500" placeholder="A short introduction"></textarea>
 </section>
 
 <section class="panel" id="filmFields" hidden>
@@ -129,14 +126,14 @@ button{cursor:pointer;font:inherit}
 
 <div class="subpanel">
 <h3>Theatrical release</h3>
-<p class="muted">Each release can include a country, flag image, date and certification.</p>
+<p class="muted">Enter a country name and its flag is added automatically, with no image URL needed.</p>
 <div id="theatricalRows"></div>
 <button class="add" type="button" id="addTheatrical">＋ Add theatrical release</button>
 </div>
 
 <div class="subpanel">
 <h3>Digital release</h3>
-<p class="muted">Add streaming platform, app icon and release date.</p>
+<p class="muted">Enter a streaming platform name and its logo is added automatically, with no image URL needed.</p>
 <div id="digitalRows"></div>
 <button class="add" type="button" id="addDigital">＋ Add digital release</button>
 </div>
@@ -169,6 +166,24 @@ button{cursor:pointer;font:inherit}
 </div>
 </section>
 
+<section class="panel" id="peopleFields" hidden>
+<h2>People article details</h2>
+<p class="muted">Add the person's biographical information. Filmography is collected automatically from Film articles linked to this People article.</p>
+<div class="field-grid">
+<div><label>OCCUPATION</label><input id="personOccupation" placeholder="e.g. Actor, director"></div>
+<div><label>DATE OF BIRTH</label><input id="personDob" placeholder="e.g. 14 May 1985"></div>
+<div><label>DATE OF DEATH (IF APPLICABLE)</label><input id="personDod" placeholder="Leave blank if living"></div>
+<div><label>BIRTHPLACE</label><input id="personBirthplace" placeholder="City, country"></div>
+<div><label>DEATH PLACE (IF APPLICABLE)</label><input id="personDeathplace" placeholder="City, country"></div>
+<div><label>PROFILE PHOTO URL</label><input id="personPhoto" placeholder="https://..."></div>
+</div>
+<div class="subpanel">
+<h3>Filmography preview</h3>
+<p class="muted">The latest five linked films will appear here. The full list can be expanded on the article page.</p>
+<div id="personFilmography" class="muted">Save this People article and link it from Film cast or crew entries to build the filmography.</div>
+</div>
+</section>
+
 <section class="panel">
 <h2>Infobox</h2>
 <p class="muted">Add facts using a heading and answer.</p>
@@ -189,8 +204,7 @@ button{cursor:pointer;font:inherit}
 <button class="tool" data-command="italic" type="button"><i>I</i></button>
 <button class="tool" data-command="insertUnorderedList" type="button">• List</button>
 <button class="tool" id="visualHeading" type="button">H2 Section</button>
-<button class="tool" id="visualLink" type="button">↗ Link</button>
-<button class="tool" id="visualCitation" type="button">[+] Citation</button>
+<button class="tool" id="visualLink" type="button">↗ Link</button><button class="tool" id="visualCitation" type="button">[+] Citation</button>
 </div>
 <div id="visualEditor" class="visual" contenteditable="true" data-placeholder="Start writing your article here..."></div>
 </div>
@@ -250,8 +264,48 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const val=id=>$(id).value.trim();
 const setVal=(id,v)=>{if($(id))$(id).value=v??"";};
 
+// Country flags are generated from the country name; platform marks use Simple Icons.
+const countryCodes={
+ "india":"in","united states":"us","usa":"us","united states of america":"us",
+ "united kingdom":"gb","uk":"gb","great britain":"gb","canada":"ca","australia":"au",
+ "new zealand":"nz","south korea":"kr","korea":"kr","japan":"jp","china":"cn",
+ "france":"fr","germany":"de","italy":"it","spain":"es","portugal":"pt",
+ "netherlands":"nl","belgium":"be","switzerland":"ch","sweden":"se","norway":"no",
+ "denmark":"dk","finland":"fi","ireland":"ie","russia":"ru","ukraine":"ua",
+ "turkey":"tr","türkiye":"tr","united arab emirates":"ae","uae":"ae",
+ "saudi arabia":"sa","qatar":"qa","kuwait":"kw","oman":"om","bahrain":"bh",
+ "pakistan":"pk","bangladesh":"bd","sri lanka":"lk","nepal":"np","bhutan":"bt",
+ "maldives":"mv","indonesia":"id","malaysia":"my","singapore":"sg","thailand":"th",
+ "vietnam":"vn","philippines":"ph","taiwan":"tw","hong kong":"hk",
+ "south africa":"za","nigeria":"ng","kenya":"ke","egypt":"eg","morocco":"ma",
+ "brazil":"br","mexico":"mx","argentina":"ar","chile":"cl","colombia":"co",
+ "peru":"pe","poland":"pl","greece":"gr","israel":"il","iran":"ir",
+ "iraq":"iq","afghanistan":"af","myanmar":"mm","cambodia":"kh","laos":"la"
+};
+const platformSlugs={
+ "netflix":"netflix","prime video":"amazonprime","amazon prime video":"amazonprime",
+ "amazon prime":"amazonprime","disney+":"disneyplus","disney plus":"disneyplus",
+ "hotstar":"hotstar","jiohotstar":"jiohotstar","zee5":"zee5","zee 5":"zee5",
+ "sonyliv":"sonyliv","sony liv":"sonyliv","apple tv+":"appletv","apple tv plus":"appletv",
+ "apple tv":"appletv","youtube":"youtube","youtube movies":"youtube",
+ "hulu":"hulu","max":"max","hbo max":"hbo","paramount+":"paramountplus",
+ "paramount plus":"paramountplus","crunchyroll":"crunchyroll","mubi":"mubi",
+ "peacock":"peacock","tubi":"tubi","rakuten tv":"rakutentv","aha":"aha",
+ "manorama max":"manoramamax","shemaroo me":"shemaroome"
+};
+function autoImageUrl(kind,name){
+ const key=String(name||"").trim().toLowerCase();
+ if(kind==="flag"){
+  const code=countryCodes[key] || (/^[a-z]{2}$/i.test(key)?key.toLowerCase():"");
+  return code?`https://flagcdn.com/w80/${code}.png`:"";
+ }
+ const slug=platformSlugs[key] || key.replace(/[^a-z0-9]+/g,"");
+ return slug?`https://cdn.simpleicons.org/${slug}`:"";
+}
+
 $("category").addEventListener("change",()=>{
  $("filmFields").hidden=$("category").value!=="Film";
+ $("peopleFields").hidden=$("category").value!=="People";
 });
 
 function addDynamic(container,fields,collection){
@@ -267,18 +321,67 @@ function renderDynamic(container,fields,collection){
  filmData[collection].forEach((item,index)=>{
   const card=document.createElement("div");
   card.className="item-row";
-  card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><strong>${esc(fields.title||"Entry")} ${index+1}</strong><button class="small delete" type="button">Remove</button></div><div class="field-grid">${fields.map(f=>`<div><label>${esc(f.label)}</label><input data-key="${esc(f.key)}" placeholder="${esc(f.placeholder||"")}" value="${esc(item[f.key])}"></div>`).join("")}</div>`;
-  card.querySelectorAll("input").forEach(input=>input.addEventListener("input",()=>item[input.dataset.key]=input.value));
+  card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><strong>${esc(fields.title||"Entry")} ${index+1}</strong><button class="small delete" type="button">Remove</button></div><div class="field-grid">${fields.map(f=>{
+   if(f.person)return `<div><label>${esc(f.label)}</label><div class="person-search"><input data-key="${esc(f.key)}" data-person-search="1" autocomplete="off" placeholder="Type a name to find a People article" value="${esc(item[f.key]||"")}"><div class="person-results" hidden></div></div><div class="person-selected">${item.person_id?"Linked People article selected":""}</div></div>`;
+   if(f.autoImage){
+    const imageKey=f.autoImage==="flag"?"flag":"icon";
+    const imageUrl=item[imageKey]||autoImageUrl(f.autoImage,item[f.key]);
+    return `<div><label>${esc(f.label)}</label><input data-key="${esc(f.key)}" data-auto-image="${esc(f.autoImage)}" placeholder="${esc(f.autoImage==="flag"?"e.g. India, United States":"e.g. Netflix, Prime Video, Disney+")}" value="${esc(item[f.key])}"><div class="auto-image-preview" style="display:flex;align-items:center;gap:8px;margin-top:7px;min-height:28px">${imageUrl?`<img src="${esc(imageUrl)}" alt="" style="width:28px;height:28px;object-fit:contain;border-radius:50%">`:""}<small class="muted">${imageUrl?"Image added automatically":"Enter a recognised name to generate its image"}</small></div></div>`;
+   }
+   return `<div><label>${esc(f.label)}</label><input data-key="${esc(f.key)}" placeholder="${esc(f.placeholder||"")}" value="${esc(item[f.key])}"></div>`;
+  }).join("")}</div>`;
+  card.querySelectorAll("input:not([data-person-search])").forEach(input=>input.addEventListener("input",()=>{
+   item[input.dataset.key]=input.value;
+   if(input.dataset.autoImage){
+    const kind=input.dataset.autoImage;
+    const imageKey=kind==="flag"?"flag":"icon";
+    item[imageKey]=autoImageUrl(kind,input.value);
+    const preview=input.parentElement.querySelector(".auto-image-preview");
+    preview.innerHTML=item[imageKey]?`<img src="${esc(item[imageKey])}" alt="" style="width:28px;height:28px;object-fit:contain;border-radius:50%"><small class="muted">Generated automatically</small>`:`<small class="muted">No matching image found. Check the spelling or enter the name in English.</small>`;
+   }
+  }));
+  const search=card.querySelector("[data-person-search]");
+  if(search){
+   const results=search.parentElement.querySelector(".person-results");
+   const selected=card.querySelector(".person-selected");
+   search.addEventListener("input",async()=>{
+    item[search.dataset.key]=search.value;
+    item.person_id=null;
+    item.person_photo=null;
+    if(item.photo!==undefined)item.photo="";
+    results.hidden=true;results.innerHTML="";
+    if(search.value.trim().length<2)return;
+    const {data,error}=await db.from("articles").select("id,title,content_blocks").eq("category","People").eq("status","published").ilike("title",`%${search.value.trim()}%`).limit(8);
+    if(error||!data?.length){results.innerHTML='<div class="muted" style="padding:10px">No published People articles found. Save the person as a People draft and publish it first.</div>';results.hidden=false;return;}
+    results.innerHTML=data.map(p=>{
+     const person=(p.content_blocks||[]).find(b=>b.kind==="person")||{};
+     return `<button class="person-option" type="button" data-id="${esc(p.id)}" data-name="${esc(p.title)}" data-photo="${esc(person.photo_url||"")}">${person.photo_url?`<img src="${esc(person.photo_url)}" alt="">`:""}<span>${esc(p.title)}<small>${esc(person.occupation||"People article")}</small></span></button>`;
+    }).join("");
+    results.hidden=false;
+    results.querySelectorAll("button").forEach(button=>button.onclick=()=>{
+     item[search.dataset.key]=button.dataset.name;
+     item.person_id=button.dataset.id;
+     item.person_photo=button.dataset.photo;
+     if(item.photo!==undefined)item.photo=button.dataset.photo;
+     search.value=button.dataset.name;
+     selected.textContent="✓ Linked to People article";
+     const photoInput=card.querySelector('input[data-key="photo"]');
+     if(photoInput)photoInput.value=button.dataset.photo;
+     results.hidden=true;
+    });
+   });
+   search.addEventListener("focus",()=>{if(search.value.trim().length>=2)search.dispatchEvent(new Event("input"));});
+  }
   card.querySelector("button").addEventListener("click",()=>{filmData[collection].splice(index,1);renderDynamic(container,fields,collection);});
   host.appendChild(card);
  });
 }
-const crewFields=[{key:"photo",label:"PHOTO URL"},{key:"name",label:"NAME"},{key:"position",label:"POSITION / ROLE"}];
-const castFields=[{key:"photo",label:"PHOTO URL"},{key:"name",label:"ACTOR NAME"},{key:"role",label:"CHARACTER / ROLE"}];
+const crewFields=[{key:"photo",label:"PHOTO URL"},{key:"name",label:"SEARCH PEOPLE ARTICLE",person:true},{key:"position",label:"POSITION / ROLE"}];
+const castFields=[{key:"photo",label:"PHOTO URL"},{key:"name",label:"SEARCH PEOPLE ARTICLE",person:true},{key:"role",label:"CHARACTER / ROLE"}];
 const songFields=[{key:"title",label:"SONG TITLE"},{key:"lyrics",label:"LYRICS"},{key:"singer",label:"SINGER"},{key:"duration",label:"DURATION"}];
-const theatricalFields=[{key:"flag",label:"COUNTRY FLAG IMAGE URL"},{key:"country",label:"COUNTRY"},{key:"date",label:"RELEASE DATE"},{key:"certification",label:"CERTIFICATION"}];
-const digitalFields=[{key:"icon",label:"PLATFORM ICON URL"},{key:"platform",label:"PLATFORM"},{key:"date",label:"RELEASE DATE"}];
-const awardFields=[{key:"name",label:"AWARD NAME"},{key:"category",label:"CATEGORY"},{key:"result",label:"RESULT (WIN / NOMINATION)"},{key:"recipient",label:"RECIPIENT"},{key:"year",label:"YEAR"}];
+const theatricalFields=[{key:"country",label:"COUNTRY",autoImage:"flag"},{key:"date",label:"RELEASE DATE"},{key:"certification",label:"CERTIFICATION"}];
+const digitalFields=[{key:"platform",label:"STREAMING PLATFORM",autoImage:"platform"},{key:"date",label:"RELEASE DATE"}];
+const awardFields=[{key:"name",label:"AWARD NAME"},{key:"category",label:"CATEGORY"},{key:"result",label:"RESULT (WIN / NOMINATION)"},{key:"recipient",label:"RECIPIENT",person:true},{key:"year",label:"YEAR"}];
 const extraFields=[{key:"heading",label:"SECTION HEADING",placeholder:"e.g. Production controversy"},{key:"content",label:"SECTION CONTENT",placeholder:"Write details here"}];
 
 $("addCrew").onclick=()=>addDynamic("crewRows",crewFields,"crew");
@@ -301,9 +404,7 @@ function renderInfo(){
   $("infoboxRows").appendChild(row);
  });
 }
-$("addInfo").onclick=()=>{infobox.push({label:"",value:""});renderInfo();};
-
-function currentBody(){return mode==="visual"?$("visualEditor").innerHTML:$("htmlEditor").value;}
+$("addInfo").onclick=()=>{infobox.push({label:"",value:""});renderInfo();};function currentBody(){return mode==="visual"?$("visualEditor").innerHTML:$("htmlEditor").value;}
 function switchMode(next){
  if(next===mode)return;
  if(mode==="visual")$("htmlEditor").value=$("visualEditor").innerHTML;
@@ -388,7 +489,7 @@ function renderFilmPreview(f){
  if(f.plot)html+=`<h2>Plot</h2><p>${esc(f.plot)}</p>`;
  function people(title,arr,role){
   if(!arr.length)return "";
-  return `<h2>${title}</h2><div class="cards">${arr.map(p=>`<div class="person-card">${p.photo?`<img src="${esc(p.photo)}" alt="">`:""}<strong>${esc(p.name)}</strong><small>${esc(p[role])}</small></div>`).join("")}</div>`;
+  return `<h2>${title}</h2><div class="cards">${arr.map(p=>`<div class="person-card">${(p.person_photo||p.photo)?`<img src="${esc(p.person_photo||p.photo)}" alt="">`:""}<strong>${esc(p.name)}</strong><small>${esc(p[role])}</small></div>`).join("")}</div>`;
  }
  html+=people("Crew",f.crew,"position");
  html+=people("Cast",f.cast,"role");
@@ -401,18 +502,53 @@ function renderFilmPreview(f){
  f.additional_sections.forEach(s=>{if(s.heading||s.content)html+=`<details><summary>${esc(s.heading||"Additional information")}</summary><p>${esc(s.content).replace(/\n/g,"<br>")}</p></details>`;});
  return html;
 }
+function getPersonData(){
+ return {
+  kind:"person",version:1,
+  occupation:val("personOccupation"),date_of_birth:val("personDob"),
+  date_of_death:val("personDod"),birthplace:val("personBirthplace"),
+  deathplace:val("personDeathplace"),photo_url:val("personPhoto")
+ };
+}
+async function loadPersonFilmography(){
+ const title=val("title");
+ if(!title||!db)return;
+ const host=$("personFilmography");
+ host.textContent="Loading linked filmography…";
+ try{
+  const {data,error}=await db.from("articles").select("id,title,content_blocks").eq("category","Film").eq("status","published").limit(500);
+  if(error)throw error;
+  const entries=[];
+  (data||[]).forEach(article=>{
+   const film=(article.content_blocks||[]).find(b=>b.kind==="film");
+   if(!film)return;
+   ["cast","crew"].forEach(section=>(film[section]||[]).forEach(person=>{
+    if(person.person_id===window.__kinoraPersonId){
+     entries.push({title:article.title,year:film.year||"",role:person.role||person.position||"",poster:film.poster_url||""});
+    }
+   }));
+  });
+  entries.sort((a,b)=>String(b.year).localeCompare(String(a.year)));
+  host.innerHTML=entries.length?entries.slice(0,5).map(e=>`<div class="filmography-entry">${e.poster?`<img src="${esc(e.poster)}" alt="">`:""}<div><strong>${esc(e.title)}</strong><div>${esc(e.year)}</div><small>${esc(e.role)}</small></div></div>`).join(""):"No linked published films yet. Link this person from a Film article's cast or crew section.";
+ }catch(e){host.textContent="Could not load filmography: "+e.message;}
+}
 function renderPreview(){
  const title=esc(val("title")||"Untitled article");
- const subtitle=esc(val("subtitle"));
- const summary=esc(val("summary"));
+ const subtitle=esc(val("subtitle") || ($("category").value==="People" ? [val("personOccupation"),val("personDob"),val("personDod")].filter(Boolean).join(" · ") : ""));
+ const isPerson=$("category").value==="People";
  let body=currentBody();
  let bodyHtml=esc(body).replace(/^===\s*(.*?)\s*===\s*$/gm,"<h3>$1</h3>").replace(/^==\s*(.*?)\s*==\s*$/gm,"<h2>$1</h2>").replace(/\n{2,}/g,"</p><p>").replace(/\n/g,"<br>");
  bodyHtml="<p>"+bodyHtml+"</p>";
  const refs=citations.map((c,i)=>`<li><a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.title||c.url)}</a>. ${esc(c.publisher)}. ${esc(c.date)}</li>`).join("");
  const refHtml=citations.length?`<h2>References</h2><ol>${refs}</ol>`:"";
- let filmHtml="";
- if($("category").value==="Film")filmHtml=renderFilmPreview(getFilmData());
- $("preview").innerHTML=`<h1>${title}</h1><p><i>${subtitle}</i></p><p>${summary}</p>${filmHtml}${bodyHtml}${refHtml}`;
+ let articleHtml="";
+ if($("category").value==="Film")articleHtml=renderFilmPreview(getFilmData());
+ if(isPerson){
+  const p=getPersonData();
+  const facts=[["Occupation",p.occupation],["Date of birth",p.date_of_birth],["Date of death",p.date_of_death],["Birthplace",p.birthplace],["Death place",p.deathplace]].filter(x=>x[1]);
+  articleHtml=`<div class="person-profile-preview">${p.photo_url?`<img src="${esc(p.photo_url)}" alt="${title}">`:""}<div><h2 style="margin-top:0">${title}</h2>${facts.map(x=>`<p><strong>${esc(x[0])}:</strong> ${esc(x[1])}</p>`).join("")}</div></div><h2>Filmography</h2><p>Linked films will appear here when this People article is connected to Film cast or crew entries.</p>`;
+ }
+ $("preview").innerHTML=`<h1>${title}</h1><p><i>${subtitle}</i></p>${articleHtml}${bodyHtml}${refHtml}`;
  $("preview").hidden=false;
  $("preview").scrollIntoView({behavior:"smooth"});
 }
@@ -424,28 +560,32 @@ $("saveButton").onclick=async()=>{
   if(!db){message.textContent="Supabase is not configured.";return;}
   const {data:{user},error:userError}=await db.auth.getUser();
   if(userError||!user){message.textContent="Please log in before saving.";return;}
-  const title=val("title"),summary=val("summary"),body=currentBody();
+  const title=val("title"),body=currentBody();
   if(!title||!body.trim()){message.textContent="Add an article title and article body first.";return;}
   const isFilm=$("category").value==="Film";
+  const isPerson=$("category").value==="People";
   const content=body.replace(/<[^>]*>/g," ").replace(/&nbsp;/g," ").trim();
   const payload={
-   title,summary,content,
-   content_blocks:isFilm?[getFilmData()]:[],
+   title,summary:"",content,
+   content_blocks:isFilm?[getFilmData()]:(isPerson?[getPersonData()]:[]),
    infobox:infobox.filter(r=>r.label.trim()||r.value.trim()),
    body_source:body,citations,
    sources:citations.map(c=>c.url).join("\n"),
-   category:isFilm?"Film":"General",
+   category:isFilm?"Film":"People",
    status:"draft",created_by:user.id
   };
   message.textContent="Saving your draft…";
   const {error}=await db.from("articles").insert(payload);
   if(error){message.textContent="Could not save: "+error.message;return;}
   message.textContent="Draft saved successfully. It has not been published yet.";
+  if(isPerson){const {data:created}=await db.from("articles").select("id").eq("created_by",user.id).eq("title",title).order("created_at",{ascending:false}).limit(1).maybeSingle();if(created)window.__kinoraPersonId=created.id;}
  }catch(e){message.textContent="Error: "+e.message;}
  finally{button.disabled=false;}
 };
 
 renderInfo();renderCitations();
+$("category").dispatchEvent(new Event("change"));
+$("title").addEventListener("input",()=>{if($("category").value==="People")loadPersonFilmography();});
 $("visualEditor").innerHTML=" <h2>Introduction</h2><p>Write your article here.</p>";
 $("htmlEditor").value="== Introduction ==\n\nWrite your article here.\n\n<reflist>";
 })();
