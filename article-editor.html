@@ -7,216 +7,303 @@
 <title>Article Studio | KINORA</title>
 <link rel="stylesheet" href="styles.css">
 <style>
-:root{
- --bg:#0b0d12;--panel:#151a24;--panel2:#1c2330;
- --line:#30394a;--muted:#9aa3b2;--white:#f4f5f7;
- --accent:#c9f06b;
-}
+:root{--bg:#0b0d12;--panel:#151a24;--panel2:#1c2330;--line:#30394a;--muted:#9aa3b2;--white:#f4f5f7;--accent:#c9f06b}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--white);font-family:system-ui,sans-serif}
-header{height:60px;padding:0 18px;border-bottom:1px solid var(--line);
- display:flex;align-items:center;justify-content:space-between;position:sticky;
- top:0;background:#0b0d12ed;backdrop-filter:blur(12px);z-index:5}
-.logo{font-size:22px;font-weight:850;color:var(--accent);text-decoration:none;letter-spacing:-1px}
-.logo span{color:white}
+header{height:60px;padding:0 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#0b0d12ed;z-index:5}
+.logo{font-size:22px;font-weight:850;color:var(--accent);text-decoration:none}.logo span{color:white}
 header a:last-child{color:var(--muted);font-size:13px;text-decoration:none}
 main{max-width:850px;margin:auto;padding:28px 17px 70px}
 .eyebrow{font-size:10px;letter-spacing:2px;color:var(--accent);font-weight:800}
-h1{font-size:34px;letter-spacing:-1.3px;margin:8px 0}
-.muted{color:var(--muted);font-size:13px;line-height:1.6}
+h1{font-size:32px;margin:8px 0}.muted{color:var(--muted);font-size:13px;line-height:1.6}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:17px;margin:18px 0}
 .panel h2{font-size:16px;margin:0 0 14px}
 label{display:block;color:var(--muted);font-size:11px;font-weight:700;margin:13px 0 6px}
-input,textarea,.visual{
- width:100%;background:var(--panel2);border:1px solid var(--line);
- border-radius:9px;color:var(--white);padding:12px;font:inherit;font-size:14px;
- outline:none;
-}
-input:focus,textarea:focus,.visual:focus{border-color:var(--accent)}
+input,textarea,select,.visual{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--white);padding:12px;font:inherit;font-size:14px;outline:none}
+input:focus,textarea:focus,select:focus,.visual:focus{border-color:var(--accent)}
 textarea{resize:vertical;line-height:1.65}
 button{cursor:pointer;font:inherit}
-.tabs{display:flex;gap:7px;margin:15px 0;flex-wrap:wrap}
-.tab{background:var(--panel2);border:1px solid var(--line);color:var(--muted);
- padding:10px 14px;border-radius:8px;font-size:13px}
-.tab.active{background:var(--accent);border-color:var(--accent);color:#10150a;font-weight:800}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.info-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:9px 0}
-.info-row input{min-width:0}
-.small{background:var(--panel2);border:1px solid var(--line);color:var(--muted);
- padding:8px 11px;border-radius:7px;font-size:12px}
+.primary{background:var(--accent);color:#10150a;border:0;border-radius:9px;padding:12px 16px;font-weight:800}
+.secondary,.small,.tool{background:var(--panel2);border:1px solid var(--line);color:white;border-radius:8px;padding:9px 12px;font-size:12px}
+.small{padding:7px 10px;color:var(--muted)}
 .delete{color:#ff9292}
-.add{width:100%;padding:13px;border:1px dashed #718348;border-radius:9px;
- color:var(--accent);background:#c9f06b0b;font-weight:700;margin-top:10px}
-.toolbar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
-.tool{background:var(--panel2);border:1px solid var(--line);color:white;
- padding:8px 11px;border-radius:7px;font-size:12px}
-.visual{min-height:270px;line-height:1.7}
+.add{width:100%;padding:12px;border:1px dashed #718348;border-radius:9px;color:var(--accent);background:#c9f06b0b;font-weight:700;margin-top:10px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.info-row,.data-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:9px 0}
+.data-row{grid-template-columns:repeat(3,minmax(0,1fr));align-items:end}
+.data-row input{min-width:0}
+.tabs,.toolbar,.actions{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
+.tab{background:var(--panel2);border:1px solid var(--line);color:var(--muted);padding:10px 14px;border-radius:8px}
+.tab.active{background:var(--accent);color:#10150a;font-weight:800}
+.visual{min-height:230px;line-height:1.7}
 .visual:empty:before{content:attr(data-placeholder);color:#758092}
-.visual h2{font-size:21px;margin:22px 0 8px}
+.tool{padding:8px 11px}
 .mode-note{font-size:11px;color:var(--muted);margin:8px 0}
-.primary{background:var(--accent);color:#10150a;border:0;border-radius:9px;
- padding:12px 16px;font-weight:800}
-.secondary{background:var(--panel2);border:1px solid var(--line);color:white;
- border-radius:9px;padding:12px 16px}
-.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}
 .status{color:var(--accent);font-size:13px;line-height:1.5}
-.modal-bg{position:fixed;inset:0;background:#000b;z-index:20;display:none;
- align-items:center;justify-content:center;padding:15px}
-.modal-bg.open{display:flex}
-.modal{width:min(480px,100%);max-height:90vh;overflow:auto;background:var(--panel);
- border:1px solid var(--line);border-radius:16px;padding:20px}
-.modal-head{display:flex;justify-content:space-between;align-items:center}
-.modal-head h2{font-size:19px;margin:0}
-.citation{padding:12px;border:1px solid var(--line);border-radius:9px;margin:9px 0}
-.citation strong{display:block;font-size:13px}
-.citation small{color:var(--muted)}
+.film-fields[hidden],[hidden]{display:none!important}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.subpanel{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:13px;margin:12px 0}
+.subpanel h3{font-size:14px;margin:0 0 8px}
+.item-row{background:#10151e;border:1px solid var(--line);padding:12px;border-radius:10px;margin:10px 0}
+.item-row .field-grid{gap:8px}
+.item-row label{margin-top:8px}
 .preview{background:white;color:#222;border-radius:12px;padding:22px;margin-top:20px;line-height:1.7}
-.preview h1{font-size:30px;color:#171717}
-.preview h2{font-size:21px;border-bottom:1px solid #ddd;padding-bottom:6px;margin-top:25px}
-.preview a{color:#2458a6}
-.preview[hidden]{display:none}
-[hidden]{display:none!important}
-@media(max-width:480px){main{padding:23px 13px 55px}h1{font-size:30px}.panel{padding:14px}.row{grid-template-columns:1fr}}
+.preview h1{font-size:30px;color:#171717}.preview h2{font-size:21px;border-bottom:1px solid #ddd;padding-bottom:6px;margin-top:25px}
+.preview h3{font-size:17px}.preview a{color:#2458a6}
+.preview details{border:1px solid #ddd;border-radius:8px;padding:12px;margin:12px 0}
+.preview summary{font-weight:700;cursor:pointer}
+.preview table{width:100%;border-collapse:collapse;font-size:13px}
+.preview td,.preview th{border:1px solid #ddd;padding:8px;text-align:left}
+.cards{display:flex;gap:12px;overflow-x:auto;padding:5px 0 15px}
+.person-card{min-width:145px;max-width:160px;border:1px solid #ddd;border-radius:10px;padding:10px;text-align:center}
+.person-card img{width:100%;height:125px;object-fit:cover;border-radius:7px;background:#eee}
+.person-card strong,.person-card small{display:block}
+.person-card small{color:#555}
+.modal-bg{position:fixed;inset:0;background:#000b;z-index:20;display:none;align-items:center;justify-content:center;padding:15px}
+.modal-bg.open{display:flex}.modal{width:min(480px,100%);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+@media(max-width:520px){main{padding:23px 13px 55px}.panel{padding:14px}.field-grid,.row,.info-row{grid-template-columns:1fr}.data-row{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
 <header>
- <a class="logo" href="index.html">K<span>INORA</span></a>
- <a href="profile.html">My profile ↗</a>
+<a class="logo" href="index.html">K<span>INORA</span></a>
+<a href="profile.html">My profile ↗</a>
 </header>
 
 <main>
- <p class="eyebrow">KINORA / CONTRIBUTOR STUDIO</p>
- <h1>Create an article.</h1>
- <p class="muted">Build your article with an independent Infobox, flexible writing modes and linked references.</p>
+<p class="eyebrow">KINORA / CONTRIBUTOR STUDIO</p>
+<h1>Create an article.</h1>
+<p class="muted">Create a standard article or use the dedicated Film article structure.</p>
 
- <section class="panel">
-  <h2>Article information</h2>
-  <label for="title">ARTICLE TITLE</label>
-  <input id="title" maxlength="150" placeholder="Enter the article title">
-  <label for="subtitle">SUBTITLE</label>
-  <input id="subtitle" maxlength="200" placeholder="Short description or profession">
-  <label for="summary">SHORT DESCRIPTION</label>
-  <textarea id="summary" rows="2" maxlength="500" placeholder="A short introduction to this subject"></textarea>
- </section>
+<section class="panel">
+<h2>Article information</h2>
+<label for="title">ARTICLE TITLE</label>
+<input id="title" maxlength="150" placeholder="Enter article title">
+<label for="subtitle">SUBTITLE</label>
+<input id="subtitle" maxlength="200" placeholder="e.g. 2026 Malayalam film">
+<label for="category">ARTICLE TYPE</label>
+<select id="category">
+<option value="General">Standard article</option>
+<option value="Film">Film</option>
+</select>
+<label for="summary">SHORT DESCRIPTION</label>
+<textarea id="summary" rows="2" maxlength="500" placeholder="A short introduction"></textarea>
+</section>
 
- <section class="panel">
-  <h2>Infobox</h2>
-  <p class="muted">Add facts using two columns: a heading and its answer.</p>
-  <div class="row">
-   <span class="eyebrow">HEADING</span>
-   <span class="eyebrow">ANSWER</span>
-  </div>
-  <div id="infoboxRows"></div>
-  <button class="add" id="addInfo" type="button">＋ Add infobox row</button>
- </section>
+<section class="panel" id="filmFields" hidden>
+<h2>Film article details</h2>
+<p class="muted">Fill in the film information. Optional sections can be left empty.</p>
+<div class="field-grid">
+<div><label>YEAR</label><input id="filmYear" placeholder="2026"></div>
+<div><label>LANGUAGE</label><input id="filmLanguage" placeholder="Malayalam"></div>
+<div><label>GENRE</label><input id="filmGenre" placeholder="Drama, thriller"></div>
+<div><label>RUNTIME</label><input id="filmRuntime" placeholder=" e.g. 2h 15m"></div>
+</div>
+<label>POSTER IMAGE URL</label>
+<input id="posterUrl" placeholder="https://...">
+<label>POSTER IMAGE CREDIT / SOURCE</label>
+<input id="posterCredit" placeholder="Photographer, studio or source">
+<label>PLOT</label>
+<textarea id="filmPlot" rows="5" placeholder="Write the film's plot..."></textarea>
 
- <section class="panel">
-  <h2>Article body</h2>
-  <p class="muted">Choose how you want to write. Switch modes without losing your text.</p>
-  <div class="tabs">
-   <button class="tab active" id="visualTab" type="button">◉ Visual</button>
-   <button class="tab" id="htmlTab" type="button">&lt;/&gt; HTML</button>
-  </div>
-  <div id="visualPanel">
-   <div class="toolbar">
-    <button class="tool" data-command="bold" type="button"><b>B</b></button>
-    <button class="tool" data-command="italic" type="button"><i>I</i></button>
-    <button class="tool" data-command="insertUnorderedList" type="button">• List</button>
-    <button class="tool" id="visualHeading" type="button">H2 Section</button>
-    <button class="tool" id="visualLink" type="button">↗ Link</button>
-    <button class="tool" id="visualCitation" type="button">[+] Citation</button>
-   </div>
-   <div id="visualEditor" class="visual" contenteditable="true"
-    data-placeholder="Start writing your article here..."></div>
-   <p class="mode-note">Use the H2 Section button to create a collapsible section in the reader view.</p>
-  </div>
-  <div id="htmlPanel" hidden>
-   <textarea id="htmlEditor" rows="16" spellcheck="false"
-    placeholder="== Early life ==&#10;&#10;Write your article here...&#10;&#10;== Career ==&#10;&#10;More information...&#10;&#10;<reflist>"></textarea>
-   <p class="mode-note">Use == Heading == for collapsible sections. Use === Subheading === for subsections. Add &lt;reflist&gt; where the reference list should appear.</p>
-   <button class="secondary" id="htmlCitation" type="button">＋ Insert citation</button>
-  </div>
- </section>
+<div class="subpanel">
+<h3>Crew</h3>
+<p class="muted">Crew appears before Cast on the article page. Add a photo URL, name and position.</p>
+<div id="crewRows"></div>
+<button class="add" type="button" id="addCrew">＋ Add crew member</button>
+</div>
 
- <section class="panel">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-   <h2 style="margin:0">References</h2>
-   <button class="small" id="openCitation" type="button">＋ Add citation</button>
-  </div>
-  <p class="muted">Citations are numbered automatically. Add them while writing, then place &lt;reflist&gt; in HTML mode to show the reference list.</p>
-  <div id="citationList"><p class="muted">No references added yet.</p></div>
- </section>
+<div class="subpanel">
+<h3>Cast</h3>
+<p class="muted">Add actor photos, names and their character / role.</p>
+<div id="castRows"></div>
+<button class="add" type="button" id="addCast">＋ Add cast member</button>
+</div>
 
- <div class="actions">
-  <button class="secondary" id="previewButton" type="button">Preview article</button>
-  <button class="primary" id="saveButton" type="button">Save as draft ↗</button>
- </div>
- <p id="message" class="status" role="status"></p>
- <section id="preview" class="preview" hidden></section>
+<div class="subpanel">
+<h3>Soundtrack</h3>
+<p class="muted">The soundtrack will appear in a collapsed dropdown on the article page.</p>
+<div id="songRows"></div>
+<button class="add" type="button" id="addSong">＋ Add soundtrack entry</button>
+</div>
+
+<div class="subpanel">
+<h3>Theatrical release</h3>
+<p class="muted">Each release can include a country, flag image, date and certification.</p>
+<div id="theatricalRows"></div>
+<button class="add" type="button" id="addTheatrical">＋ Add theatrical release</button>
+</div>
+
+<div class="subpanel">
+<h3>Digital release</h3>
+<p class="muted">Add streaming platform, app icon and release date.</p>
+<div id="digitalRows"></div>
+<button class="add" type="button" id="addDigital">＋ Add digital release</button>
+</div>
+
+<div class="subpanel">
+<h3>Box office</h3>
+<p class="muted">This section will be collapsed by default. Leave unknown figures blank rather than guessing.</p>
+<div class="field-grid">
+<div><label>PRODUCTION BUDGET</label><input id="budget" placeholder="e.g. ₹20 crore"></div>
+<div><label>WORLDWIDE GROSS</label><input id="worldwideGross" placeholder="e.g. ₹100 crore"></div>
+<div><label>DOMESTIC GROSS</label><input id="domesticGross" placeholder="e.g. ₹60 crore"></div>
+<div><label>OVERSEAS GROSS</label><input id="overseasGross" placeholder="e.g. ₹40 crore"></div>
+<div><label>BOX OFFICE VERDICT</label><input id="boxOfficeVerdict" placeholder="e.g. Hit / Average"></div>
+<div><label>BOX OFFICE SOURCE</label><input id="boxOfficeSource" placeholder="Source URL"></div>
+</div>
+</div>
+
+<div class="subpanel">
+<h3>Awards and nominations</h3>
+<p class="muted">This section will also be collapsed by default.</p>
+<div id="awardRows"></div>
+<button class="add" type="button" id="addAward">＋ Add award / nomination</button>
+</div>
+
+<div class="subpanel">
+<h3>Additional sections</h3>
+<p class="muted">Create your own dropdown sections for production, controversies, filming, marketing, reception, censorship or any other topic.</p>
+<div id="extraRows"></div>
+<button class="add" type="button" id="addExtra">＋ Add custom section</button>
+</div>
+</section>
+
+<section class="panel">
+<h2>Infobox</h2>
+<p class="muted">Add facts using a heading and answer.</p>
+<div id="infoboxRows"></div>
+<button class="add" id="addInfo" type="button">＋ Add infobox row</button>
+</section>
+
+<section class="panel">
+<h2>Article body</h2>
+<p class="muted">Use Visual or HTML mode. This is used for standard articles and any additional article text.</p>
+<div class="tabs">
+<button class="tab active" id="visualTab" type="button">◉ Visual</button>
+<button class="tab" id="htmlTab" type="button">&lt;/&gt; HTML</button>
+</div>
+<div id="visualPanel">
+<div class="toolbar">
+<button class="tool" data-command="bold" type="button"><b>B</b></button>
+<button class="tool" data-command="italic" type="button"><i>I</i></button>
+<button class="tool" data-command="insertUnorderedList" type="button">• List</button>
+<button class="tool" id="visualHeading" type="button">H2 Section</button>
+<button class="tool" id="visualLink" type="button">↗ Link</button>
+<button class="tool" id="visualCitation" type="button">[+] Citation</button>
+</div>
+<div id="visualEditor" class="visual" contenteditable="true" data-placeholder="Start writing your article here..."></div>
+</div>
+<div id="htmlPanel" hidden>
+<textarea id="htmlEditor" rows="16" spellcheck="false" placeholder="== Introduction ==&#10;&#10;Write your article here...&#10;&#10;<reflist>"></textarea>
+<p class="mode-note">Use == Heading == for sections and === Subheading === for subsections. Add &lt;reflist&gt; where references should appear.</p>
+<button class="secondary" id="htmlCitation" type="button">＋ Insert citation</button>
+</div>
+</section>
+
+<section class="panel">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+<h2 style="margin:0">References</h2>
+<button class="small" id="openCitation" type="button">＋ Add citation</button>
+</div>
+<div id="citationList"><p class="muted">No references added yet.</p></div>
+</section>
+
+<div class="actions">
+<button class="secondary" id="previewButton" type="button">Preview article</button>
+<button class="primary" id="saveButton" type="button">Save as draft ↗</button>
+</div>
+<p id="message" class="status" role="status"></p>
+<section id="preview" class="preview" hidden></section>
 </main>
 
-<div class="modal-bg" id="citationModal" role="dialog" aria-modal="true" aria-labelledby="citationHeading">
- <div class="modal">
-  <div class="modal-head">
-   <h2 id="citationHeading">Add a citation</h2>
-   <button class="small" id="closeCitation" type="button">✕</button>
-  </div>
-  <p class="muted">Paste a source URL, load its details, then check the information before adding it.</p>
-  <label for="citationUrl">SOURCE URL</label>
-  <input id="citationUrl" type="url" placeholder="https://example.com/article">
-  <button class="secondary" style="width:100%;margin-top:10px" id="loadCitation" type="button">Load citation</button>
-  <p id="citationStatus" class="mode-note" role="status"></p>
-  <label for="citationTitle">WEBSITE / ARTICLE TITLE</label>
-  <input id="citationTitle" placeholder="Article title">
-  <label for="citationPublisher">PUBLISHER</label>
-  <input id="citationPublisher" placeholder="Publisher name">
-  <label for="citationDate">PUBLISHED</label>
-  <input id="citationDate" placeholder="Publication date">
-  <button class="primary" style="width:100%;margin-top:18px" id="confirmCitation" type="button">Add citation to article</button>
- </div>
+<div class="modal-bg" id="citationModal">
+<div class="modal">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<h2>Add a citation</h2><button class="small" id="closeCitation" type="button">✕</button>
+</div>
+<label>SOURCE URL</label><input id="citationUrl" placeholder="https://example.com">
+<button class="secondary" style="width:100%;margin-top:10px" id="loadCitation" type="button">Load citation</button>
+<p id="citationStatus" class="mode-note"></p>
+<label>WEBSITE / ARTICLE TITLE</label><input id="citationTitle">
+<label>PUBLISHER</label><input id="citationPublisher">
+<label>PUBLISHED</label><input id="citationDate">
+<button class="primary" style="width:100%;margin-top:18px" id="confirmCitation" type="button">Add citation</button>
+</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
 (()=>{
-const cfg=window.KINORA_CONFIG;
 const $=id=>document.getElementById(id);
+const cfg=window.KINORA_CONFIG;
 const message=$("message");
-let db=null,infobox=[],citations=[],mode="visual";
-let visualSelection=null,htmlSelection=null;
+let db=null,mode="visual",infobox=[],citations=[];
+const filmData={crew:[],cast:[],soundtrack:[],theatrical_releases:[],digital_releases:[],awards:[],additional_sections:[]};
 
 if(cfg?.SUPABASE_URL&&cfg?.SUPABASE_ANON_KEY&&window.supabase){
  db=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
-}else{
- message.textContent="Supabase configuration missing. Check config.js.";
-}
+}else{message.textContent="Supabase configuration missing. Check config.js.";}
 
-function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const val=id=>$(id).value.trim();
+const setVal=(id,v)=>{if($(id))$(id).value=v??"";};
+
+$("category").addEventListener("change",()=>{
+ $("filmFields").hidden=$("category").value!=="Film";
+});
+
+function addDynamic(container,fields,collection){
+ const index=filmData[collection].length;
+ const item={};
+ fields.forEach(f=>item[f.key]="");
+ filmData[collection].push(item);
+ renderDynamic(container,fields,collection);
+}
+function renderDynamic(container,fields,collection){
+ const host=$(container);
+ host.innerHTML="";
+ filmData[collection].forEach((item,index)=>{
+  const card=document.createElement("div");
+  card.className="item-row";
+  card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><strong>${esc(fields.title||"Entry")} ${index+1}</strong><button class="small delete" type="button">Remove</button></div><div class="field-grid">${fields.map(f=>`<div><label>${esc(f.label)}</label><input data-key="${esc(f.key)}" placeholder="${esc(f.placeholder||"")}" value="${esc(item[f.key])}"></div>`).join("")}</div>`;
+  card.querySelectorAll("input").forEach(input=>input.addEventListener("input",()=>item[input.dataset.key]=input.value));
+  card.querySelector("button").addEventListener("click",()=>{filmData[collection].splice(index,1);renderDynamic(container,fields,collection);});
+  host.appendChild(card);
+ });
+}
+const crewFields=[{key:"photo",label:"PHOTO URL"},{key:"name",label:"NAME"},{key:"position",label:"POSITION / ROLE"}];
+const castFields=[{key:"photo",label:"PHOTO URL"},{key:"name",label:"ACTOR NAME"},{key:"role",label:"CHARACTER / ROLE"}];
+const songFields=[{key:"title",label:"SONG TITLE"},{key:"lyrics",label:"LYRICS"},{key:"singer",label:"SINGER"},{key:"duration",label:"DURATION"}];
+const theatricalFields=[{key:"flag",label:"COUNTRY FLAG IMAGE URL"},{key:"country",label:"COUNTRY"},{key:"date",label:"RELEASE DATE"},{key:"certification",label:"CERTIFICATION"}];
+const digitalFields=[{key:"icon",label:"PLATFORM ICON URL"},{key:"platform",label:"PLATFORM"},{key:"date",label:"RELEASE DATE"}];
+const awardFields=[{key:"name",label:"AWARD NAME"},{key:"category",label:"CATEGORY"},{key:"result",label:"RESULT (WIN / NOMINATION)"},{key:"recipient",label:"RECIPIENT"},{key:"year",label:"YEAR"}];
+const extraFields=[{key:"heading",label:"SECTION HEADING",placeholder:"e.g. Production controversy"},{key:"content",label:"SECTION CONTENT",placeholder:"Write details here"}];
+
+$("addCrew").onclick=()=>addDynamic("crewRows",crewFields,"crew");
+$("addCast").onclick=()=>addDynamic("castRows",castFields,"cast");
+$("addSong").onclick=()=>addDynamic("songRows",songFields,"soundtrack");
+$("addTheatrical").onclick=()=>addDynamic("theatricalRows",theatricalFields,"theatrical_releases");
+$("addDigital").onclick=()=>addDynamic("digitalRows",digitalFields,"digital_releases");
+$("addAward").onclick=()=>addDynamic("awardRows",awardFields,"awards");
+$("addExtra").onclick=()=>addDynamic("extraRows",extraFields,"additional_sections");
+
 function renderInfo(){
  $("infoboxRows").innerHTML="";
  infobox.forEach((r,i)=>{
-  const row=document.createElement("div");
-  row.className="info-row";
-  row.innerHTML=`<input aria-label="Infobox heading" placeholder="e.g. Born" value="${esc(r.label)}">
-  <div style="display:flex;gap:6px"><input aria-label="Infobox answer" placeholder="e.g. 15 March 1985" value="${esc(r.value)}"><button class="small delete" type="button">×</button></div>`;
+  const row=document.createElement("div");row.className="info-row";
+  row.innerHTML=`<input placeholder="Heading" value="${esc(r.label)}"><div style="display:flex;gap:6px"><input placeholder="Answer" value="${esc(r.value)}"><button class="small delete" type="button">×</button></div>`;
   const inputs=row.querySelectorAll("input");
-  inputs[0].addEventListener("input",e=>infobox[i].label=e.target.value);
-  inputs[1].addEventListener("input",e=>infobox[i].value=e.target.value);
-  row.querySelector("button").addEventListener("click",()=>{infobox.splice(i,1);renderInfo();});
+  inputs[0].oninput=e=>r.label=e.target.value;
+  inputs[1].oninput=e=>r.value=e.target.value;
+  row.querySelector("button").onclick=()=>{infobox.splice(i,1);renderInfo();};
   $("infoboxRows").appendChild(row);
  });
 }
-$("addInfo").addEventListener("click",()=>{infobox.push({label:"",value:""});renderInfo();});
+$("addInfo").onclick=()=>{infobox.push({label:"",value:""});renderInfo();};
 
-function currentBody(){
- return mode==="visual"?$("visualEditor").innerHTML:$("htmlEditor").value;
-}
-function setBody(value){
- $("visualEditor").innerHTML=value;
- $("htmlEditor").value=value;
-}
+function currentBody(){return mode==="visual"?$("visualEditor").innerHTML:$("htmlEditor").value;}
 function switchMode(next){
  if(next===mode)return;
  if(mode==="visual")$("htmlEditor").value=$("visualEditor").innerHTML;
@@ -227,149 +314,140 @@ function switchMode(next){
  $("visualTab").classList.toggle("active",next==="visual");
  $("htmlTab").classList.toggle("active",next==="html");
 }
-$("visualTab").addEventListener("click",()=>switchMode("visual"));
-$("htmlTab").addEventListener("click",()=>switchMode("html"));
-
-$("visualEditor").addEventListener("keyup",()=>{if(mode==="visual")visualSelection=window.getSelection();});
-$("visualEditor").addEventListener("mouseup",()=>{visualSelection=window.getSelection();});
-$("htmlEditor").addEventListener("select",()=>{htmlSelection={start:$("htmlEditor").selectionStart,end:$("htmlEditor").selectionEnd};});
-
-document.querySelectorAll("[data-command]").forEach(b=>b.addEventListener("click",()=>{
- $("visualEditor").focus();
- document.execCommand(b.dataset.command,false,null);
-}));
-$("visualHeading").addEventListener("click",()=>{
- $("visualEditor").focus();
- document.execCommand("formatBlock",false,"H2");
-});
-$("visualLink").addEventListener("click",()=>{
- const url=prompt("Enter a complete http:// or https:// URL");
- if(url&&/^https?:\/\//i.test(url)){
-  $("visualEditor").focus();document.execCommand("createLink",false,url);
- }
-});
-
-function insertAtCursor(text){
- if(mode==="visual"){
-  $("visualEditor").focus();
-  document.execCommand("insertText",false,text);
- }else{
-  const el=$("htmlEditor"),start=el.selectionStart,end=el.selectionEnd;
-  el.setRangeText(text,start,end,"end");el.focus();
- }
-}
-function citationMarker(){
+$("visualTab").onclick=()=>switchMode("visual");
+$("htmlTab").onclick=()=>switchMode("html");
+document.querySelectorAll("[data-command]").forEach(b=>b.onclick=()=>{ $("visualEditor").focus();document.execCommand(b.dataset.command,false,null);});
+$("visualHeading").onclick=()=>{ $("visualEditor").focus();document.execCommand("formatBlock",false,"H2");};
+$("visualLink").onclick=()=>{const u=prompt("Enter a complete https:// URL");if(u&&/^https?:\/\//i.test(u)){ $("visualEditor").focus();document.execCommand("createLink",false,u);}};
+function insertCitation(){
  if(!citations.length)return;
- insertAtCursor("["+citations.length+"]");
+ const marker="["+citations.length+"]";
+ if(mode==="visual"){ $("visualEditor").focus();document.execCommand("insertText",false,marker);}
+ else{const e=$("htmlEditor");e.setRangeText(marker,e.selectionStart,e.selectionEnd,"end");e.focus();}
 }
-$("visualCitation").addEventListener("click",citationMarker);
-$("htmlCitation").addEventListener("click",citationMarker);
+$("visualCitation").onclick=insertCitation;
+$("htmlCitation").onclick=insertCitation;
 
 function renderCitations(){
- const list=$("citationList");
- if(!citations.length){list.innerHTML='<p class="muted">No references added yet.</p>';return;}
- list.innerHTML=citations.map((c,i)=>`<div class="citation">
- <strong>${i+1}. <a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.title||c.url)}</a></strong>
- <small>${esc(c.publisher||"Publisher not specified")} · ${esc(c.date||"Date not specified")}</small>
- <div style="text-align:right;margin-top:7px"><button class="small delete" data-remove="${i}" type="button">Remove</button></div>
- </div>`).join("");
- list.querySelectorAll("[data-remove]").forEach(b=>b.addEventListener("click",()=>{
-  citations.splice(Number(b.dataset.remove),1);renderCitations();
- }));
+ const host=$("citationList");
+ if(!citations.length){host.innerHTML='<p class="muted">No references added yet.</p>';return;}
+ host.innerHTML=citations.map((c,i)=>`<div class="item-row"><strong>${i+1}. <a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.title||c.url)}</a></strong><p class="muted">${esc(c.publisher)} · ${esc(c.date)}</p><button class="small delete" data-remove="${i}" type="button">Remove</button></div>`).join("");
+ host.querySelectorAll("[data-remove]").forEach(b=>b.onclick=()=>{citations.splice(Number(b.dataset.remove),1);renderCitations();});
 }
-function openModal(){$("citationModal").classList.add("open");}
-function closeModal(){$("citationModal").classList.remove("open");}
-$("openCitation").addEventListener("click",openModal);
-$("closeCitation").addEventListener("click",closeModal);
-$("citationModal").addEventListener("click",e=>{if(e.target===$("citationModal"))closeModal();});
+function openCitation(){$("citationModal").classList.add("open");}
+function closeCitation(){$("citationModal").classList.remove("open");}
+$("openCitation").onclick=openCitation;
+$("closeCitation").onclick=closeCitation;
+$("citationModal").onclick=e=>{if(e.target===$("citationModal"))closeCitation();};
 
-$("loadCitation").addEventListener("click",async()=>{
- const url=$("citationUrl").value.trim();
- if(!/^https?:\/\//i.test(url)){
-  $("citationStatus").textContent="Enter a valid http:// or https:// URL.";return;
- }
- $("citationStatus").textContent="Trying to retrieve webpage details…";
+$("loadCitation").onclick=async()=>{
+ const url=val("citationUrl");
+ if(!/^https?:\/\//i.test(url)){$("citationStatus").textContent="Enter a valid URL.";return;}
+ $("citationStatus").textContent="Trying to load webpage details…";
  try{
-  const response=await fetch("https://api.microlink.io/?url="+encodeURIComponent(url));
-  if(!response.ok)throw new Error("Metadata service unavailable");
-  const result=await response.json();
-  const d=result.data||{};
-  $("citationTitle").value=d.title||"";
-  $("citationPublisher").value=d.publisher||d.site||new URL(url).hostname;
-  $("citationDate").value=d.date?new Date(d.date).toLocaleDateString():"";
-  $("citationStatus").textContent=d.title?"Details loaded. Please verify them.":"No metadata found. Enter the details manually.";
- }catch(e){
-  $("citationStatus").textContent="Automatic loading was blocked or unavailable. Enter the citation details manually.";
-  if(!$("citationPublisher").value){
-   try{$("citationPublisher").value=new URL(url).hostname;}catch(_){}
-  }
+  const res=await fetch("https://api.microlink.io/?url="+encodeURIComponent(url));
+  if(!res.ok)throw new Error();
+  const d=(await res.json()).data||{};
+  setVal("citationTitle",d.title);
+  setVal("citationPublisher",d.publisher||d.site||new URL(url).hostname);
+  setVal("citationDate",d.date?new Date(d.date).toLocaleDateString():"");
+  $("citationStatus").textContent=d.title?"Details loaded. Please verify them.":"No metadata found. Enter details manually.";
+ }catch(e){$("citationStatus").textContent="Automatic loading unavailable. Enter details manually.";try{setVal("citationPublisher",new URL(url).hostname);}catch(_){}}
+};
+$("confirmCitation").onclick=()=>{
+ const url=val("citationUrl");
+ if(!/^https?:\/\//i.test(url)){$("citationStatus").textContent="Enter a valid URL.";return;}
+ citations.push({url,title:val("citationTitle"),publisher:val("citationPublisher"),date:val("citationDate")});
+ renderCitations();closeCitation();
+ ["citationUrl","citationTitle","citationPublisher","citationDate","citationStatus"].forEach(id=>setVal(id,""));
+};
+
+function getFilmData(){
+ return {
+  kind:"film",version:1,
+  subtitle:val("subtitle"),
+  year:val("filmYear"),language:val("filmLanguage"),genre:val("filmGenre"),
+  runtime:val("filmRuntime"),poster_url:val("posterUrl"),poster_credit:val("posterCredit"),
+  plot:val("filmPlot"),
+  crew:filmData.crew,cast:filmData.cast,soundtrack:filmData.soundtrack,
+  theatrical_releases:filmData.theatrical_releases,
+  digital_releases:filmData.digital_releases,
+  box_office:{
+   budget:val("budget"),worldwide_gross:val("worldwideGross"),
+   domestic_gross:val("domesticGross"),overseas_gross:val("overseasGross"),
+   verdict:val("boxOfficeVerdict"),source:val("boxOfficeSource")
+  },
+  awards:filmData.awards,
+  additional_sections:filmData.additional_sections
+ };
+}
+function safeLink(url,text){return url?`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(text)}</a>`:esc(text||"");}
+function renderFilmPreview(f){
+ let html="";
+ if(f.poster_url)html+=`<img src="${esc(f.poster_url)}" alt="Film poster" style="display:block;max-width:220px;width:60%;margin:20px auto">`;
+ if(f.plot)html+=`<h2>Plot</h2><p>${esc(f.plot)}</p>`;
+ function people(title,arr,role){
+  if(!arr.length)return "";
+  return `<h2>${title}</h2><div class="cards">${arr.map(p=>`<div class="person-card">${p.photo?`<img src="${esc(p.photo)}" alt="">`:""}<strong>${esc(p.name)}</strong><small>${esc(p[role])}</small></div>`).join("")}</div>`;
  }
-});
-$("confirmCitation").addEventListener("click",()=>{
- const url=$("citationUrl").value.trim();
- if(!/^https?:\/\//i.test(url)){ $("citationStatus").textContent="Enter a valid source URL.";return;}
- citations.push({
-  url,title:$("citationTitle").value.trim(),
-  publisher:$("citationPublisher").value.trim(),
-  date:$("citationDate").value.trim()
- });
- renderCitations();
- closeModal();
- ["citationUrl","citationTitle","citationPublisher","citationDate","citationStatus"].forEach(id=>$(id).value="");
-});
+ html+=people("Crew",f.crew,"position");
+ html+=people("Cast",f.cast,"role");
+ if(f.soundtrack.length)html+=`<details><summary>Soundtrack</summary><table><tr><th>#</th><th>Title</th><th>Lyrics</th><th>Singer</th><th>Length</th></tr>${f.soundtrack.map((s,i)=>`<tr><td>${i+1}</td><td>${esc(s.title)}</td><td>${esc(s.lyrics)}</td><td>${esc(s.singer)}</td><td>${esc(s.duration)}</td></tr>`).join("")}</table></details>`;
+ if(f.theatrical_releases.length)html+=`<details><summary>Theatrical release</summary><table>${f.theatrical_releases.map(r=>`<tr><td>${r.flag?`<img src="${esc(r.flag)}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle"> `:""}${esc(r.country)}</td><td>${esc(r.date)}</td><td>${esc(r.certification)}</td></tr>`).join("")}</table></details>`;
+ if(f.digital_releases.length)html+=`<details><summary>Digital release</summary><table>${f.digital_releases.map(r=>`<tr><td>${r.icon?`<img src="${esc(r.icon)}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle"> `:""}${esc(r.platform)}</td><td>${esc(r.date)}</td></tr>`).join("")}</table></details>`;
+ const b=f.box_office;
+ if(Object.values(b).some(Boolean))html+=`<details><summary>Box office</summary><table>${[["Budget",b.budget],["Worldwide gross",b.worldwide_gross],["Domestic gross",b.domestic_gross],["Overseas gross",b.overseas_gross],["Verdict",b.verdict],["Source",b.source]].filter(x=>x[1]).map(x=>`<tr><th>${x[0]}</th><td>${safeLink(x[0]==="Source"?x[1]:"",x[1])}</td></tr>`).join("")}</table></details>`;
+ if(f.awards.length)html+=`<details><summary>Awards and nominations</summary><table><tr><th>Award</th><th>Category</th><th>Result</th><th>Recipient</th><th>Year</th></tr>${f.awards.map(a=>`<tr><td>${esc(a.name)}</td><td>${esc(a.category)}</td><td>${esc(a.result)}</td><td>${esc(a.recipient)}</td><td>${esc(a.year)}</td></tr>`).join("")}</table></details>`;
+ f.additional_sections.forEach(s=>{if(s.heading||s.content)html+=`<details><summary>${esc(s.heading||"Additional information")}</summary><p>${esc(s.content).replace(/\n/g,"<br>")}</p></details>`;});
+ return html;
+}
 function renderPreview(){
- let source=currentBody();
- let html=source;
- html=html.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
- html=html.replace(/^===\s*(.*?)\s*===\s*$/gm,"<h3>$1</h3>");
- html=html.replace(/^==\s*(.*?)\s*==\s*$/gm,"<h2>$1</h2>");
- html=html.replace(/\[([0-9]+)\]/g,(m,n)=>`<sup>[${n}]</sup>`);
- html=html.replace(/&lt;reflist&gt;/gi,"__REFLIST__");
- html=html.replace(/\n{2,}/g,"</p><p>").replace(/\n/g,"<br>");
- html="<p>"+html+"</p>";
+ const title=esc(val("title")||"Untitled article");
+ const subtitle=esc(val("subtitle"));
+ const summary=esc(val("summary"));
+ let body=currentBody();
+ let bodyHtml=esc(body).replace(/^===\s*(.*?)\s*===\s*$/gm,"<h3>$1</h3>").replace(/^==\s*(.*?)\s*==\s*$/gm,"<h2>$1</h2>").replace(/\n{2,}/g,"</p><p>").replace(/\n/g,"<br>");
+ bodyHtml="<p>"+bodyHtml+"</p>";
  const refs=citations.map((c,i)=>`<li><a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.title||c.url)}</a>. ${esc(c.publisher)}. ${esc(c.date)}</li>`).join("");
- const reflist=`<h2>References</h2><ol>${refs}</ol>`;
- html=html.replace("__REFLIST__",reflist);
- if(!source.toLowerCase().includes("<reflist>")&&citations.length)html+=reflist;
- $("preview").innerHTML=`<h1>${esc($("title").value||"Untitled article")}</h1>
- <p>${esc($("subtitle").value)}</p><p>${esc($("summary").value)}</p>
- ${infobox.length?'<h2>Information</h2><table>'+infobox.map(r=>`<tr><th>${esc(r.label)}</th><td>${esc(r.value)}</td></tr>`).join("")+'</table>':''}${html}`;
+ const refHtml=citations.length?`<h2>References</h2><ol>${refs}</ol>`:"";
+ let filmHtml="";
+ if($("category").value==="Film")filmHtml=renderFilmPreview(getFilmData());
+ $("preview").innerHTML=`<h1>${title}</h1><p><i>${subtitle}</i></p><p>${summary}</p>${filmHtml}${bodyHtml}${refHtml}`;
  $("preview").hidden=false;
  $("preview").scrollIntoView({behavior:"smooth"});
 }
-$("previewButton").addEventListener("click",renderPreview);
+$("previewButton").onclick=renderPreview;
 
-$("saveButton").addEventListener("click",async()=>{
+$("saveButton").onclick=async()=>{
  const button=$("saveButton");button.disabled=true;
  try{
   if(!db){message.textContent="Supabase is not configured.";return;}
   const {data:{user},error:userError}=await db.auth.getUser();
   if(userError||!user){message.textContent="Please log in before saving.";return;}
-  const title=$("title").value.trim();
-  const summary=$("summary").value.trim();
-  const body=currentBody();
+  const title=val("title"),summary=val("summary"),body=currentBody();
   if(!title||!body.trim()){message.textContent="Add an article title and article body first.";return;}
+  const isFilm=$("category").value==="Film";
   const content=body.replace(/<[^>]*>/g," ").replace(/&nbsp;/g," ").trim();
-  message.textContent="Saving your draft…";
-  const {error}=await db.from("articles").insert({
+  const payload={
    title,summary,content,
-   content_blocks:[],
+   content_blocks:isFilm?[getFilmData()]:[],
    infobox:infobox.filter(r=>r.label.trim()||r.value.trim()),
-   body_source:body,
-   citations,
-   sources:citations.map(c=>c.url),
-   category:"General",
-   status:"draft",
-   created_by:user.id
-  });
+   body_source:body,citations,
+   sources:citations.map(c=>c.url).join("\n"),
+   category:isFilm?"Film":"General",
+   status:"draft",created_by:user.id
+  };
+  message.textContent="Saving your draft…";
+  const {error}=await db.from("articles").insert(payload);
   if(error){message.textContent="Could not save: "+error.message;return;}
-  message.textContent="Draft saved successfully. It is not publicly published.";
+  message.textContent="Draft saved successfully. It has not been published yet.";
  }catch(e){message.textContent="Error: "+e.message;}
  finally{button.disabled=false;}
-});
-renderInfo();
-renderCitations();
-setBody("== Introduction ==\n\nWrite your introduction here.\n\n<reflist>");
+};
+
+renderInfo();renderCitations();
+$("visualEditor").innerHTML=" <h2>Introduction</h2><p>Write your article here.</p>";
+$("htmlEditor").value="== Introduction ==\n\nWrite your article here.\n\n<reflist>";
 })();
 </script>
 </body>
