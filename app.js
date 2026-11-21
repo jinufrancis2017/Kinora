@@ -265,15 +265,17 @@
     }
 
     target.innerHTML = data.map(a => `
-      <article class="article-card">
-        <h3>${esc(a.title)}</h3>
-        <p>${esc(a.summary || "Explore this article on KINORA.")}</p>
-        <div class="article-meta">
-          ${esc(a.category || "General")} ·
-          ${new Date(a.created_at).toLocaleDateString()}
-        </div>
-      </article>
-    `).join("");
+  <a class="article-card"
+     href="article.html?id=${encodeURIComponent(a.id)}"
+     style="display:block;text-decoration:none;color:inherit">
+    <h3>${esc(a.title)}</h3>
+    <p>${esc(a.summary || "Explore this article on KINORA.")}</p>
+    <div class="article-meta">
+      ${esc(a.category || "General")} ·
+      ${new Date(a.created_at).toLocaleDateString()}
+    </div>
+  </a>
+`).join("");
   }
 
   // PROFILE
