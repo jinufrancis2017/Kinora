@@ -1,0 +1,685 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moderation Centre | KINORA</title>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root {
+  --bg:#0b0d12;
+  --panel:#131720;
+  --panel2:#191f2b;
+  --border:#293140;
+  --text:#edf1f7;
+  --muted:#929bad;
+  --accent:#8b7cff;
+  --green:#35c98a;
+  --red:#ff6575;
+  --yellow:#f2bd57;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.topbar{
+  height:65px;padding:0 22px;display:flex;align-items:center;
+  justify-content:space-between;border-bottom:1px solid var(--border);
+  background:#10141c;position:sticky;top:0;z-index:10;
+}
+.brand{font-size:21px;font-weight:800;letter-spacing:2px}
+.brand span{color:var(--accent)}
+.top-actions{display:flex;gap:10px;align-items:center}
+.top-actions a,.top-actions button{
+  color:var(--text);text-decoration:none;background:var(--panel2);
+  border:1px solid var(--border);padding:9px 13px;border-radius:9px;
+  font-size:13px;
+}
+main{max-width:1250px;margin:auto;padding:28px 20px 60px}
+.page-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:15px}
+h1{font-size:27px;margin:0 0 7px}
+.subtitle{color:var(--muted);font-size:14px}
+.role-pill{
+  background:#292447;color:#b9adff;padding:7px 12px;
+  border-radius:30px;font-size:12px;font-weight:bold;
+}
+.stats{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:13px;margin:25px 0;
+}
+.stat{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:13px;padding:17px;
+}
+.stat small{color:var(--muted);font-size:12px}
+.stat strong{display:block;font-size:27px;margin-top:9px}
+.stat.pending strong{color:var(--yellow)}
+.stat.published strong{color:var(--green)}
+.stat.rejected strong{color:var(--red)}
+.tabs{display:flex;gap:8px;border-bottom:1px solid var(--border);margin-bottom:18px}
+.tab{
+  border:0;background:transparent;color:var(--muted);
+  padding:12px 15px;border-bottom:2px solid transparent;
+}
+.tab.active{color:var(--text);border-color:var(--accent)}
+.layout{display:grid;grid-template-columns: minmax(280px,390px) 1fr;gap:17px}
+.panel{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:13px;overflow:hidden;
+}
+.panel-head{
+  padding:16px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.panel-head h2{font-size:15px;margin:0}
+.panel-body{padding:15px}
+.article-list{display:flex;flex-direction:column;gap:9px}
+.article-item{
+  border:1px solid var(--border);border-radius:10px;
+  padding:13px;background:#10141c;cursor:pointer;
+}
+.article-item.selected{border-color:var(--accent);background:#1b1b30}
+.article-item h3{font-size:14px;margin:0 0 7px;line-height:1.4}
+.meta{font-size:11px;color:var(--muted);line-height:1.7}
+.tag{
+  display:inline-block;border-radius:5px;padding:4px 7px;
+  font-size:10px;background:#252b38;color:#b9c1d0;margin-right:5px;
+}
+.empty,.loading{padding:30px 15px;text-align:center;color:var(--muted);font-size:13px}
+.preview{min-height:420px}
+.preview-inner{padding:20px}
+.preview-title{font-size:25px;margin:0 0 7px}
+.preview-subtitle{color:var(--muted);font-size:13px;margin-bottom:17px}
+.preview-image{
+  width:145px;max-height:190px;object-fit:cover;border-radius:9px;
+  float:right;margin:0 0 15px 18px;border:1px solid var(--border);
+}
+.preview-section{margin-top:20px}
+.preview-section h3{font-size:15px;border-bottom:1px solid var(--border);padding-bottom:8px}
+.preview-section p{color:#c8cfda;line-height:1.7;font-size:14px;white-space:pre-wrap}
+.preview-section pre{
+  white-space:pre-wrap;overflow-wrap:anywhere;color:#c8cfda;
+  font-family:inherit;font-size:13px;line-height:1.6;
+}
+.action-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:23px}
+.action{
+  border:0;border-radius:9px;padding:11px 17px;font-weight:bold;font-size:13px;
+}
+.approve{background:var(--green);color:#071b12}
+.reject{background:#49212b;color:#ff9ba5;border:1px solid #71323e}
+.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--border)}
+.notice{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.5}
+.history-list{display:flex;flex-direction:column;gap:10px}
+.history-item{
+  padding:14px;border:1px solid var(--border);border-radius:10px;
+  background:#10141c;
+}
+.history-item strong{font-size:14px}
+.history-item p{font-size:12px;color:var(--muted);margin:7px 0 0;line-height:1.6}
+.status-published{color:var(--green)}
+.status-rejected{color:var(--red)}
+textarea{
+  width:100%;min-height:110px;background:#0d1118;color:var(--text);
+  border:1px solid var(--border);border-radius:9px;padding:12px;resize:vertical;
+}
+.modal-backdrop{
+  position:fixed;inset:0;background:#000b;display:none;
+  align-items:center;justify-content:center;padding:18px;z-index:30;
+}
+.modal{
+  width:min(480px,100%);background:var(--panel);
+  border:1px solid var(--border);border-radius:15px;padding:20px;
+}
+.modal h2{font-size:19px;margin:0 0 8px}
+.modal p{font-size:13px;color:var(--muted);line-height:1.5}
+.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:15px}
+.error{color:#ff8b98;font-size:13px;padding:12px}
+.hidden{display:none!important}
+.clearfix::after{content:"";display:block;clear:both}
+@media(max-width:760px){
+  main{padding:22px 13px 45px}
+  .stats{grid-template-columns:repeat(2,1fr);gap:9px}
+  .stat{padding:13px}
+  .stat strong{font-size:23px}
+  .layout{grid-template-columns:1fr}
+  .preview{min-height:300px}
+  .page-heading{align-items:center}
+  h1{font-size:23px}
+  .topbar{padding:0 13px}
+  .brand{font-size:18px}
+}
+</style>
+</head>
+
+<body>
+<header class="topbar">
+  <div class="brand">KINO<span>RA</span></div>
+  <div class="top-actions">
+    <a href="index.html">Home</a>
+    <a href="profile.html">Profile</a>
+    <button id="logoutBtn">Logout</button>
+  </div>
+</header>
+
+<main>
+  <div id="accessMessage" class="loading">Checking moderator access...</div>
+
+  <div id="dashboard" class="hidden">
+    <div class="page-heading">
+      <div>
+        <h1>Moderation Centre</h1>
+        <div class="subtitle">Review submissions and maintain KINORA's article quality.</div>
+      </div>
+      <span class="role-pill" id="roleLabel">MODERATOR</span>
+    </div>
+
+    <section class="stats">
+      <div class="stat pending"><small>Awaiting review</small><strong id="pendingCount">—</strong></div>
+      <div class="stat published"><small>Published</small><strong id="publishedCount">—</strong></div>
+      <div class="stat rejected"><small>Rejected</small><strong id="rejectedCount">—</strong></div>
+      <div class="stat"><small>Your reviews</small><strong id="myReviews">—</strong></div>
+    </section>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="queue">Review queue</button>
+      <button class="tab" data-tab="history">Review history</button>
+    </nav>
+
+    <section id="queueTab">
+      <div class="layout">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Pending submissions</h2>
+            <button class="secondary action" id="refreshBtn">Refresh</button>
+          </div>
+          <div class="panel-body">
+            <div id="queueList" class="article-list">
+              <div class="loading">Loading submissions...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel preview">
+          <div class="panel-head"><h2>Article preview</h2></div>
+          <div id="previewContent" class="preview-inner">
+            <div class="empty">Select an article from the queue to review it.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="historyTab" class="hidden">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Moderation history</h2>
+          <button class="secondary action" id="historyRefreshBtn">Refresh</button>
+        </div>
+        <div class="panel-body">
+          <div id="historyList" class="history-list">
+            <div class="loading">Loading review history...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="modal-backdrop" id="rejectModal">
+  <div class="modal">
+    <h2>Reject this article?</h2>
+    <p>A clear reason is required. The contributor should understand what needs to be corrected.</p>
+    <textarea id="rejectReason" placeholder="Explain why this article is being rejected..."></textarea>
+    <div class="modal-actions">
+      <button class="action secondary" id="cancelReject">Cancel</button>
+      <button class="action reject" id="confirmReject">Confirm rejection</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(async function(){
+  const cfg = window.KINORA_CONFIG || {};
+  const accessMessage = document.getElementById("accessMessage");
+  const dashboard = document.getElementById("dashboard");
+
+  if(!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY){
+    accessMessage.textContent =
+      "KINORA configuration not found. Check that the config.js script path matches your existing project.";
+    return;
+  }
+
+  if(!window.supabase || !window.supabase.createClient){
+    accessMessage.textContent = "Supabase library could not load. Please refresh the page.";
+    return;
+  }
+
+  const db = window.supabase.createClient(
+    cfg.SUPABASE_URL,
+    cfg.SUPABASE_ANON_KEY
+  );
+
+  const $ = id => document.getElementById(id);
+  let currentUser = null;
+  let currentRole = null;
+  let pendingArticles = [];
+  let selectedArticleId = null;
+  let selectedArticle = null;
+
+  function esc(value){
+    return String(value ?? "").replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[c]));
+  }
+
+  function dateText(value){
+    if(!value) return "Unknown date";
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? "Unknown date" : d.toLocaleString();
+  }
+
+  function firstBlock(article){
+    const blocks = article.content_blocks;
+    if(Array.isArray(blocks)) return blocks[0] || {};
+    if(blocks && typeof blocks === "object") return blocks;
+    return {};
+  }
+
+  function articleSubtitle(article, block){
+    if(block.kind === "film"){
+      return [block.year,block.language,block.genre].filter(Boolean).join(" • ");
+    }
+    if(block.kind === "person"){
+      return [
+        block.occupation,
+        block.date_of_birth ? "Born " + block.date_of_birth : "",
+        block.date_of_death ? "Died " + block.date_of_death : ""
+      ].filter(Boolean).join(" • ");
+    }
+    return article.summary || article.category || "";
+  }
+
+  function articleImage(block){
+    if(block.kind === "film") return block.poster_url || "";
+    if(block.kind === "person") return block.photo_url || "";
+    return "";
+  }
+
+  function addSection(container,title,value){
+    if(value === null || value === undefined || value === "") return;
+    let content = "";
+    if(Array.isArray(value)){
+      content = value.map(item => {
+        if(typeof item === "string") return esc(item);
+        if(item && typeof item === "object"){
+          return esc(Object.entries(item)
+            .filter(([k,v]) => v !== null && v !== undefined && v !== "")
+            .map(([k,v]) => k.replace(/_/g," ") + ": " + v)
+            .join(" • "));
+        }
+        return esc(item);
+      }).join("<br>");
+    } else if(typeof value === "object"){
+      content = esc(JSON.stringify(value,null,2));
+    } else {
+      content = esc(value);
+    }
+    const section = document.createElement("section");
+    section.className = "preview-section";
+    section.innerHTML = "<h3>" + esc(title) + "</h3><p>" + content + "</p>";
+    container.appendChild(section);
+  }
+
+  async function start(){
+    const {data:{session},error:sessionError} = await db.auth.getSession();
+
+    if(sessionError || !session){
+      accessMessage.textContent = "Please log in to access the Moderation Centre.";
+      return;
+    }
+
+    currentUser = session.user;
+
+    const {data:profile,error:profileError} = await db
+      .from("profiles")
+      .select("username,role")
+      .eq("id",currentUser.id)
+      .maybeSingle();
+
+    if(profileError || !profile){
+      accessMessage.textContent = "Could not verify your KINORA account role.";
+      return;
+    }
+
+    currentRole = profile.role;
+
+    if(!["admin","moderator"].includes(currentRole)){
+      accessMessage.textContent = "Access denied. This page is only available to moderators and admins.";
+      return;
+    }
+
+    $("roleLabel").textContent = currentRole.toUpperCase();
+    accessMessage.classList.add("hidden");
+    dashboard.classList.remove("hidden");
+
+    await refreshAll();
+  }
+
+  async function refreshAll(){
+    await Promise.all([
+      loadQueue(),
+      loadStats(),
+      loadHistory()
+    ]);
+  }
+
+  async function loadStats(){
+    const [pending,published,rejected,mine] = await Promise.all([
+      db.from("articles").select("id",{count:"exact",head:true}).eq("status","pending"),
+      db.from("articles").select("id",{count:"exact",head:true}).eq("status","published"),
+      db.from("articles").select("id",{count:"exact",head:true}).eq("status","rejected"),
+      db.from("article_moderation_log").select("id",{count:"exact",head:true}).eq("moderator_id",currentUser.id)
+    ]);
+
+    $("pendingCount").textContent = pending.count ?? "—";
+    $("publishedCount").textContent = published.count ?? "—";
+    $("rejectedCount").textContent = rejected.count ?? "—";
+    $("myReviews").textContent = mine.count ?? "—";
+  }
+
+  async function loadQueue(){
+    $("queueList").innerHTML = '<div class="loading">Loading submissions...</div>';
+
+    const {data,error} = await db
+      .from("articles")
+      .select("id,title,summary,content,content_blocks,body_source,citations,sources,category,status,created_by,created_at")
+      .eq("status","pending")
+      .order("created_at",{ascending:true});
+
+    if(error){
+      $("queueList").innerHTML = '<div class="error">Could not load the review queue: ' + esc(error.message) + '</div>';
+      return;
+    }
+
+    pendingArticles = data || [];
+
+    if(!pendingArticles.length){
+      $("queueList").innerHTML = '<div class="empty">No articles are waiting for review. 🎉</div>';
+      selectedArticleId = null;
+      selectedArticle = null;
+      $("previewContent").innerHTML = '<div class="empty">Your review queue is clear.</div>';
+      await loadStats();
+      return;
+    }
+
+    const authorIds = [...new Set(pendingArticles.map(a => a.created_by).filter(Boolean))];
+    let authors = {};
+
+    if(authorIds.length){
+      const {data:profiles} = await db
+        .from("profiles")
+        .select("id,username")
+        .in("id",authorIds);
+
+      (profiles || []).forEach(p => authors[p.id] = p.username || "Contributor");
+    }
+
+    $("queueList").innerHTML = pendingArticles.map(a => {
+      const block = firstBlock(a);
+      return `
+        <div class="article-item ${selectedArticleId === a.id ? "selected" : ""}" data-id="${esc(a.id)}">
+          <h3>${esc(a.title || "Untitled article")}</h3>
+          <div class="meta">
+            <span class="tag">${esc(a.category || block.kind || "Article")}</span>
+            ${esc(authors[a.created_by] || "Contributor")}<br>
+            Submitted ${esc(dateText(a.created_at))}
+          </div>
+        </div>`;
+    }).join("");
+
+    $("queueList").querySelectorAll(".article-item").forEach(item => {
+      item.addEventListener("click",() => selectArticle(item.dataset.id));
+    });
+
+    if(selectedArticleId && pendingArticles.some(a => a.id === selectedArticleId)){
+      await selectArticle(selectedArticleId);
+    } else {
+      $("previewContent").innerHTML = '<div class="empty">Select an article from the queue to review it.</div>';
+    }
+
+    await loadStats();
+  }
+
+  async function selectArticle(id){
+    selectedArticleId = id;
+    selectedArticle = pendingArticles.find(a => String(a.id) === String(id));
+
+    if(!selectedArticle) return;
+
+    $("queueList").querySelectorAll(".article-item").forEach(item => {
+      item.classList.toggle("selected",item.dataset.id === String(id));
+    });
+
+    const a = selectedArticle;
+    const block = firstBlock(a);
+    const imageUrl = articleImage(block);
+    const preview = $("previewContent");
+
+    preview.innerHTML = "";
+
+    const title = document.createElement("h2");
+    title.className = "preview-title";
+    title.textContent = a.title || "Untitled article";
+    preview.appendChild(title);
+
+    const subtitle = document.createElement("div");
+    subtitle.className = "preview-subtitle";
+    subtitle.textContent = articleSubtitle(a,block);
+    preview.appendChild(subtitle);
+
+    if(imageUrl){
+      const img = document.createElement("img");
+      img.className = "preview-image";
+      img.src = imageUrl;
+      img.alt = a.title || "Article image";
+      img.onerror = () => img.remove();
+      preview.appendChild(img);
+    }
+
+    const details = document.createElement("div");
+    details.className = "meta";
+    details.textContent = (a.category || "Article") + " • Submitted " + dateText(a.created_at);
+    preview.appendChild(details);
+
+    const clearfix = document.createElement("div");
+    clearfix.className = "clearfix";
+    preview.appendChild(clearfix);
+
+    if(block.kind === "film"){
+      addSection(preview,"Film information",[
+        block.year && "Year: " + block.year,
+        block.language && "Language: " + block.language,
+        block.genre && "Genre: " + block.genre,
+        block.runtime && "Runtime: " + block.runtime
+      ].filter(Boolean).join("\n"));
+      addSection(preview,"Plot",block.plot);
+      addSection(preview,"Cast",block.cast);
+      addSection(preview,"Crew",block.crew);
+      addSection(preview,"Soundtrack",block.soundtrack);
+      addSection(preview,"Theatrical releases",block.theatrical_releases);
+      addSection(preview,"Digital releases",block.digital_releases);
+      addSection(preview,"Box office",block.box_office);
+      addSection(preview,"Awards",block.awards);
+    }else if(block.kind === "person"){
+      addSection(preview,"Personal information",[
+        block.occupation && "Occupation: " + block.occupation,
+        block.date_of_birth && "Date of birth: " + block.date_of_birth,
+        block.date_of_death && "Date of death: " + block.date_of_death,
+        block.birthplace && "Birthplace: " + block.birthplace,
+        block.deathplace && "Deathplace: " + block.deathplace
+      ].filter(Boolean).join("\n"));
+    }
+
+    addSection(preview,"Article content",a.body_source || a.content || "");
+    addSection(preview,"References",a.citations);
+    addSection(preview,"Sources",a.sources);
+
+    const actions = document.createElement("div");
+    actions.className = "action-row";
+    actions.innerHTML = `
+      <button class="action approve" id="approveArticle">Approve & publish</button>
+      <button class="action reject" id="rejectArticle">Reject article</button>
+    `;
+    preview.appendChild(actions);
+
+    const note = document.createElement("div");
+    note.className = "notice";
+    note.textContent = "Approval publishes the article. Rejection requires a reason and records the decision in moderation history.";
+    preview.appendChild(note);
+
+    $("approveArticle").addEventListener("click",approveSelected);
+    $("rejectArticle").addEventListener("click",() => {
+      $("rejectReason").value = "";
+      $("rejectModal").style.display = "flex";
+    });
+  }
+
+  async function moderate(decision,reason){
+    if(!selectedArticleId) return;
+
+    const buttons = document.querySelectorAll("#approveArticle,#rejectArticle,#confirmReject");
+    buttons.forEach(b => b.disabled = true);
+
+    const {data,error} = await db.rpc("moderate_article",{
+      p_article_id:selectedArticleId,
+      p_decision:decision,
+      p_reason:reason || null
+    });
+
+    buttons.forEach(b => b.disabled = false);
+
+    if(error){
+      alert("Moderation failed: " + error.message);
+      return;
+    }
+
+    if(data && data.success === false){
+      alert("The moderation action was not completed.");
+      return;
+    }
+
+    $("rejectModal").style.display = "none";
+    selectedArticleId = null;
+    selectedArticle = null;
+
+    alert(decision === "published" ? "Article approved and published!" : "Article rejected. The reason has been recorded.");
+
+    await refreshAll();
+    $("previewContent").innerHTML = '<div class="empty">Select another article to review.</div>';
+  }
+
+  async function approveSelected(){
+    if(!selectedArticleId) return;
+    if(!confirm("Approve and publish this article?")) return;
+    await moderate("published",null);
+  }
+
+  $("confirmReject").addEventListener("click",async()=>{
+    const reason = $("rejectReason").value.trim();
+    if(!reason){
+      alert("Please enter a rejection reason.");
+      $("rejectReason").focus();
+      return;
+    }
+    await moderate("rejected",reason);
+  });
+
+  $("cancelReject").addEventListener("click",()=>{
+    $("rejectModal").style.display = "none";
+  });
+
+  $("rejectModal").addEventListener("click",e=>{
+    if(e.target === $("rejectModal")) $("rejectModal").style.display = "none";
+  });
+
+  async function loadHistory(){
+    $("historyList").innerHTML = '<div class="loading">Loading review history...</div>';
+
+    const {data,error} = await db
+      .from("article_moderation_log")
+      .select("id,article_id,moderator_id,action,reason,created_at")
+      .order("created_at",{ascending:false})
+      .limit(100);
+
+    if(error){
+      $("historyList").innerHTML = '<div class="error">Could not load history: ' + esc(error.message) + '</div>';
+      return;
+    }
+
+    if(!data || !data.length){
+      $("historyList").innerHTML = '<div class="empty">No moderation activity yet.</div>';
+      return;
+    }
+
+    const articleIds = [...new Set(data.map(x=>x.article_id).filter(Boolean))];
+    const moderatorIds = [...new Set(data.map(x=>x.moderator_id).filter(Boolean))];
+
+    let articleMap = {};
+    let moderatorMap = {};
+
+    if(articleIds.length){
+      const {data:articles} = await db.from("articles").select("id,title").in("id",articleIds);
+      (articles || []).forEach(a=>articleMap[a.id]=a.title || "Untitled article");
+    }
+
+    if(moderatorIds.length){
+      const {data:profiles} = await db.from("profiles").select("id,username").in("id",moderatorIds);
+      (profiles || []).forEach(p=>moderatorMap[p.id]=p.username || "Moderator");
+    }
+
+    $("historyList").innerHTML = data.map(item=>{
+      const published = item.action === "published";
+      return `
+        <div class="history-item">
+          <strong>${esc(articleMap[item.article_id] || "Article")}</strong>
+          <p>
+            <span class="${published ? "status-published" : "status-rejected"}">
+              ${published ? "Published" : "Rejected"}
+            </span>
+            by ${esc(moderatorMap[item.moderator_id] || "Moderator")}
+            • ${esc(dateText(item.created_at))}
+          </p>
+          ${item.reason ? `<p>Reason: ${esc(item.reason)}</p>` : ""}
+        </div>`;
+    }).join("");
+  }
+
+  document.querySelectorAll(".tab").forEach(tab=>{
+    tab.addEventListener("click",()=>{
+      document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+      tab.classList.add("active");
+
+      $("queueTab").classList.toggle("hidden",tab.dataset.tab !== "queue");
+      $("historyTab").classList.toggle("hidden",tab.dataset.tab !== "history");
+    });
+  });
+
+  $("refreshBtn").addEventListener("click",refreshAll);
+  $("historyRefreshBtn").addEventListener("click",loadHistory);
+
+  $("logoutBtn").addEventListener("click",async()=>{
+    await db.auth.signOut();
+    window.location.href = "index.html";
+  });
+
+  await start();
+})();
+</script>
+</body>
+</html>
