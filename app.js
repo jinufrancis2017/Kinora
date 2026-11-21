@@ -319,7 +319,7 @@
 
     const { data: prof } = await client
       .from("profiles")
-      .select("username,created_at")
+      .select("username,created_at,username_changed")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -429,8 +429,41 @@
           : ""
       }
 
-      <section class="profile-section">
-        <h2>Account settings</h2>
+      
+${prof?.username_changed ? `
+  <section class="profile-section">
+    <h2>Account settings</h2>
+    <div class="form-stack">
+      <label>
+        Username
+        <input type="text" value="${esc(username)}" disabled>
+        <small>Your one-time username change has already been used. Your username is now permanent.</small>
+      </label>
+    </div>
+  </section>
+` : `
+  <section class="profile-section">
+    <h2>Account settings</h2>
+    <form id="usernameForm" class="form-stack">
+      <label>
+        Change username
+        <input
+          id="newUsername"
+          type="text"
+          minlength="3"
+          maxlength="24"
+          pattern="[A-Za-z0-9_]+"
+          value="${esc(username)}"
+          autocomplete="username"
+          required
+        >
+        <small>You can change your username only once. 3–24 letters, numbers or underscores.</small>
+      </label>
+      <button class="button primary" type="submit">Save username</button>
+      <p id="usernameMessage" class="form-message" role="status"></p>
+    </form>
+  </section>
+`}
 
         <form id="usernameForm" class="form-stack">
           <label>
