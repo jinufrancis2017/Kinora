@@ -43,10 +43,7 @@
   ];
 
   function getRank(characters) {
-    let current = {
-      name: "Newcomer",
-      threshold: 0
-    };
+    let current = { name: "Newcomer", threshold: 0 };
 
     for (const rank of ranks) {
       if (characters >= rank.threshold) {
@@ -101,30 +98,21 @@
                 <span>${esc(current.name)}</span>
                 <span>${esc(next.name)}</span>
               </div>
-
-              <div
-                class="rank-progress-track"
+              <div class="rank-progress-track"
                 role="progressbar"
                 aria-valuemin="0"
                 aria-valuemax="100"
-                aria-valuenow="${Math.round(result.progress)}"
-              >
-                <div
-                  class="rank-progress-fill"
-                  style="width:${result.progress.toFixed(2)}%"
-                ></div>
+                aria-valuenow="${Math.round(result.progress)}">
+                <div class="rank-progress-fill"
+                  style="width:${result.progress.toFixed(2)}%">
+                </div>
               </div>
-
               <p class="rank-next">
                 <strong>${result.remaining.toLocaleString()}</strong>
                 more characters to reach ${esc(next.name)}
               </p>
             `
-            : `
-              <p class="rank-next">
-                You've reached the highest contributor rank.
-              </p>
-            `
+            : `<p class="rank-next">You've reached the highest contributor rank.</p>`
         }
       </section>
     `;
@@ -140,7 +128,6 @@
     if (!client) return;
 
     const user = await getUser();
-
     const login = $("loginNav");
     const signup = $("signupNav");
     const profileNav = $("profileNav");
@@ -222,11 +209,7 @@
       const username = $("signupUsername").value.trim();
 
       if (!/^[A-Za-z0-9_]{3,24}$/.test(username)) {
-        say(
-          "signupMessage",
-          "Use 3–24 letters, numbers or underscores for your username.",
-          true
-        );
+        say("signupMessage", "Use 3–24 letters, numbers or underscores for your username.", true);
         return;
       }
 
@@ -249,10 +232,7 @@
       if (data.session) {
         location.href = profile;
       } else {
-        say(
-          "signupMessage",
-          "Account created. Check your email and confirm your address, then log in."
-        );
+        say("signupMessage", "Account created. Check your email and confirm your address, then log in.");
       }
     });
   }
@@ -263,8 +243,7 @@
     if (!target) return;
 
     if (!client) {
-      target.innerHTML =
-        '<div class="panel muted">Supabase is not configured yet. Check config.js.</div>';
+      target.innerHTML = '<div class="panel muted">Supabase is not configured yet. Check config.js.</div>';
       return;
     }
 
@@ -276,14 +255,12 @@
       .limit(12);
 
     if (error) {
-      target.innerHTML =
-        '<div class="panel muted">Could not load articles right now.</div>';
+      target.innerHTML = '<div class="panel muted">Could not load articles right now.</div>';
       return;
     }
 
     if (!data?.length) {
-      target.innerHTML =
-        '<div class="panel muted">No published articles yet. Be one of the first contributors.</div>';
+      target.innerHTML = '<div class="panel muted">No published articles yet. Be one of the first contributors.</div>';
       return;
     }
 
@@ -305,8 +282,7 @@
     if (!target) return;
 
     if (!client) {
-      target.innerHTML =
-        '<section class="panel">Supabase is not configured. Please check config.js.</section>';
+      target.innerHTML = '<section class="panel">Supabase is not configured. Please check config.js.</section>';
       return;
     }
 
@@ -317,11 +293,16 @@
       return;
     }
 
-    const { data: prof } = await client
+    const { data: prof, error: profileError } = await client
       .from("profiles")
       .select("username,created_at,username_changed")
       .eq("id", user.id)
       .maybeSingle();
+
+    if (profileError) {
+      target.innerHTML = `<section class="panel">Could not load your profile: ${esc(profileError.message)}</section>`;
+      return;
+    }
 
     const username =
       prof?.username ||
@@ -334,8 +315,6 @@
       .select("id", { count: "exact", head: true })
       .eq("created_by", user.id);
 
-    // Only revisions belonging to currently published articles
-    // are included in the displayed contribution total.
     const { data: publishedArticles, error: publishedError } = await client
       .from("articles")
       .select("id")
@@ -404,17 +383,14 @@
           <strong>${createdCount ?? 0}</strong>
           <span>Articles created</span>
         </div>
-
         <div class="stat">
           <strong>${editedCount}</strong>
           <span>Articles edited</span>
         </div>
-
         <div class="stat">
           <strong>${charsAdded.toLocaleString()}</strong>
           <span>Characters added</span>
         </div>
-
         <div class="stat">
           <strong>${revisions.length}</strong>
           <span>Recorded revisions</span>
@@ -423,9 +399,7 @@
 
       ${
         revisionError
-          ? `<p class="muted">
-              Contribution totals could not be loaded. Please try again later.
-            </p>`
+          ? `<p class="muted">Contribution totals could not be loaded. Please try again later.</p>`
           : ""
       }
 
@@ -470,7 +444,6 @@
 
       <section class="profile-section">
         <h2>Articles you created</h2>
-
         <div class="profile-list">
           ${
             (myArticles || []).length
@@ -495,11 +468,7 @@
         const nextUsername = $("newUsername").value.trim();
 
         if (!/^[A-Za-z0-9_]{3,24}$/.test(nextUsername)) {
-          say(
-            "usernameMessage",
-            "Use 3–24 letters, numbers or underscores.",
-            true
-          );
+          say("usernameMessage", "Use 3–24 letters, numbers or underscores.", true);
           return;
         }
 
@@ -521,7 +490,6 @@
           return;
         }
 
-        say("usernameMessage", "Username updated successfully.");
         await loadProfile();
       });
     }
