@@ -1,17 +1,141 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b0d12"><title>KINORA — Knowledge, organised</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script><script defer src="app.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101014">
+  <title>KINORA — Film & Series Encyclopedia</title>
+  <meta name="description" content="Discover films, series and the people behind every production.">
+
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
 </head>
+
 <body>
-<header class="topbar"><a class="brand" href="index.html">KINORA<span>.</span></a><nav><a href="index.html">Explore</a><a id="profileNav" href="login.html">Profile</a><a id="loginNav" class="nav-pill" href="login.html">Log in</a><a id="signupNav" class="nav-pill bright" href="signup.html">Create account</a><button id="logoutBtn" class="text-button hidden" type="button">Log out</button></nav></header>
-<main class="wrap">
-  <section class="hero"><p class="eyebrow">THE OPEN KNOWLEDGE PROJECT</p><h1>Knowledge is better<br><span>when it’s shared.</span></h1><p class="muted hero-copy">Explore ideas, discover new subjects and help build a knowledge base shaped by its contributors.</p><div class="hero-actions"><a class="button primary" href="#articles">Explore articles</a><a class="button secondary" href="signup.html">Become a contributor</a></div></section>
-  <section class="section" id="articles"><div class="section-head"><div><p class="eyebrow">DISCOVER</p><h2>Recently published</h2></div><span class="subtle">Community knowledge</span></div><div id="articleList" class="article-grid"><div class="panel muted">Loading articles…</div></div></section>
-  <section class="section contribute panel"><div><p class="eyebrow">CONTRIBUTE TO KINORA</p><h2>Your knowledge belongs here.</h2><p class="muted">Create an article and submit it for review. New submissions remain drafts until they are approved.</p></div><a class="button primary" href="login.html">Start contributing</a></section>
-</main><footer class="footer">KINORA <span>·</span> An independent knowledge project</footer>
-</body></html>
+
+  <!-- HEADER -->
+  <header class="navbar">
+    <a href="index.html" class="logo">KINORA<span>.</span></a>
+
+    <div class="nav-actions">
+      <button class="icon-btn" id="searchBtn" aria-label="Search">
+        <svg viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m16 16 5 5"></path>
+        </svg>
+      </button>
+
+      <button class="icon-btn" id="menuBtn"
+        aria-label="Open menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24">
+          <path d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- SEARCH -->
+  <div class="search-panel" id="searchPanel">
+    <input type="search" id="searchInput"
+      placeholder="Search films, series and people...">
+    <button id="closeSearch">✕</button>
+  </div>
+
+  <!-- MENU -->
+  <nav class="menu-panel" id="menuPanel">
+    <a href="#" id="profileLink" hidden>My Profile</a>
+    <a href="#" id="watchlistLink" hidden>My Watchlist</a>
+    <a href="#">Films</a>
+    <a href="#">Series</a>
+    <a href="#">People</a>
+    <a href="#">Recently Added</a>
+    <a href="#">About KINORA</a>
+    <a href="#" id="accountLink">Sign In / Register</a>
+  </nav>
+
+  <main>
+
+    <!-- CINEMAS -->
+    <section class="section cinema-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">ON THE BIG SCREEN</p>
+          <h2>Currently in cinemas</h2>
+          <p class="subheading" id="locationText">
+            Discover films showing near you.
+          </p>
+        </div>
+
+        <button class="text-btn" id="locationBtn">
+          <span>⌖</span> Location
+        </button>
+      </div>
+
+      <div class="horizontal-list" id="cinemaList">
+        <div class="loading-card">Loading cinema listings...</div>
+      </div>
+
+      <p class="small-note">
+        Recently released films will remain here for up to one month.
+      </p>
+    </section>
+
+    <!-- FEATURED -->
+    <section class="section featured-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">HANDPICKED FOR YOU</p>
+          <h2>Featured on KINORA</h2>
+        </div>
+      </div>
+
+      <div class="featured-carousel" id="featuredCarousel">
+
+        <button class="carousel-arrow prev"
+          id="prevFeatured" aria-label="Previous featured title">‹</button>
+
+        <div class="featured-track" id="featuredTrack">
+          <div class="loading-card">Loading featured titles...</div>
+        </div>
+
+        <button class="carousel-arrow next"
+          id="nextFeatured" aria-label="Next featured title">›</button>
+      </div>
+
+      <div class="carousel-indicators" id="carouselIndicators"></div>
+    </section>
+
+    <!-- RECENTLY ADDED -->
+    <section class="section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">EXPLORE THE ARCHIVE</p>
+          <h2>Recently added</h2>
+        </div>
+        <a href="#" class="text-btn">View all →</a>
+      </div>
+
+      <div class="horizontal-list" id="recentList">
+        <div class="empty-state">
+          New additions will appear here.
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <a href="index.html" class="logo">KINORA<span>.</span></a>
+      <p>Every film has a story. Every person has a credit.</p>
+      <div class="footer-links">
+        <a href="#">About</a>
+        <a href="#">Privacy</a>
+        <a href="#">Contact</a>
+      </div>
+      <p class="copyright">© 2026 KINORA. All rights reserved.</p>
+    </footer>
+
+  </main>
+
+</body>
+</html>
