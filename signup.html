@@ -1,4 +1,306 @@
+
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#0b0d12"><title>Create account — KINORA</title><link rel="stylesheet" href="styles.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script defer src="app.js"></script></head>
-<body><header class="topbar"><a class="brand" href="index.html">KINORA<span>.</span></a><nav><a href="index.html">Explore</a><a href="login.html" class="nav-pill">Log in</a></nav></header>
-<main class="auth-wrap"><a class="back-link" href="index.html">← Back to KINORA</a><section class="auth-card"><p class="eyebrow">JOIN THE COMMUNITY</p><h1>Create your account</h1><p class="muted">Choose a username that will appear on your public profile.</p><form id="signupForm" class="form-stack"><label>Username<input id="signupUsername" type="text" minlength="3" maxlength="24" pattern="[A-Za-z0-9_]+" autocomplete="username" placeholder="e.g. jfxds" required><small>3–24 characters. Letters, numbers and underscores only.</small></label><label>Email address<input id="signupEmail" type="email" autocomplete="email" placeholder="you@example.com" required></label><label>Password<input id="signupPassword" type="password" minlength="8" autocomplete="new-password" placeholder="At least 8 characters" required></label><button class="button primary full" type="submit">Create account</button></form><p id="signupMessage" class="form-message" role="status"></p><p class="auth-switch">Already have an account? <a href="login.html">Log in</a></p></section></main></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d12">
+
+  <title>Create account — KINORA</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script defer src="app.js"></script>
+
+  <style>
+    body.auth-page {
+      min-height: 100vh;
+      background: #0b0d12;
+      color: #f5f5f7;
+      font-family: inherit;
+    }
+
+    .auth-page .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 6%;
+      border-bottom: 1px solid #252630;
+    }
+
+    .auth-page .brand {
+      color: #fff;
+      font-size: 27px;
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      text-decoration: none;
+    }
+
+    .auth-page .brand span {
+      color: var(--accent, #ff3b9d);
+    }
+
+    .auth-page nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .auth-page nav a {
+      color: #ddd;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .auth-page .nav-pill {
+      padding: 10px 17px;
+      border: 1px solid #383945;
+      border-radius: 30px;
+    }
+
+    .auth-page .auth-wrap {
+      width: min(100% - 32px, 470px);
+      margin: 55px auto;
+    }
+
+    .auth-page .back-link {
+      display: inline-block;
+      color: #aaa;
+      text-decoration: none;
+      font-size: 14px;
+      margin-bottom: 22px;
+    }
+
+    .auth-page .back-link:hover,
+    .auth-page .auth-switch a:hover {
+      color: var(--accent, #ff3b9d);
+    }
+
+    .auth-page .auth-card {
+      background: #12141c;
+      border: 1px solid #292b36;
+      border-radius: 22px;
+      padding: 36px;
+      box-shadow: 0 20px 70px #0005;
+    }
+
+    .auth-page .eyebrow {
+      color: var(--accent, #ff3b9d);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 2px;
+    }
+
+    .auth-page h1 {
+      font-size: clamp(29px, 7vw, 38px);
+      line-height: 1.15;
+      letter-spacing: -1.5px;
+      margin: 13px 0;
+    }
+
+    .auth-page .muted {
+      color: #999ba8;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+
+    .auth-page .form-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 19px;
+    }
+
+    .auth-page .form-stack label {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      color: #e5e5e9;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .auth-page .form-stack input {
+      width: 100%;
+      box-sizing: border-box;
+      background: #0b0d12;
+      color: #fff;
+      border: 1px solid #353744;
+      border-radius: 11px;
+      padding: 15px;
+      font: inherit;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .auth-page .form-stack input:focus {
+      border-color: var(--accent, #ff3b9d);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #ff3b9d) 17%, transparent);
+    }
+
+    .auth-page .form-stack small {
+      color: #858795;
+      font-size: 11px;
+      font-weight: 400;
+      line-height: 1.5;
+    }
+
+    .auth-page .button.primary {
+      background: var(--accent, #ff3b9d);
+      color: #090a0e;
+      border: none;
+      border-radius: 11px;
+      padding: 15px;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .auth-page .button.primary:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    .auth-page .full {
+      width: 100%;
+    }
+
+    .auth-page .form-message {
+      color: #ddd;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-top: 15px;
+    }
+
+    .auth-page .auth-switch {
+      color: #999ba8;
+      font-size: 13px;
+      text-align: center;
+      margin-top: 25px;
+    }
+
+    .auth-page .auth-switch a {
+      color: var(--accent, #ff3b9d);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    @media(max-width: 480px) {
+      .auth-page .topbar {
+        padding: 17px 20px;
+      }
+
+      .auth-page .auth-wrap {
+        margin: 30px auto;
+      }
+
+      .auth-page .auth-card {
+        padding: 25px 21px;
+      }
+
+      .auth-page nav {
+        gap: 12px;
+      }
+    }
+  </style>
+
+  <script>
+    (() => {
+      const colours = [
+        "#FF3B9D", "#B7F500", "#2589FF", "#9B65FF",
+        "#FF8138", "#00D6C9", "#FF4055", "#FFD43B"
+      ];
+      const colour = colours[Math.floor(Math.random() * colours.length)];
+      document.documentElement.style.setProperty("--accent", colour);
+    })();
+  </script>
+</head>
+
+<body class="auth-page">
+
+  <header class="topbar">
+    <a class="brand" href="index.html">KINORA<span>.</span></a>
+
+    <nav>
+      <a href="index.html">Explore</a>
+      <a href="login.html" class="nav-pill">Log in</a>
+    </nav>
+  </header>
+
+  <main class="auth-wrap">
+
+    <a class="back-link" href="index.html">← Back to KINORA</a>
+
+    <section class="auth-card">
+
+      <p class="eyebrow">JOIN THE COMMUNITY</p>
+
+      <h1>Create your account</h1>
+
+      <p class="muted">
+        Join the KINORA community.
+        Create your profile and help build a knowledge base for cinema.
+      </p>
+
+      <form id="signupForm" class="form-stack">
+
+        <label>
+          Username
+          <input
+            id="signupUsername"
+            type="text"
+            minlength="3"
+            maxlength="24"
+            pattern="[A-Za-z0-9_]+"
+            autocomplete="username"
+            placeholder="e.g. jfxds"
+            required
+          >
+          <small>
+            3–24 characters. Letters, numbers and underscores only.
+          </small>
+        </label>
+
+        <label>
+          Email address
+          <input
+            id="signupEmail"
+            type="email"
+            autocomplete="email"
+            placeholder="you@example.com"
+            required
+          >
+        </label>
+
+        <label>
+          Password
+          <input
+            id="signupPassword"
+            type="password"
+            minlength="8"
+            autocomplete="new-password"
+            placeholder="At least 8 characters"
+            required
+          >
+        </label>
+
+        <button class="button primary full" type="submit">
+          Create account
+        </button>
+
+      </form>
+
+      <p id="signupMessage" class="form-message" role="status"></p>
+
+      <p class="auth-switch">
+        Already have an account?
+        <a href="login.html">Log in</a>
+      </p>
+
+    </section>
+  </main>
+
+</body>
+</html>
