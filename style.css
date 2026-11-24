@@ -621,3 +621,20 @@ main {
     animation-duration: .01ms !important;
   }
 }
+/* KINORA — Consistent typography across all pages */
+
+html,
+body,
+body.auth-page,
+body.auth-page * {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body.auth-page input,
+body.auth-page button,
+body.auth-page select,
+body.auth-page textarea {
+  font-family: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+}
