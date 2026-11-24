@@ -5,11 +5,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#101014">
+
   <title>KINORA — Film & Series Encyclopedia</title>
   <meta name="description" content="Discover films, series and the people behind every production.">
 
   <link rel="stylesheet" href="style.css">
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+
+  <!-- KINORA scripts -->
   <script src="script.js" defer></script>
+  <script src="app.js" defer></script>
 </head>
 
 <body>
@@ -44,14 +52,21 @@
 
   <!-- MENU -->
   <nav class="menu-panel" id="menuPanel">
-    <a href="#" id="profileLink" hidden>My Profile</a>
+
+    <!-- Logged-in users -->
+    <a href="profile.html" id="profileLink" hidden>My Profile</a>
     <a href="#" id="watchlistLink" hidden>My Watchlist</a>
+    <button id="logoutBtn" class="menu-action" hidden>Log out</button>
+
     <a href="#">Films</a>
     <a href="#">Series</a>
     <a href="#">People</a>
     <a href="#">Recently Added</a>
     <a href="#">About KINORA</a>
-    <a href="#" id="accountLink">Sign In / Register</a>
+
+    <!-- Guests -->
+    <a href="login.html" id="accountLink">Sign In / Register</a>
+
   </nav>
 
   <main>
@@ -127,11 +142,13 @@
     <footer class="footer">
       <a href="index.html" class="logo">KINORA<span>.</span></a>
       <p>Every film has a story. Every person has a credit.</p>
+
       <div class="footer-links">
         <a href="#">About</a>
         <a href="#">Privacy</a>
         <a href="#">Contact</a>
       </div>
+
       <p class="copyright">© 2026 KINORA. All rights reserved.</p>
     </footer>
 
