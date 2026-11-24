@@ -1,18 +1,33 @@
 
 (() => {
   const cfg = window.KINORA_CONFIG || {};
-  const hasConfig = cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY &&
+
+  const hasConfig =
+    cfg.SUPABASE_URL &&
+    cfg.SUPABASE_ANON_KEY &&
     !cfg.SUPABASE_ANON_KEY.includes("PASTE_YOUR");
 
-  const client = hasConfig && window.supabase
-    ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY)
-    : null;
+  const client =
+    hasConfig && window.supabase
+      ? window.supabase.createClient(
+          cfg.SUPABASE_URL,
+          cfg.SUPABASE_ANON_KEY
+        )
+      : null;
 
   const $ = id => document.getElementById(id);
+
+  const home = "index.html";
+  const profile = "profile.html";
+
+  // --------------------------------------------------
+  // HELPERS
+  // --------------------------------------------------
 
   const say = (id, message, error = false) => {
     const el = $(id);
     if (!el) return;
+
     el.textContent = message;
     el.classList.toggle("error", error);
   };
@@ -26,157 +41,213 @@
       "'": "&#39;"
     }[c]));
 
-  const home = "index.html";
-  const profile = "profile.html";
+  async function getUser() {
+    if (!client) return null;
 
-  // CONTRIBUTOR RANK SYSTEM
-  const ranks = [
-    { name: "NewBee", threshold: 10000 },
-    { name: "Amateur", threshold: 100000 },
-    { name: "Pro", threshold: 500000 },
-    { name: "Elite", threshold: 1000000 },
-    { name: "Legend", threshold: 10000000 },
-    { name: "Spirit", threshold: 100000000 },
-    { name: "Beast", threshold: 500000000 },
-    { name: "God", threshold: 1000000000 },
-    { name: "King of God", threshold: 1000000000000 }
+    const {
+      data: { user },
+      error
+    } = await client.auth.getUser();
+
+    if (error) return null;
+
+    return user;
+  }
+
+  // --------------------------------------------------
+  // CONTRIBUTOR LEVEL SYSTEM
+  // --------------------------------------------------
+
+  // XP is calculated from:
+  // 1 XP for each recorded published-article edit
+  // 10 XP for each published article created
+
+  const levels = [
+    { level: 1, name: "Starter", xp: 0 },
+    { level: 2, name: "Amateur", xp: 5 },
+    { level: 3, name: "Contributor", xp: 20 },
+    { level: 4, name: "Editor", xp: 50 },
+    { level: 5, name: "Senior Editor", xp: 100 },
+    { level: 6, name: "Expert", xp: 200 },
+    { level: 7, name: "Master", xp: 400 },
+    { level: 8, name: "Legend", xp: 750 },
+    { level: 9, name: "Icon", xp: 1200 }
   ];
 
-  function getRank(characters) {
-    let current = { name: "Newcomer", threshold: 0 };
+  function getLevel(xp) {
+    let current = levels[0];
+    let next = null;
 
-    for (const rank of ranks) {
-      if (characters >= rank.threshold) {
-        current = rank;
+    for (let i = 0; i < levels.length; i++) {
+      if (xp >= levels[i].xp) {
+        current = levels[i];
+        next = levels[i + 1] || null;
       } else {
         break;
       }
     }
 
-    const currentIndex = ranks.findIndex(r => r.name === current.name);
-    const next = currentIndex === -1
-      ? ranks[0]
-      : ranks[currentIndex + 1] || null;
-
     let progress = 100;
     let remaining = 0;
 
     if (next) {
-      const range = next.threshold - current.threshold;
+      const range = next.xp - current.xp;
+
       progress = Math.min(
         100,
-        Math.max(0, ((characters - current.threshold) / range) * 100)
+        Math.max(
+          0,
+          ((xp - current.xp) / range) * 100
+        )
       );
-      remaining = Math.max(0, next.threshold - characters);
+
+      remaining = next.xp - xp;
     }
 
-    return { current, next, progress, remaining };
+    return {
+      current,
+      next,
+      progress,
+      remaining
+    };
   }
 
-  function rankHTML(characters) {
-    const result = getRank(characters);
+  function levelHTML(xp) {
+    const result = getLevel(xp);
     const current = result.current;
     const next = result.next;
 
     return `
       <section class="profile-section contributor-rank">
+
         <div class="rank-heading">
           <div>
-            <p class="eyebrow">CONTRIBUTOR STATUS</p>
-            <h2>Your rank</h2>
+            <p class="eyebrow">CONTRIBUTOR PROGRESSION</p>
+            <h2>Your level</h2>
           </div>
-          <span class="rank-badge">${esc(current.name)}</span>
+
+          <span class="rank-badge">
+            LEVEL ${current.level}
+          </span>
         </div>
 
         <div class="rank-total">
-          <strong>${characters.toLocaleString()}</strong>
-          <span>approved contribution characters</span>
+          <strong>${xp.toLocaleString()} XP</strong>
+          <span>${esc(current.name)}</span>
         </div>
 
         ${
           next
             ? `
               <div class="rank-progress-info">
-                <span>${esc(current.name)}</span>
-                <span>${esc(next.name)}</span>
+                <span>Level ${current.level}</span>
+                <span>Level ${next.level}</span>
               </div>
-              <div class="rank-progress-track"
+
+              <div
+                class="rank-progress-track"
                 role="progressbar"
                 aria-valuemin="0"
                 aria-valuemax="100"
-                aria-valuenow="${Math.round(result.progress)}">
-                <div class="rank-progress-fill"
-                  style="width:${result.progress.toFixed(2)}%">
-                </div>
+                aria-valuenow="${Math.round(result.progress)}"
+              >
+                <div
+                  class="rank-progress-fill"
+                  style="width:${result.progress.toFixed(2)}%"
+                ></div>
               </div>
+
               <p class="rank-next">
-                <strong>${result.remaining.toLocaleString()}</strong>
-                more characters to reach ${esc(next.name)}
+                <strong>${result.remaining} XP</strong>
+                more to reach ${esc(next.name)}
               </p>
             `
-            : `<p class="rank-next">You've reached the highest contributor rank.</p>`
+            : `
+              <p class="rank-next">
+                You've reached the highest contributor level.
+              </p>
+            `
         }
+
       </section>
     `;
   }
 
-  async function getUser() {
-    if (!client) return null;
+  // --------------------------------------------------
+  // NAVIGATION
+  // --------------------------------------------------
 
-    const { data: { user }, error } = await client.auth.getUser();
-
-    if (error) {
-      console.error("Could not get user:", error.message);
-      return null;
-    }
-
-    return user;
-  }
-
-  // NAVIGATION AND ACCOUNT STATE
   async function syncNav() {
-    const user = await getUser();
-    const loggedIn = Boolean(user);
+    if (!client) return;
 
-    // Existing navigation IDs
+    const user = await getUser();
+
+    // Older navigation IDs
     const login = $("loginNav");
     const signup = $("signupNav");
-    const profileNav = $("profileNav");
+    const oldProfile = $("profileNav");
 
-    // New homepage navigation IDs
+    // Current homepage navigation IDs
     const profileLink = $("profileLink");
     const watchlistLink = $("watchlistLink");
     const accountLink = $("accountLink");
 
     const logout = $("logoutBtn");
 
-    // Older navigation
-    if (login) login.classList.toggle("hidden", loggedIn);
-    if (signup) signup.classList.toggle("hidden", loggedIn);
+    if (user) {
+      if (login) login.classList.add("hidden");
+      if (signup) signup.classList.add("hidden");
 
-    if (profileNav) {
-      profileNav.href = loggedIn ? profile : "login.html";
-      profileNav.textContent = loggedIn ? "My profile" : "Profile";
-    }
+      if (oldProfile) {
+        oldProfile.href = profile;
+        oldProfile.textContent = "My profile";
+      }
 
-    // New homepage menu
-    if (profileLink) {
-      profileLink.href = profile;
-      profileLink.hidden = !loggedIn;
-    }
+      if (profileLink) {
+        profileLink.href = profile;
+        profileLink.hidden = false;
+      }
 
-    if (watchlistLink) {
-      watchlistLink.hidden = !loggedIn;
-    }
+      if (watchlistLink) {
+        watchlistLink.hidden = false;
+      }
 
-    if (accountLink) {
-      accountLink.href = "login.html";
-      accountLink.hidden = loggedIn;
-    }
+      if (accountLink) {
+        accountLink.hidden = true;
+      }
 
-    if (logout) {
-      logout.hidden = !loggedIn;
-      logout.classList.toggle("hidden", !loggedIn);
+      if (logout) {
+        logout.classList.remove("hidden");
+        logout.hidden = false;
+      }
+
+    } else {
+      if (login) login.classList.remove("hidden");
+      if (signup) signup.classList.remove("hidden");
+
+      if (oldProfile) {
+        oldProfile.href = "login.html";
+        oldProfile.textContent = "Profile";
+      }
+
+      if (profileLink) {
+        profileLink.href = "login.html";
+        profileLink.hidden = true;
+      }
+
+      if (watchlistLink) {
+        watchlistLink.hidden = true;
+      }
+
+      if (accountLink) {
+        accountLink.href = "login.html";
+        accountLink.hidden = false;
+      }
+
+      if (logout) {
+        logout.classList.add("hidden");
+        logout.hidden = true;
+      }
     }
   }
 
@@ -186,7 +257,7 @@
     const { error } = await client.auth.signOut();
 
     if (error) {
-      console.error("Logout failed:", error.message);
+      alert("Could not log out. Please try again.");
       return;
     }
 
@@ -194,13 +265,13 @@
   }
 
   document.querySelectorAll("#logoutBtn").forEach(button => {
-    button.addEventListener("click", e => {
-      e.preventDefault();
-      logout();
-    });
+    button.addEventListener("click", logout);
   });
 
+  // --------------------------------------------------
   // LOGIN
+  // --------------------------------------------------
+
   const loginForm = $("loginForm");
 
   if (loginForm) {
@@ -208,7 +279,11 @@
       e.preventDefault();
 
       if (!client) {
-        say("loginMessage", "Add your Supabase public key to config.js first.", true);
+        say(
+          "loginMessage",
+          "Check your Supabase settings in config.js.",
+          true
+        );
         return;
       }
 
@@ -228,7 +303,10 @@
     });
   }
 
+  // --------------------------------------------------
   // SIGNUP
+  // --------------------------------------------------
+
   const signupForm = $("signupForm");
 
   if (signupForm) {
@@ -236,14 +314,22 @@
       e.preventDefault();
 
       if (!client) {
-        say("signupMessage", "Add your Supabase public key to config.js first.", true);
+        say(
+          "signupMessage",
+          "Check your Supabase settings in config.js.",
+          true
+        );
         return;
       }
 
       const username = $("signupUsername").value.trim();
 
       if (!/^[A-Za-z0-9_]{3,24}$/.test(username)) {
-        say("signupMessage", "Use 3–24 letters, numbers or underscores for your username.", true);
+        say(
+          "signupMessage",
+          "Use 3–24 letters, numbers or underscores for your username.",
+          true
+        );
         return;
       }
 
@@ -266,18 +352,28 @@
       if (data.session) {
         location.href = profile;
       } else {
-        say("signupMessage", "Account created. Check your email and confirm your address, then log in.");
+        say(
+          "signupMessage",
+          "Account created. Check your email and confirm your address, then log in."
+        );
       }
     });
   }
 
+  // --------------------------------------------------
   // HOMEPAGE ARTICLES
+  // --------------------------------------------------
+
   async function loadArticles() {
     const target = $("articleList");
     if (!target) return;
 
     if (!client) {
-      target.innerHTML = '<div class="panel muted">Supabase is not configured yet. Check config.js.</div>';
+      target.innerHTML = `
+        <div class="panel muted">
+          Supabase is not configured yet. Check config.js.
+        </div>
+      `;
       return;
     }
 
@@ -289,36 +385,57 @@
       .limit(12);
 
     if (error) {
-      target.innerHTML = '<div class="panel muted">Could not load articles right now.</div>';
+      target.innerHTML = `
+        <div class="panel muted">
+          Could not load articles right now.
+        </div>
+      `;
       return;
     }
 
     if (!data?.length) {
-      target.innerHTML = '<div class="panel muted">No published articles yet. Be one of the first contributors.</div>';
+      target.innerHTML = `
+        <div class="panel muted">
+          No published articles yet. Be one of the first contributors.
+        </div>
+      `;
       return;
     }
 
-    target.innerHTML = data.map(a => `
-      <a class="article-card"
-         href="article.html?id=${encodeURIComponent(a.id)}"
-         style="display:block;text-decoration:none;color:inherit">
-        <h3>${esc(a.title)}</h3>
-        <p>${esc(a.summary || "Explore this article on KINORA.")}</p>
+    target.innerHTML = data.map(article => `
+      <a
+        class="article-card"
+        href="article.html?id=${encodeURIComponent(article.id)}"
+        style="display:block;text-decoration:none;color:inherit"
+      >
+        <h3>${esc(article.title)}</h3>
+
+        <p>
+          ${esc(article.summary || "Explore this article on KINORA.")}
+        </p>
+
         <div class="article-meta">
-          ${esc(a.category || "General")} ·
-          ${new Date(a.created_at).toLocaleDateString()}
+          ${esc(article.category || "General")} ·
+          ${new Date(article.created_at).toLocaleDateString()}
         </div>
       </a>
     `).join("");
   }
 
-  // PROFILE
+  // --------------------------------------------------
+  // USER PROFILE
+  // --------------------------------------------------
+
   async function loadProfile() {
     const target = $("profileContent");
     if (!target) return;
 
     if (!client) {
-      target.innerHTML = '<section class="panel">Supabase is not configured. Please check config.js.</section>';
+      target.innerHTML = `
+        <section class="panel">
+          Supabase is not configured. Please check config.js.
+        </section>
+      `;
       return;
     }
 
@@ -329,14 +446,24 @@
       return;
     }
 
-    const { data: prof, error: profileError } = await client
+    // PROFILE DETAILS
+
+    const {
+      data: prof,
+      error: profileError
+    } = await client
       .from("profiles")
       .select("username,created_at,username_changed")
       .eq("id", user.id)
       .maybeSingle();
 
     if (profileError) {
-      target.innerHTML = `<section class="panel">Could not load your profile: ${esc(profileError.message)}</section>`;
+      target.innerHTML = `
+        <section class="panel">
+          Could not load your profile:
+          ${esc(profileError.message)}
+        </section>
+      `;
       return;
     }
 
@@ -346,12 +473,41 @@
       user.email?.split("@")[0] ||
       "Contributor";
 
-    const { count: createdCount } = await client
+    // ARTICLES CREATED
+
+    const {
+      count: createdCount,
+      error: createdError
+    } = await client
       .from("articles")
-      .select("id", { count: "exact", head: true })
+      .select("id", {
+        count: "exact",
+        head: true
+      })
       .eq("created_by", user.id);
 
-    const { data: publishedArticles, error: publishedError } = await client
+    // PUBLISHED ARTICLES CREATED
+    // Used for contributor XP.
+
+    const {
+      count: publishedCreatedCount,
+      error: publishedCreatedError
+    } = await client
+      .from("articles")
+      .select("id", {
+        count: "exact",
+        head: true
+      })
+      .eq("created_by", user.id)
+      .eq("status", "published");
+
+    // ALL PUBLISHED ARTICLES
+    // Only edits to published articles count.
+
+    const {
+      data: publishedArticles,
+      error: publishedError
+    } = await client
       .from("articles")
       .select("id")
       .eq("status", "published");
@@ -361,10 +517,14 @@
 
     if (publishedError) {
       revisionError = true;
+
     } else if (publishedArticles?.length) {
       const publishedIds = publishedArticles.map(a => a.id);
 
-      const { data, error } = await client
+      const {
+        data,
+        error
+      } = await client
         .from("article_revisions")
         .select("article_id,chars_added,created_at")
         .eq("editor_id", user.id)
@@ -377,16 +537,39 @@
       }
     }
 
-    const editedCount = new Set(
+    // TOTAL EDIT ACTIONS
+
+    const totalEdits = revisions.length;
+
+    // UNIQUE ARTICLES EDITED
+
+    const editedArticles = new Set(
       revisions.map(r => r.article_id)
     ).size;
 
+    // CHARACTERS ADDED
+
     const charsAdded = revisions.reduce(
-      (sum, r) => sum + Math.max(0, Number(r.chars_added) || 0),
+      (sum, revision) =>
+        sum + Math.max(
+          0,
+          Number(revision.chars_added) || 0
+        ),
       0
     );
 
-    const { data: myArticles } = await client
+    // CONTRIBUTOR XP
+
+    const xp =
+      totalEdits +
+      ((publishedCreatedCount || 0) * 10);
+
+    // ARTICLES CREATED BY THIS USER
+
+    const {
+      data: myArticles,
+      error: myArticlesError
+    } = await client
       .from("articles")
       .select("id,title,status,created_at")
       .eq("created_by", user.id)
@@ -395,70 +578,142 @@
 
     const initials = (username[0] || "K").toUpperCase();
 
+    const memberDate = new Date(
+      prof?.created_at || user.created_at
+    ).toLocaleDateString(undefined, {
+      month: "long",
+      year: "numeric"
+    });
+
+    // --------------------------------------------------
+    // PROFILE DISPLAY
+    // --------------------------------------------------
+
     target.innerHTML = `
+
       <section class="profile-hero">
-        <div class="avatar">${esc(initials)}</div>
+
+        <div class="avatar">
+          ${esc(initials)}
+        </div>
+
         <div>
           <p class="eyebrow">KINORA CONTRIBUTOR</p>
+
           <h1>${esc(username)}</h1>
+
           <p class="muted">
-            Member since ${new Date(
-              prof?.created_at || user.created_at
-            ).toLocaleDateString(undefined, {
-              month: "long",
-              year: "numeric"
-            })}
+            Member since ${memberDate}
           </p>
         </div>
+
       </section>
 
-      ${rankHTML(charsAdded)}
+      ${levelHTML(xp)}
 
       <section class="stats-grid">
+
         <div class="stat">
-          <strong>${createdCount ?? 0}</strong>
+          <strong>
+            ${createdError ? "—" : (createdCount ?? 0)}
+          </strong>
           <span>Articles created</span>
         </div>
+
         <div class="stat">
-          <strong>${editedCount}</strong>
+          <strong>
+            ${revisionError ? "—" : totalEdits}
+          </strong>
+          <span>Total edits</span>
+        </div>
+
+        <div class="stat">
+          <strong>
+            ${revisionError ? "—" : editedArticles}
+          </strong>
           <span>Articles edited</span>
         </div>
+
         <div class="stat">
-          <strong>${charsAdded.toLocaleString()}</strong>
+          <strong>
+            ${revisionError ? "—" : charsAdded.toLocaleString()}
+          </strong>
           <span>Characters added</span>
         </div>
-        <div class="stat">
-          <strong>${revisions.length}</strong>
-          <span>Recorded revisions</span>
-        </div>
+
       </section>
 
       ${
         revisionError
-          ? `<p class="muted">Contribution totals could not be loaded. Please try again later.</p>`
+          ? `
+            <p class="muted">
+              Edit statistics could not be loaded.
+              Please check the article revision permissions.
+            </p>
+          `
           : ""
       }
 
       ${
-        prof?.username_changed
+        createdError
           ? `
-            <section class="profile-section">
-              <h2>Account settings</h2>
+            <p class="muted">
+              Article creation statistics could not be loaded.
+            </p>
+          `
+          : ""
+      }
+
+      <section class="profile-section">
+
+        <div class="rank-heading">
+          <div>
+            <p class="eyebrow">COMMUNITY ACTIVITY</p>
+            <h2>Your ratings</h2>
+          </div>
+
+          <span class="rank-badge">
+            Coming soon
+          </span>
+        </div>
+
+        <p class="muted">
+          KINORA's film and series rating system will appear here
+          once the production database and rating feature are ready.
+        </p>
+
+      </section>
+
+      <section class="profile-section">
+
+        <h2>Account settings</h2>
+
+        ${
+          prof?.username_changed
+            ? `
               <div class="form-stack">
                 <label>
                   Username
-                  <input type="text" value="${esc(username)}" disabled>
-                  <small>Your one-time username change has already been used. Your username is now permanent.</small>
+
+                  <input
+                    type="text"
+                    value="${esc(username)}"
+                    disabled
+                  >
+
+                  <small>
+                    Your one-time username change has already been used.
+                    Your username is now permanent.
+                  </small>
                 </label>
               </div>
-            </section>
-          `
-          : `
-            <section class="profile-section">
-              <h2>Account settings</h2>
+            `
+            : `
               <form id="usernameForm" class="form-stack">
+
                 <label>
                   Change username
+
                   <input
                     id="newUsername"
                     type="text"
@@ -469,31 +724,78 @@
                     autocomplete="username"
                     required
                   >
-                  <small>You can change your username only once. 3–24 letters, numbers or underscores.</small>
+
+                  <small>
+                    You can change your username only once.
+                    Use 3–24 letters, numbers or underscores.
+                  </small>
                 </label>
-                <button class="button primary" type="submit">Save username</button>
-                <p id="usernameMessage" class="form-message" role="status"></p>
+
+                <button
+                  class="button primary"
+                  type="submit"
+                >
+                  Save username
+                </button>
+
+                <p
+                  id="usernameMessage"
+                  class="form-message"
+                  role="status"
+                ></p>
+
               </form>
-            </section>
-          `
-      }
+            `
+        }
+
+      </section>
 
       <section class="profile-section">
+
         <h2>Articles you created</h2>
+
         <div class="profile-list">
+
           ${
-            (myArticles || []).length
-              ? myArticles.map(a => `
-                  <div class="profile-article">
-                    <strong>${esc(a.title)}</strong>
-                    <span>${esc((a.status || "").replace("_", " "))}</span>
-                  </div>
-                `).join("")
-              : '<div class="panel muted">You haven’t submitted an article yet.</div>'
+            myArticlesError
+              ? `
+                <div class="panel muted">
+                  Could not load your articles.
+                </div>
+              `
+              : (myArticles || []).length
+                ? myArticles.map(article => `
+                    <div class="profile-article">
+
+                      <strong>
+                        ${esc(article.title)}
+                      </strong>
+
+                      <span>
+                        ${esc(
+                          (article.status || "draft")
+                            .replace(/_/g, " ")
+                        )}
+                      </span>
+
+                    </div>
+                  `).join("")
+                : `
+                    <div class="panel muted">
+                      You haven't created an article yet.
+                    </div>
+                  `
           }
+
         </div>
+
       </section>
+
     `;
+
+    // --------------------------------------------------
+    // ONE-TIME USERNAME CHANGE
+    // --------------------------------------------------
 
     const usernameForm = $("usernameForm");
 
@@ -504,15 +806,35 @@
         const nextUsername = $("newUsername").value.trim();
 
         if (!/^[A-Za-z0-9_]{3,24}$/.test(nextUsername)) {
-          say("usernameMessage", "Use 3–24 letters, numbers or underscores.", true);
+          say(
+            "usernameMessage",
+            "Use 3–24 letters, numbers or underscores.",
+            true
+          );
           return;
         }
+
+        if (nextUsername === username) {
+          say(
+            "usernameMessage",
+            "This is already your username.",
+            true
+          );
+          return;
+        }
+
+        const button = usernameForm.querySelector("button");
+
+        if (button) button.disabled = true;
 
         say("usernameMessage", "Saving username…");
 
         const { error } = await client
           .from("profiles")
-          .update({ username: nextUsername })
+          .update({
+            username: nextUsername,
+            username_changed: true
+          })
           .eq("id", user.id);
 
         if (error) {
@@ -523,6 +845,8 @@
               : error.message,
             true
           );
+
+          if (button) button.disabled = false;
           return;
         }
 
@@ -531,7 +855,10 @@
     }
   }
 
-  // INITIALISE
+  // --------------------------------------------------
+  // START APP
+  // --------------------------------------------------
+
   syncNav();
   loadArticles();
   loadProfile();
@@ -541,4 +868,5 @@
       syncNav();
     });
   }
+
 })();
