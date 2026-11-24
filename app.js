@@ -54,7 +54,9 @@
     }
 
     const currentIndex = ranks.findIndex(r => r.name === current.name);
-    const next = ranks[currentIndex + 1] || null;
+    const next = currentIndex === -1
+      ? ranks[0]
+      : ranks[currentIndex + 1] || null;
 
     let progress = 100;
     let remaining = 0;
@@ -120,50 +122,82 @@
 
   async function getUser() {
     if (!client) return null;
-    const { data: { user } } = await client.auth.getUser();
+
+    const { data: { user }, error } = await client.auth.getUser();
+
+    if (error) {
+      console.error("Could not get user:", error.message);
+      return null;
+    }
+
     return user;
   }
 
+  // NAVIGATION AND ACCOUNT STATE
   async function syncNav() {
-    if (!client) return;
-
     const user = await getUser();
+    const loggedIn = Boolean(user);
+
+    // Existing navigation IDs
     const login = $("loginNav");
     const signup = $("signupNav");
     const profileNav = $("profileNav");
+
+    // New homepage navigation IDs
+    const profileLink = $("profileLink");
+    const watchlistLink = $("watchlistLink");
+    const accountLink = $("accountLink");
+
     const logout = $("logoutBtn");
 
-    if (user) {
-      if (login) login.classList.add("hidden");
-      if (signup) signup.classList.add("hidden");
+    // Older navigation
+    if (login) login.classList.toggle("hidden", loggedIn);
+    if (signup) signup.classList.toggle("hidden", loggedIn);
 
-      if (profileNav) {
-        profileNav.href = profile;
-        profileNav.textContent = "My profile";
-      }
+    if (profileNav) {
+      profileNav.href = loggedIn ? profile : "login.html";
+      profileNav.textContent = loggedIn ? "My profile" : "Profile";
+    }
 
-      if (logout) logout.classList.remove("hidden");
-    } else {
-      if (login) login.classList.remove("hidden");
-      if (signup) signup.classList.remove("hidden");
+    // New homepage menu
+    if (profileLink) {
+      profileLink.href = profile;
+      profileLink.hidden = !loggedIn;
+    }
 
-      if (profileNav) {
-        profileNav.href = "login.html";
-        profileNav.textContent = "Profile";
-      }
+    if (watchlistLink) {
+      watchlistLink.hidden = !loggedIn;
+    }
 
-      if (logout) logout.classList.add("hidden");
+    if (accountLink) {
+      accountLink.href = "login.html";
+      accountLink.hidden = loggedIn;
+    }
+
+    if (logout) {
+      logout.hidden = !loggedIn;
+      logout.classList.toggle("hidden", !loggedIn);
     }
   }
 
   async function logout() {
     if (!client) return;
-    await client.auth.signOut();
+
+    const { error } = await client.auth.signOut();
+
+    if (error) {
+      console.error("Logout failed:", error.message);
+      return;
+    }
+
     location.href = home;
   }
 
   document.querySelectorAll("#logoutBtn").forEach(button => {
-    button.addEventListener("click", logout);
+    button.addEventListener("click", e => {
+      e.preventDefault();
+      logout();
+    });
   });
 
   // LOGIN
@@ -265,17 +299,17 @@
     }
 
     target.innerHTML = data.map(a => `
-  <a class="article-card"
-     href="article.html?id=${encodeURIComponent(a.id)}"
-     style="display:block;text-decoration:none;color:inherit">
-    <h3>${esc(a.title)}</h3>
-    <p>${esc(a.summary || "Explore this article on KINORA.")}</p>
-    <div class="article-meta">
-      ${esc(a.category || "General")} ·
-      ${new Date(a.created_at).toLocaleDateString()}
-    </div>
-  </a>
-`).join("");
+      <a class="article-card"
+         href="article.html?id=${encodeURIComponent(a.id)}"
+         style="display:block;text-decoration:none;color:inherit">
+        <h3>${esc(a.title)}</h3>
+        <p>${esc(a.summary || "Explore this article on KINORA.")}</p>
+        <div class="article-meta">
+          ${esc(a.category || "General")} ·
+          ${new Date(a.created_at).toLocaleDateString()}
+        </div>
+      </a>
+    `).join("");
   }
 
   // PROFILE
@@ -497,11 +531,14 @@
     }
   }
 
+  // INITIALISE
   syncNav();
   loadArticles();
   loadProfile();
 
   if (client) {
-    client.auth.onAuthStateChange(() => syncNav());
+    client.auth.onAuthStateChange(() => {
+      syncNav();
+    });
   }
 })();
