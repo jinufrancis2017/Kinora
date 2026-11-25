@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Article Studio | KINORA</title>
 <link rel="stylesheet" href="style.css">
+
 <style>
 :root{--bg:#0b0d12;--panel:#151a24;--panel2:#1c2330;--line:#30394a;--muted:#9aa3b2;--white:#f4f5f7;--accent:#c9f06b}
 *{box-sizing:border-box}
@@ -29,10 +30,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .small{padding:7px 10px;color:var(--muted)}
 .delete{color:#ff9292}
 .add{width:100%;padding:12px;border:1px dashed #718348;border-radius:9px;color:var(--accent);background:#c9f06b0b;font-weight:700;margin-top:10px}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.info-row,.data-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:9px 0}
-.data-row{grid-template-columns:repeat(3,minmax(0,1fr));align-items:end}
-.data-row input{min-width:0}
+.row,.info-row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .tabs,.toolbar,.actions{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
 .tab{background:var(--panel2);border:1px solid var(--line);color:var(--muted);padding:10px 14px;border-radius:8px}
 .tab.active{background:var(--accent);color:#10150a;font-weight:800}
@@ -60,7 +58,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .person-card img{width:100%;height:125px;object-fit:cover;border-radius:7px;background:#eee}
 .person-card strong,.person-card small{display:block}
 .person-card small{color:#555}
-.person-search{position:relative}.person-results{position:absolute;top:100%;left:0;right:0;z-index:8;background:#202938;border:1px solid var(--line);border-radius:9px;max-height:190px;overflow:auto;box-shadow:0 8px 24px #0008}
+.person-search{position:relative}
+.person-results{position:absolute;top:100%;left:0;right:0;z-index:8;background:#202938;border:1px solid var(--line);border-radius:9px;max-height:190px;overflow:auto;box-shadow:0 8px 24px #0008}
 .person-option{display:flex;align-items:center;gap:9px;width:100%;padding:8px;border:0;border-bottom:1px solid var(--line);background:transparent;color:white;text-align:left}
 .person-option img{width:34px;height:34px;border-radius:50%;object-fit:cover}
 .person-option small{display:block;color:var(--muted)}
@@ -70,8 +69,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .person-profile-preview{display:flex;gap:18px;align-items:flex-start}
 .person-profile-preview img{width:130px;max-height:170px;object-fit:cover;border-radius:8px}
 .modal-bg{position:fixed;inset:0;background:#000b;z-index:20;display:none;align-items:center;justify-content:center;padding:15px}
-.modal-bg.open{display:flex}.modal{width:min(480px,100%);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
-@media(max-width:520px){main{padding:23px 13px 55px}.panel{padding:14px}.field-grid,.row,.info-row{grid-template-columns:1fr}.data-row{grid-template-columns:1fr 1fr}}
+.modal-bg.open{display:flex}
+.modal{width:min(480px,100%);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+@media(max-width:520px){main{padding:23px 13px 55px}.panel{padding:14px}.field-grid,.row,.info-row{grid-template-columns:1fr}}
 </style>
 </head>
 
@@ -106,12 +106,14 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <section class="panel" id="filmFields" hidden>
 <h2>Film article details</h2>
 <p class="muted">Fill in the film information. Optional sections can be left empty.</p>
+
 <div class="field-grid">
 <div><label>YEAR</label><input id="filmYear" placeholder="2026"></div>
 <div><label>LANGUAGE</label><input id="filmLanguage" placeholder="Malayalam"></div>
 <div><label>GENRE</label><input id="filmGenre" placeholder="Drama, thriller"></div>
 <div><label>RUNTIME</label><input id="filmRuntime" placeholder="e.g. 2h 15m"></div>
 </div>
+
 <label>POSTER IMAGE URL</label>
 <input id="posterUrl" placeholder="https://...">
 <label>POSTER IMAGE CREDIT / SOURCE</label>
@@ -120,7 +122,13 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <textarea id="filmPlot" rows="5" placeholder="Write the film's plot..."></textarea>
 
 <div class="subpanel">
-<h3>Crew</h3>
+<h3>Production studios</h3>
+<p class="muted">Enter production companies associated with the film. Separate multiple names with commas.</p>
+<textarea id="filmStudios" rows="2" placeholder="e.g. Aashirvad Cinemas, Wayfarer Films"></textarea>
+</div>
+
+<div class="subpanel">
+<h3>Main crew</h3>
 <p class="muted">Search for a published People article; its photo loads automatically.</p>
 <div id="crewRows"></div>
 <button class="add" type="button" id="addCrew">＋ Add crew member</button>
@@ -131,6 +139,13 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <p class="muted">Search for a published People article; the actor photo loads automatically.</p>
 <div id="castRows"></div>
 <button class="add" type="button" id="addCast">＋ Add cast member</button>
+</div>
+
+<div class="subpanel">
+<h3>Additional crew</h3>
+<p class="muted">Add other contributors such as assistant directors, editors, choreographers, stunt coordinators and technicians.</p>
+<div id="additionalCrewRows"></div>
+<button class="add" type="button" id="addAdditionalCrew">＋ Add additional crew member</button>
 </div>
 
 <div class="subpanel">
@@ -251,8 +266,11 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
+
 <script>
 (async()=>{
+"use strict";
+
 const $=id=>document.getElementById(id);
 const cfg=window.KINORA_CONFIG;
 const message=$("message");
@@ -264,8 +282,13 @@ let citations=[];
 let existingArticle=null;
 
 const filmData={
- crew:[],cast:[],soundtrack:[],
- theatrical_releases:[],digital_releases:[],awards:[]
+ crew:[],
+ cast:[],
+ additional_crew:[],
+ soundtrack:[],
+ theatrical_releases:[],
+ digital_releases:[],
+ awards:[]
 };
 
 if(cfg?.SUPABASE_URL&&cfg?.SUPABASE_ANON_KEY&&window.supabase){
@@ -274,7 +297,10 @@ if(cfg?.SUPABASE_URL&&cfg?.SUPABASE_ANON_KEY&&window.supabase){
  message.textContent="Supabase configuration missing. Check config.js.";
 }
 
-const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({
+ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+
 const val=id=>$(id).value.trim();
 const setVal=(id,v)=>{if($(id))$(id).value=v??"";};
 
@@ -310,10 +336,12 @@ const platformSlugs={
 
 function autoImageUrl(kind,name){
  const key=String(name||"").trim().toLowerCase();
+
  if(kind==="flag"){
   const code=countryCodes[key]||(/^[a-z]{2}$/i.test(key)?key.toLowerCase():"");
   return code?`https://flagcdn.com/w80/${code}.png`:"";
  }
+
  const slug=platformSlugs[key]||key.replace(/[^a-z0-9]+/g,"");
  return slug?`https://cdn.simpleicons.org/${slug}`:"";
 }
@@ -354,13 +382,14 @@ function renderDynamic(container,fields,collection){
         value="${esc(item[f.key]||"")}">
        <div class="person-results" hidden></div>
       </div>
-      <div class="person-selected">${item.person_id?"Linked People article selected":""}</div>
+      <div class="person-selected">${item.person_id?"✓ Linked People article selected":""}</div>
      </div>`;
     }
 
     if(f.autoImage){
      const imageKey=f.autoImage==="flag"?"flag":"icon";
      const imageUrl=item[imageKey]||autoImageUrl(f.autoImage,item[f.key]);
+
      return `<div>
       <label>${esc(f.label)}</label>
       <input data-key="${esc(f.key)}" data-auto-image="${esc(f.autoImage)}"
@@ -382,10 +411,12 @@ function renderDynamic(container,fields,collection){
   card.querySelectorAll("input:not([data-person-search])").forEach(input=>{
    input.addEventListener("input",()=>{
     item[input.dataset.key]=input.value;
+
     if(input.dataset.autoImage){
      const kind=input.dataset.autoImage;
      const imageKey=kind==="flag"?"flag":"icon";
      item[imageKey]=autoImageUrl(kind,input.value);
+
      const preview=input.parentElement.querySelector(".auto-image-preview");
      preview.innerHTML=item[imageKey]
       ?`<img src="${esc(item[imageKey])}" alt="" style="width:28px;height:28px;object-fit:contain;border-radius:50%"><small class="muted">Generated automatically</small>`
@@ -404,10 +435,12 @@ function renderDynamic(container,fields,collection){
     item[search.dataset.key]=search.value;
     item.person_id=null;
     item.person_photo=null;
+    selected.textContent="";
     results.hidden=true;
     results.innerHTML="";
 
     if(search.value.trim().length<2)return;
+    if(!db)return;
 
     const {data,error}=await db.from("articles")
      .select("id,title,content_blocks")
@@ -447,7 +480,7 @@ function renderDynamic(container,fields,collection){
    });
   }
 
-  card.querySelector("button").addEventListener("click",()=>{
+  card.querySelector(".delete").addEventListener("click",()=>{
    filmData[collection].splice(index,1);
    renderDynamic(container,fields,collection);
   });
@@ -456,15 +489,50 @@ function renderDynamic(container,fields,collection){
  });
 }
 
-const crewFields=[{key:"name",label:"SEARCH PEOPLE ARTICLE",person:true},{key:"position",label:"POSITION / ROLE"}];
-const castFields=[{key:"name",label:"SEARCH PEOPLE ARTICLE",person:true},{key:"role",label:"CHARACTER / ROLE"}];
-const songFields=[{key:"title",label:"SONG TITLE"},{key:"lyrics",label:"LYRICS"},{key:"singer",label:"SINGER"},{key:"duration",label:"DURATION"}];
-const theatricalFields=[{key:"country",label:"COUNTRY",autoImage:"flag"},{key:"date",label:"RELEASE DATE"},{key:"certification",label:"CERTIFICATION"}];
-const digitalFields=[{key:"platform",label:"STREAMING PLATFORM",autoImage:"platform"},{key:"date",label:"RELEASE DATE"}];
-const awardFields=[{key:"name",label:"AWARD NAME"},{key:"category",label:"CATEGORY"},{key:"result",label:"RESULT (WIN / NOMINATION)"},{key:"recipient",label:"RECIPIENT",person:true},{key:"year",label:"YEAR"}];
+const crewFields=[
+ {key:"name",label:"SEARCH PEOPLE ARTICLE",person:true},
+ {key:"position",label:"POSITION / ROLE"}
+];
+
+const castFields=[
+ {key:"name",label:"SEARCH PEOPLE ARTICLE",person:true},
+ {key:"role",label:"CHARACTER / ROLE"}
+];
+
+const additionalCrewFields=[
+ {key:"name",label:"SEARCH PEOPLE ARTICLE",person:true},
+ {key:"position",label:"POSITION / ROLE"}
+];
+
+const songFields=[
+ {key:"title",label:"SONG TITLE"},
+ {key:"lyrics",label:"LYRICS"},
+ {key:"singer",label:"SINGER"},
+ {key:"duration",label:"DURATION"}
+];
+
+const theatricalFields=[
+ {key:"country",label:"COUNTRY",autoImage:"flag"},
+ {key:"date",label:"RELEASE DATE"},
+ {key:"certification",label:"CERTIFICATION"}
+];
+
+const digitalFields=[
+ {key:"platform",label:"STREAMING PLATFORM",autoImage:"platform"},
+ {key:"date",label:"RELEASE DATE"}
+];
+
+const awardFields=[
+ {key:"name",label:"AWARD NAME"},
+ {key:"category",label:"CATEGORY"},
+ {key:"result",label:"RESULT (WIN / NOMINATION)"},
+ {key:"recipient",label:"RECIPIENT",person:true},
+ {key:"year",label:"YEAR"}
+];
 
 $("addCrew").onclick=()=>addDynamic("crewRows",crewFields,"crew");
 $("addCast").onclick=()=>addDynamic("castRows",castFields,"cast");
+$("addAdditionalCrew").onclick=()=>addDynamic("additionalCrewRows",additionalCrewFields,"additional_crew");
 $("addSong").onclick=()=>addDynamic("songRows",songFields,"soundtrack");
 $("addTheatrical").onclick=()=>addDynamic("theatricalRows",theatricalFields,"theatrical_releases");
 $("addDigital").onclick=()=>addDynamic("digitalRows",digitalFields,"digital_releases");
@@ -476,8 +544,10 @@ function currentBody(){
 
 function switchMode(next){
  if(next===mode)return;
+
  if(mode==="visual")$("htmlEditor").value=$("visualEditor").innerHTML;
  else $("visualEditor").innerHTML=$("htmlEditor").value;
+
  mode=next;
  $("visualPanel").hidden=next!=="visual";
  $("htmlPanel").hidden=next!=="html";
@@ -510,7 +580,9 @@ $("visualLink").onclick=()=>{
 
 function insertCitation(){
  if(!citations.length)return;
+
  const marker="["+citations.length+"]";
+
  if(mode==="visual"){
   $("visualEditor").focus();
   document.execCommand("insertText",false,marker);
@@ -520,15 +592,18 @@ function insertCitation(){
   e.focus();
  }
 }
+
 $("visualCitation").onclick=insertCitation;
 $("htmlCitation").onclick=insertCitation;
 
 function renderCitations(){
  const host=$("citationList");
+
  if(!citations.length){
   host.innerHTML='<p class="muted">No references added yet.</p>';
   return;
  }
+
  host.innerHTML=citations.map((c,i)=>`
   <div class="item-row">
    <strong>${i+1}. <a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.title||c.url)}</a></strong>
@@ -547,25 +622,35 @@ function renderCitations(){
 
 function openCitation(){$("citationModal").classList.add("open");}
 function closeCitation(){$("citationModal").classList.remove("open");}
+
 $("openCitation").onclick=openCitation;
 $("closeCitation").onclick=closeCitation;
-$("citationModal").onclick=e=>{if(e.target===$("citationModal"))closeCitation();};
+$("citationModal").onclick=e=>{
+ if(e.target===$("citationModal"))closeCitation();
+};
 
 $("loadCitation").onclick=async()=>{
  const url=val("citationUrl");
+
  if(!/^https?:\/\//i.test(url)){
   $("citationStatus").textContent="Enter a valid URL.";
   return;
  }
+
  $("citationStatus").textContent="Trying to load webpage details…";
+
  try{
   const res=await fetch("https://api.microlink.io/?url="+encodeURIComponent(url));
   if(!res.ok)throw new Error();
+
   const d=(await res.json()).data||{};
   setVal("citationTitle",d.title);
   setVal("citationPublisher",d.publisher||d.site||new URL(url).hostname);
   setVal("citationDate",d.date?new Date(d.date).toLocaleDateString():"");
-  $("citationStatus").textContent=d.title?"Details loaded. Please verify them.":"No metadata found. Enter details manually.";
+
+  $("citationStatus").textContent=d.title
+   ?"Details loaded. Please verify them."
+   :"No metadata found. Enter details manually.";
  }catch(e){
   $("citationStatus").textContent="Automatic loading unavailable. Enter details manually.";
   try{setVal("citationPublisher",new URL(url).hostname);}catch(_){}
@@ -574,91 +659,140 @@ $("loadCitation").onclick=async()=>{
 
 $("confirmCitation").onclick=()=>{
  const url=val("citationUrl");
+
  if(!/^https?:\/\//i.test(url)){
   $("citationStatus").textContent="Enter a valid URL.";
   return;
  }
+
  citations.push({
-  url,title:val("citationTitle"),
+  url,
+  title:val("citationTitle"),
   publisher:val("citationPublisher"),
   date:val("citationDate")
  });
+
  renderCitations();
  closeCitation();
- ["citationUrl","citationTitle","citationPublisher","citationDate","citationStatus"].forEach(id=>setVal(id,""));
+
+ ["citationUrl","citationTitle","citationPublisher","citationDate","citationStatus"]
+ .forEach(id=>setVal(id,""));
 };
 
 function getFilmData(){
+ const studios=val("filmStudios")
+  .split(",")
+  .map(s=>s.trim())
+  .filter(Boolean);
+
  return {
-  kind:"film",version:1,
+  kind:"film",
+  version:1,
   subtitle:val("subtitle"),
-  year:val("filmYear"),language:val("filmLanguage"),
-  genre:val("filmGenre"),runtime:val("filmRuntime"),
-  poster_url:val("posterUrl"),poster_credit:val("posterCredit"),
+  year:val("filmYear"),
+  language:val("filmLanguage"),
+  genre:val("filmGenre"),
+  runtime:val("filmRuntime"),
+  poster_url:val("posterUrl"),
+  poster_credit:val("posterCredit"),
   plot:val("filmPlot"),
-  crew:filmData.crew,cast:filmData.cast,
+  studios,
+  crew:filmData.crew,
+  cast:filmData.cast,
+  additional_crew:filmData.additional_crew,
   soundtrack:filmData.soundtrack,
   theatrical_releases:filmData.theatrical_releases,
   digital_releases:filmData.digital_releases,
   box_office:{
-   budget:val("budget"),worldwide_gross:val("worldwideGross"),
-   domestic_gross:val("domesticGross"),overseas_gross:val("overseasGross"),
-   verdict:val("boxOfficeVerdict"),source:val("boxOfficeSource")
+   budget:val("budget"),
+   worldwide_gross:val("worldwideGross"),
+   domestic_gross:val("domesticGross"),
+   overseas_gross:val("overseasGross"),
+   verdict:val("boxOfficeVerdict"),
+   source:val("boxOfficeSource")
   },
   awards:filmData.awards
  };
 }
 
 function safeLink(url,text){
- return url?`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(text)}</a>`:esc(text||"");
+ return url
+  ?`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(text)}</a>`
+  :esc(text||"");
 }
 
 function renderFilmPreview(f){
  let html="";
- if(f.poster_url)html+=`<img src="${esc(f.poster_url)}" alt="Film poster" style="display:block;max-width:220px;width:60%;margin:20px auto">`;
+
+ if(f.poster_url){
+  html+=`<img src="${esc(f.poster_url)}" alt="Film poster" style="display:block;max-width:220px;width:60%;margin:20px auto">`;
+ }
+
  if(f.plot)html+=`<h2>Plot</h2><p>${esc(f.plot)}</p>`;
 
+ if(f.studios?.length){
+  html+=`<h2>Production studios</h2><ul>${f.studios.map(s=>`<li>${esc(s)}</li>`).join("")}</ul>`;
+ }
+
  function people(title,arr,role){
-  if(!arr.length)return "";
+  if(!arr?.length)return "";
+
   return `<h2>${title}</h2><div class="cards">${arr.map(p=>`
    <div class="person-card">
     ${(p.person_photo||p.photo)?`<img src="${esc(p.person_photo||p.photo)}" alt="">`:""}
-    <strong>${esc(p.name)}</strong><small>${esc(p[role])}</small>
-   </div>`).join("")}</div>`;
+    <strong>${esc(p.name)}</strong>
+    <small>${esc(p[role])}</small>
+   </div>
+  `).join("")}</div>`;
  }
 
  html+=people("Crew",f.crew||[],"position");
  html+=people("Cast",f.cast||[],"role");
+ html+=people("Additional crew",f.additional_crew||[],"position");
 
- if(f.soundtrack?.length)html+=`<details><summary>Soundtrack</summary><table>
- <tr><th>#</th><th>Title</th><th>Lyrics</th><th>Singer</th><th>Length</th></tr>
- ${f.soundtrack.map((s,i)=>`<tr><td>${i+1}</td><td>${esc(s.title)}</td><td>${esc(s.lyrics)}</td><td>${esc(s.singer)}</td><td>${esc(s.duration)}</td></tr>`).join("")}
- </table></details>`;
+ if(f.soundtrack?.length){
+  html+=`<details><summary>Soundtrack</summary><table>
+   <tr><th>#</th><th>Title</th><th>Lyrics</th><th>Singer</th><th>Length</th></tr>
+   ${f.soundtrack.map((s,i)=>`<tr><td>${i+1}</td><td>${esc(s.title)}</td><td>${esc(s.lyrics)}</td><td>${esc(s.singer)}</td><td>${esc(s.duration)}</td></tr>`).join("")}
+  </table></details>`;
+ }
 
- if(f.theatrical_releases?.length)html+=`<details><summary>Theatrical release</summary><table>
- ${f.theatrical_releases.map(r=>`<tr><td>${r.flag?`<img src="${esc(r.flag)}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle"> `:""}${esc(r.country)}</td><td>${esc(r.date)}</td><td>${esc(r.certification)}</td></tr>`).join("")}
- </table></details>`;
+ if(f.theatrical_releases?.length){
+  html+=`<details><summary>Theatrical release</summary><table>
+   ${f.theatrical_releases.map(r=>`<tr><td>${r.flag?`<img src="${esc(r.flag)}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle"> `:""}${esc(r.country)}</td><td>${esc(r.date)}</td><td>${esc(r.certification)}</td></tr>`).join("")}
+  </table></details>`;
+ }
 
- if(f.digital_releases?.length)html+=`<details><summary>Digital release</summary><table>
- ${f.digital_releases.map(r=>`<tr><td>${r.icon?`<img src="${esc(r.icon)}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle"> `:""}${esc(r.platform)}</td><td>${esc(r.date)}</td></tr>`).join("")}
- </table></details>`;
+ if(f.digital_releases?.length){
+  html+=`<details><summary>Digital release</summary><table>
+   ${f.digital_releases.map(r=>`<tr><td>${r.icon?`<img src="${esc(r.icon)}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle"> `:""}${esc(r.platform)}</td><td>${esc(r.date)}</td></tr>`).join("")}
+  </table></details>`;
+ }
 
  const b=f.box_office||{};
- if(Object.values(b).some(Boolean))html+=`<details><summary>Box office</summary><table>
- ${[["Budget",b.budget],["Worldwide gross",b.worldwide_gross],["Domestic gross",b.domestic_gross],["Overseas gross",b.overseas_gross],["Verdict",b.verdict],["Source",b.source]].filter(x=>x[1]).map(x=>`<tr><th>${x[0]}</th><td>${safeLink(x[0]==="Source"?x[1]:"",x[1])}</td></tr>`).join("")}
- </table></details>`;
 
- if(f.awards?.length)html+=`<details><summary>Awards and nominations</summary><table>
- <tr><th>Award</th><th>Category</th><th>Result</th><th>Recipient</th><th>Year</th></tr>
- ${f.awards.map(a=>`<tr><td>${esc(a.name)}</td><td>${esc(a.category)}</td><td>${esc(a.result)}</td><td>${esc(a.recipient)}</td><td>${esc(a.year)}</td></tr>`).join("")}
- </table></details>`;
+ if(Object.values(b).some(Boolean)){
+  html+=`<details><summary>Box office</summary><table>
+   ${[["Budget",b.budget],["Worldwide gross",b.worldwide_gross],["Domestic gross",b.domestic_gross],["Overseas gross",b.overseas_gross],["Verdict",b.verdict],["Source",b.source]]
+    .filter(x=>x[1])
+    .map(x=>`<tr><th>${x[0]}</th><td>${safeLink(x[0]==="Source"?x[1]:"",x[1])}</td></tr>`).join("")}
+  </table></details>`;
+ }
+
+ if(f.awards?.length){
+  html+=`<details><summary>Awards and nominations</summary><table>
+   <tr><th>Award</th><th>Category</th><th>Result</th><th>Recipient</th><th>Year</th></tr>
+   ${f.awards.map(a=>`<tr><td>${esc(a.name)}</td><td>${esc(a.category)}</td><td>${esc(a.result)}</td><td>${esc(a.recipient)}</td><td>${esc(a.year)}</td></tr>`).join("")}
+  </table></details>`;
+ }
 
  return html;
 }
 
 function getPersonData(){
  return {
-  kind:"person",version:1,
+  kind:"person",
+  version:1,
   subtitle:val("subtitle"),
   occupation:val("personOccupation"),
   date_of_birth:val("personDob"),
@@ -672,35 +806,48 @@ function getPersonData(){
 async function loadPersonFilmography(){
  const title=val("title");
  if(!title||!db)return;
+
  const host=$("personFilmography");
  host.textContent="Loading linked filmography…";
+
  try{
   const {data,error}=await db.from("articles")
    .select("id,title,content_blocks")
-   .eq("category","Film").eq("status","published").limit(500);
+   .eq("category","Film")
+   .eq("status","published")
+   .limit(500);
+
   if(error)throw error;
 
   const entries=[];
+
   (data||[]).forEach(article=>{
    const film=(article.content_blocks||[]).find(b=>b.kind==="film");
    if(!film)return;
-   ["cast","crew"].forEach(section=>(film[section]||[]).forEach(person=>{
-    if(person.person_id===window.__kinoraPersonId){
-     entries.push({
-      title:article.title,year:film.year||"",
-      role:person.role||person.position||"",
-      poster:film.poster_url||""
-     });
-    }
-   }));
+
+   ["cast","crew","additional_crew"].forEach(section=>{
+    (film[section]||[]).forEach(person=>{
+     if(person.person_id===window.__kinoraPersonId){
+      entries.push({
+       title:article.title,
+       year:film.year||"",
+       role:person.role||person.position||"",
+       poster:film.poster_url||""
+      });
+     }
+    });
+   });
   });
 
   entries.sort((a,b)=>String(b.year).localeCompare(String(a.year)));
+
   host.innerHTML=entries.length?entries.slice(0,5).map(e=>`
    <div class="filmography-entry">
     ${e.poster?`<img src="${esc(e.poster)}" alt="">`:""}
     <div><strong>${esc(e.title)}</strong><div>${esc(e.year)}</div><small>${esc(e.role)}</small></div>
-   </div>`).join(""):"No linked published films yet.";
+   </div>
+  `).join(""):"No linked published films yet.";
+
  }catch(e){
   host.textContent="Could not load filmography: "+e.message;
  }
@@ -708,11 +855,13 @@ async function loadPersonFilmography(){
 
 function renderPreview(){
  const title=esc(val("title")||"Untitled article");
+
  const subtitle=esc(val("subtitle")||(
   $("category").value==="People"
    ?[val("personOccupation"),val("personDob"),val("personDod")].filter(Boolean).join(" · ")
    :""
  ));
+
  const isPerson=$("category").value==="People";
  const body=currentBody();
 
@@ -724,17 +873,26 @@ function renderPreview(){
 
  bodyHtml="<p>"+bodyHtml+"</p>";
 
- const refs=citations.map(c=>`<li><a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.title||c.url)}</a>. ${esc(c.publisher)}. ${esc(c.date)}</li>`).join("");
+ const refs=citations.map(c=>`
+  <li><a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.title||c.url)}</a>. ${esc(c.publisher)}. ${esc(c.date)}</li>
+ `).join("");
+
  const refHtml=citations.length?`<h2>References</h2><ol>${refs}</ol>`:"";
 
  let articleHtml="";
- if($("category").value==="Film")articleHtml=renderFilmPreview(getFilmData());
+
+ if($("category").value==="Film"){
+  articleHtml=renderFilmPreview(getFilmData());
+ }
 
  if(isPerson){
   const p=getPersonData();
+
   const facts=[
-   ["Occupation",p.occupation],["Date of birth",p.date_of_birth],
-   ["Date of death",p.date_of_death],["Birthplace",p.birthplace],
+   ["Occupation",p.occupation],
+   ["Date of birth",p.date_of_birth],
+   ["Date of death",p.date_of_death],
+   ["Birthplace",p.birthplace],
    ["Death place",p.deathplace]
   ].filter(x=>x[1]);
 
@@ -742,18 +900,19 @@ function renderPreview(){
    ${p.photo_url?`<img src="${esc(p.photo_url)}" alt="${title}">`:""}
    <div><h2 style="margin-top:0">${title}</h2>
    ${facts.map(x=>`<p><strong>${esc(x[0])}:</strong> ${esc(x[1])}</p>`).join("")}</div>
-  </div><h2>Filmography</h2><p>Linked films will appear here when this People article is connected to Film cast or crew entries.</p>`;
+  </div>
+  <h2>Filmography</h2>
+  <p>Linked films will appear here when this People article is connected to Film cast or crew entries.</p>`;
  }
 
  $("preview").innerHTML=`<h1>${title}</h1><p><i>${subtitle}</i></p>${articleHtml}${bodyHtml}${refHtml}`;
  $("preview").hidden=false;
  $("preview").scrollIntoView({behavior:"smooth"});
 }
+
 $("previewButton").onclick=renderPreview;
 
-/* LOAD AN EXISTING ARTICLE
-   Any logged-in user can load a published article.
-   Drafts and pending articles remain author-only. */
+/* LOAD AN EXISTING ARTICLE */
 async function loadExistingArticle(){
  if(!editingArticleId)return;
 
@@ -773,8 +932,6 @@ async function loadExistingArticle(){
   if(error)throw error;
   if(!article)throw new Error("Article not found.");
 
-  // Only published articles are open to all contributors.
-  // Draft, pending and rejected articles remain author-only.
   if(article.status!=="published"&&article.created_by!==user.id){
    throw new Error("You can only edit another contributor's published articles.");
   }
@@ -800,6 +957,12 @@ async function loadExistingArticle(){
    setVal("posterCredit",block.poster_credit);
    setVal("filmPlot",block.plot);
 
+   const studios=Array.isArray(block.studios)
+    ?block.studios.join(", ")
+    :(block.studios||"");
+
+   setVal("filmStudios",studios);
+
    const b=block.box_office||{};
    setVal("budget",b.budget);
    setVal("worldwideGross",b.worldwide_gross);
@@ -808,12 +971,16 @@ async function loadExistingArticle(){
    setVal("boxOfficeVerdict",b.verdict);
    setVal("boxOfficeSource",b.source);
 
-   ["crew","cast","soundtrack","theatrical_releases","digital_releases","awards"].forEach(key=>{
+   [
+    "crew","cast","additional_crew","soundtrack",
+    "theatrical_releases","digital_releases","awards"
+   ].forEach(key=>{
     filmData[key]=Array.isArray(block[key])?block[key]:[];
    });
 
    renderDynamic("crewRows",crewFields,"crew");
    renderDynamic("castRows",castFields,"cast");
+   renderDynamic("additionalCrewRows",additionalCrewFields,"additional_crew");
    renderDynamic("songRows",songFields,"soundtrack");
    renderDynamic("theatricalRows",theatricalFields,"theatrical_releases");
    renderDynamic("digitalRows",digitalFields,"digital_releases");
@@ -840,7 +1007,9 @@ async function loadExistingArticle(){
   }else{
    $("htmlEditor").value=body;
    $("visualEditor").innerHTML=body
-    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
     .replace(/^===\s*(.*?)\s*===$/gm,"<h3>$1</h3>")
     .replace(/^==\s*(.*?)\s*==$/gm,"<h2>$1</h2>")
     .replace(/\n/g,"<br>");
@@ -848,15 +1017,20 @@ async function loadExistingArticle(){
 
   $("pageHeading").textContent="Edit article.";
   $("pageDescription").textContent=article.status==="published"
-   ?"Collaboratively edit this published KINORA article."
+   ?"Published article loaded. Editing is temporarily locked while moderation support is prepared."
    :"Update your existing KINORA article.";
-  document.title="Edit Article | KINORA";
-  $("saveButton").textContent=article.status==="published"?"Save changes":"Save draft";
-  $("submitButton").textContent=article.status==="published"?"Save changes":"Submit for review ↗";
 
-  message.textContent=article.status==="published"
-   ?"Published article loaded. You can edit and save your changes."
-   :"Your article loaded successfully.";
+  document.title="Edit Article | KINORA";
+
+  if(article.status==="published"){
+   $("saveButton").disabled=true;
+   $("submitButton").disabled=true;
+   message.textContent="Published article loaded in read-only mode. Your public article cannot be overwritten until the moderation proposal system is ready.";
+  }else{
+   $("saveButton").textContent="Save draft";
+   $("submitButton").textContent="Submit for review ↗";
+   message.textContent="Your article loaded successfully.";
+  }
 
   if(isPerson)loadPersonFilmography();
 
@@ -866,7 +1040,7 @@ async function loadExistingArticle(){
  }
 }
 
-/* SAVE NEW OR EXISTING ARTICLE */
+/* SAVE NEW OR EXISTING UNPUBLISHED ARTICLE */
 async function saveArticle(submitForReview){
  const button=submitForReview?$("submitButton"):$("saveButton");
  button.disabled=true;
@@ -877,6 +1051,10 @@ async function saveArticle(submitForReview){
   const {data:{user},error:userError}=await db.auth.getUser();
   if(userError)throw userError;
   if(!user)throw new Error("Please log in before saving.");
+
+  if(existingArticle?.status==="published"){
+   throw new Error("Published article editing is temporarily locked until section moderation is connected. No public data has been changed.");
+  }
 
   const title=val("title");
   const body=currentBody();
@@ -903,36 +1081,23 @@ async function saveArticle(submitForReview){
   };
 
   if(editingArticleId){
-
    if(!existingArticle)throw new Error("The existing article has not loaded.");
 
-   // Preserve the original creator. Never transfer ownership
-   // to the contributor who is editing the article.
-   payload.created_by=existingArticle.created_by;
-
-   // Published articles stay published after collaborative edits.
-   // Other contributors cannot edit another user's unpublished article.
-   if(existingArticle.status==="published"){
-    payload.status="published";
-   }else{
-    if(existingArticle.created_by!==user.id){
-     throw new Error("Only the original author can edit an unpublished article.");
-    }
-
-    if(existingArticle.status==="draft"&&submitForReview){
-     payload.status="pending";
-    }else{
-     payload.status=existingArticle.status;
-    }
+   if(existingArticle.created_by!==user.id){
+    throw new Error("Only the original author can edit an unpublished article.");
    }
+
+   payload.created_by=existingArticle.created_by;
+   payload.status=existingArticle.status==="draft"&&submitForReview
+    ?"pending"
+    :existingArticle.status;
 
    message.textContent="Saving your changes…";
 
-   // No created_by filter here: published articles can be edited
-   // by any authenticated contributor under the new RLS policy.
    const {error:updateError}=await db.from("articles")
     .update(payload)
-    .eq("id",editingArticleId);
+    .eq("id",editingArticleId)
+    .eq("created_by",user.id);
 
    if(updateError)throw updateError;
 
@@ -940,23 +1105,24 @@ async function saveArticle(submitForReview){
 
    if(isPerson)window.__kinoraPersonId=editingArticleId;
 
-   message.textContent=existingArticle.status==="published"
-    ?"Changes saved! The published article has been updated."
-    :existingArticle.status==="pending"
+   message.textContent=existingArticle.status==="pending"
     ?"Changes saved. Your article remains under review."
     :existingArticle.status==="rejected"
     ?"Changes saved. Your article remains rejected until resubmitted."
     :"Draft changes saved successfully.";
 
   }else{
-
    payload.created_by=user.id;
    payload.status="draft";
 
-   message.textContent=submitForReview?"Saving and submitting your article…":"Saving your draft…";
+   message.textContent=submitForReview
+    ?"Saving and submitting your article…"
+    :"Saving your draft…";
 
    const {data:created,error:insertError}=await db.from("articles")
-    .insert(payload).select("id").single();
+    .insert(payload)
+    .select("id")
+    .single();
 
    if(insertError)throw insertError;
 
@@ -970,12 +1136,18 @@ async function saveArticle(submitForReview){
     if(updateError)throw updateError;
 
     message.textContent="Submitted for review! A moderator must approve it before it appears publicly.";
+    payload.status="pending";
    }else{
     message.textContent="Draft saved. It is private and has not been submitted for review.";
    }
 
    existingArticle={...payload,id:created.id};
-   window.history.replaceState(null,"","article-editor.html?id="+encodeURIComponent(created.id));
+
+   window.history.replaceState(
+    null,
+    "",
+    "article-editor.html?id="+encodeURIComponent(created.id)
+   );
 
    if(isPerson)window.__kinoraPersonId=created.id;
   }
@@ -985,6 +1157,10 @@ async function saveArticle(submitForReview){
   message.textContent="Could not save: "+e.message;
  }finally{
   button.disabled=false;
+
+  if(existingArticle?.status==="published"){
+   button.disabled=true;
+  }
  }
 }
 
@@ -993,6 +1169,7 @@ $("submitButton").onclick=()=>saveArticle(true);
 
 renderCitations();
 $("category").dispatchEvent(new Event("change"));
+
 $("title").addEventListener("input",()=>{
  if($("category").value==="People")loadPersonFilmography();
 });
