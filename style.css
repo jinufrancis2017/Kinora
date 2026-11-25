@@ -638,3 +638,497 @@ body.auth-page textarea {
   font-weight: inherit;
   letter-spacing: inherit;
 }
+
+/* =========================================
+   KINORA — PROFILE PAGE DESIGN
+   ========================================= */
+
+.topbar {
+  min-height: 68px;
+  padding: 0 5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  background: rgba(16, 16, 20, 0.96);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar .brand {
+  color: var(--text);
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: -1.5px;
+}
+
+.topbar .brand span {
+  color: var(--accent);
+}
+
+.topbar nav {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.topbar nav a {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.topbar nav a:hover {
+  color: var(--accent);
+}
+
+.topbar nav button {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 13px;
+  font-size: 12px;
+}
+
+.profile-wrap {
+  width: min(1050px, 90%);
+  margin: 0 auto;
+  padding: 35px 0 80px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 28px;
+}
+
+.back-link:hover {
+  color: var(--accent);
+}
+
+#profileContent {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+#profileContent h1,
+#profileContent h2,
+#profileContent h3 {
+  color: var(--text);
+  line-height: 1.2;
+}
+
+#profileContent h1 {
+  font-size: clamp(30px, 5vw, 42px);
+  font-weight: 850;
+  letter-spacing: -1.5px;
+  margin: 7px 0;
+}
+
+#profileContent h2 {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -.5px;
+  margin-bottom: 17px;
+}
+
+#profileContent p {
+  line-height: 1.65;
+}
+
+#profileContent .muted,
+#profileContent small {
+  color: var(--muted);
+}
+
+#profileContent .eyebrow {
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+/* Profile introduction */
+
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 27px;
+  background: linear-gradient(135deg, var(--surface), var(--surface-2));
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+
+.avatar {
+  width: 76px;
+  height: 76px;
+  flex: 0 0 76px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 30px;
+  font-weight: 900;
+}
+
+/* Profile sections */
+
+.profile-section,
+.contributor-rank,
+#profileContent > .panel {
+  padding: 25px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+}
+
+.profile-section {
+  margin-top: 0;
+}
+
+/* Contributor level and progress */
+
+.contributor-rank {
+  position: relative;
+  overflow: hidden;
+}
+
+.rank-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 14px;
+  border-radius: 30px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.rank-total {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.rank-total strong {
+  font-size: 32px;
+  font-weight: 900;
+}
+
+.rank-total span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.rank-progress-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 9px;
+}
+
+.rank-progress-track {
+  width: 100%;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.rank-progress-fill {
+  height: 100%;
+  min-width: 0;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width .5s ease;
+}
+
+.rank-next {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 13px;
+}
+
+/* Level system compatibility */
+
+.level-card,
+.contributor-level,
+.level-progress,
+.progress-card {
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+}
+
+.level-badge,
+.level-label {
+  display: inline-flex;
+  padding: 7px 12px;
+  border-radius: 30px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.level-progress-track,
+.progress-track {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--surface-2);
+  margin: 12px 0;
+}
+
+.level-progress-fill,
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+/* Statistics */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.stat {
+  min-width: 0;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+}
+
+.stat strong {
+  display: block;
+  color: var(--text);
+  font-size: 27px;
+  font-weight: 850;
+  margin-bottom: 7px;
+}
+
+.stat span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Account settings */
+
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-stack label {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.form-stack input {
+  width: 100%;
+  min-height: 46px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  outline: none;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.form-stack input:focus {
+  border-color: var(--accent);
+}
+
+.form-stack input:disabled {
+  opacity: .7;
+  cursor: not-allowed;
+}
+
+.form-stack small {
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.button.primary {
+  align-self: flex-start;
+  padding: 12px 19px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #101014;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.button.primary:hover {
+  filter: brightness(1.12);
+}
+
+.form-message {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.form-message.error {
+  color: #ff6868;
+}
+
+/* Created articles */
+
+.profile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 15px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.profile-article strong {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.profile-article span {
+  color: var(--accent);
+  font-size: 11px;
+  text-transform: capitalize;
+}
+
+/* Ratings and empty states */
+
+#profileContent .empty-state,
+#profileContent .panel.muted {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Mobile profile layout */
+
+@media (max-width: 650px) {
+  .topbar {
+    min-height: 62px;
+    padding: 0 17px;
+  }
+
+  .topbar .brand {
+    font-size: 22px;
+  }
+
+  .topbar nav {
+    gap: 11px;
+  }
+
+  .topbar nav a {
+    font-size: 11px;
+  }
+
+  .topbar nav button {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .profile-wrap {
+    width: auto;
+    margin: 0 17px;
+    padding: 25px 0 60px;
+  }
+
+  #profileContent {
+    gap: 15px;
+  }
+
+  .profile-hero {
+    padding: 19px;
+    gap: 14px;
+  }
+
+  .avatar {
+    width: 59px;
+    height: 59px;
+    flex-basis: 59px;
+    font-size: 24px;
+  }
+
+  .profile-section,
+  .contributor-rank {
+    padding: 19px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .stat {
+    padding: 16px;
+  }
+
+  .stat strong {
+    font-size: 23px;
+  }
+
+  .rank-total strong {
+    font-size: 27px;
+  }
+}
+
+@media (max-width: 380px) {
+  .topbar nav {
+    gap: 8px;
+  }
+
+  .topbar nav a {
+    font-size: 10px;
+  }
+
+  .profile-article {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
