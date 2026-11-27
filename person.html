@@ -20,9 +20,7 @@
   --glass:rgba(255,255,255,.045);
   --glass-strong:rgba(255,255,255,.065);
 }
-
 *{box-sizing:border-box}
-
 body{
   margin:0;
   background:
@@ -33,446 +31,96 @@ body{
   font-family:Arial,sans-serif;
   min-height:100vh;
 }
-
 a{color:inherit;text-decoration:none}
-
-.person-page{
-  width:min(1120px,92%);
-  margin:auto;
-  padding:30px 0 80px;
-}
-
-.person-back{
-  display:inline-block;
-  color:var(--person-muted);
-  font-size:13px;
-  margin-bottom:28px;
-  transition:color .2s;
-}
-
+.person-page{width:min(1120px,92%);margin:auto;padding:30px 0 80px}
+.person-back{display:inline-block;color:var(--person-muted);font-size:13px;margin-bottom:28px;transition:color .2s}
 .person-back:hover{color:var(--person-accent)}
-
 .person-hero{
-  display:grid;
-  grid-template-columns:260px 1fr;
-  gap:34px;
-  align-items:center;
-  padding:28px;
-  background:linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.025));
-  border:1px solid rgba(255,255,255,.13);
-  border-radius:24px;
-  backdrop-filter:blur(22px);
-  -webkit-backdrop-filter:blur(22px);
+  display:grid;grid-template-columns:260px 1fr;gap:34px;align-items:center;
+  padding:28px;background:linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.025));
+  border:1px solid rgba(255,255,255,.13);border-radius:24px;
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
   box-shadow:0 20px 70px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.08);
 }
-
 .person-photo-wrap{
-  width:100%;
-  aspect-ratio:3/4;
-  border-radius:17px;
-  overflow:hidden;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.13);
+  width:100%;aspect-ratio:3/4;border-radius:17px;overflow:hidden;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);
   box-shadow:0 12px 35px rgba(0,0,0,.3);
 }
-
 .person-photo{width:100%;height:100%;object-fit:cover}
-
-.person-photo-placeholder{
-  height:100%;
-  display:grid;
-  place-items:center;
-  color:var(--person-muted);
-  font-size:54px;
-}
-
-.person-label{
-  color:var(--person-accent);
-  text-transform:uppercase;
-  letter-spacing:2px;
-  font-size:11px;
-  font-weight:700;
-  margin-bottom:12px;
-}
-
-.person-name{
-  font-size:clamp(32px,5vw,54px);
-  line-height:1.05;
-  margin:0 0 12px;
-  letter-spacing:-1.5px;
-}
-
-.person-occupation{
-  color:var(--person-muted);
-  font-size:15px;
-  margin-bottom:22px;
-}
-
-.person-bio{
-  color:#c5c9d3;
-  font-size:15px;
-  line-height:1.8;
-  white-space:pre-line;
-}
-
-.person-facts{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:12px;
-  margin-top:25px;
-}
-
-.person-fact{
-  padding:14px;
-  background:rgba(255,255,255,.045);
-  border:1px solid rgba(255,255,255,.09);
-  border-radius:13px;
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
-}
-
-.person-fact-label{
-  color:var(--person-muted);
-  font-size:11px;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  margin-bottom:7px;
-}
-
+.person-photo-placeholder{height:100%;display:grid;place-items:center;color:var(--person-muted);font-size:54px}
+.person-label{color:var(--person-accent);text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:700;margin-bottom:12px}
+.person-name{font-size:clamp(32px,5vw,54px);line-height:1.05;margin:0 0 12px;letter-spacing:-1.5px}
+.person-occupation{color:var(--person-muted);font-size:15px;margin-bottom:22px}
+.person-bio{color:#c5c9d3;font-size:15px;line-height:1.8;white-space:pre-line}
+.person-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:25px}
+.person-fact{padding:14px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-radius:13px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:inset 0 1px 0 rgba(255,255,255,.035)}
+.person-fact-label{color:var(--person-muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
 .person-fact-value{font-size:13px;line-height:1.5}
-
-.person-actions{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:22px;
-}
-
-.edit-profile-btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  padding:11px 17px;
-  border-radius:30px;
-  border:1px solid rgba(167,139,250,.45);
-  background:rgba(167,139,250,.12);
-  color:#c4b5fd;
-  font-size:12px;
-  font-weight:700;
-  transition:.2s;
-}
-
-.edit-profile-btn:hover{
-  background:rgba(167,139,250,.23);
-  border-color:var(--person-accent);
-  transform:translateY(-2px);
-}
-
+.person-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:22px}
+.edit-profile-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 17px;border-radius:30px;border:1px solid rgba(167,139,250,.45);background:rgba(167,139,250,.12);color:#c4b5fd;font-size:12px;font-weight:700;transition:.2s}
+.edit-profile-btn:hover{background:rgba(167,139,250,.23);border-color:var(--person-accent);transform:translateY(-2px)}
 .person-section{margin-top:48px}
-
-.section-heading{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  margin-bottom:20px;
-}
-
-.section-heading h2{
-  font-size:23px;
-  margin:0;
-  letter-spacing:-.5px;
-}
-
+.section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.section-heading h2{font-size:23px;margin:0;letter-spacing:-.5px}
 .section-count{color:var(--person-muted);font-size:12px}
-
 .role-section{margin-top:28px}
-
-.role-heading{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin-bottom:15px;
-}
-
+.role-heading{display:flex;align-items:center;gap:12px;margin-bottom:15px}
 .role-heading h3{font-size:16px;margin:0}
-
-.role-line{
-  flex:1;
-  height:1px;
-  background:var(--person-border);
-}
-
-.film-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(105px,1fr));
-  gap:12px;
-}
-
-.film-card{
-  min-width:0;
-  overflow:hidden;
-  border-radius:10px;
-  background:rgba(255,255,255,.045);
-  border:1px solid var(--person-border);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-  transition:transform .2s,border-color .2s,background .2s;
-}
-
-.film-card:hover{
-  transform:translateY(-3px);
-  border-color:var(--person-accent);
-  background:rgba(255,255,255,.075);
-}
-
-.film-poster{
-  width:100%;
-  aspect-ratio:2/3;
-  object-fit:cover;
-  display:block;
-  background:#202431;
-}
-
-.film-poster-placeholder{
-  width:100%;
-  aspect-ratio:2/3;
-  display:grid;
-  place-items:center;
-  color:var(--person-muted);
-  background:#202431;
-  font-size:25px;
-}
-
+.role-line{flex:1;height:1px;background:var(--person-border)}
+.film-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:12px}
+.film-card{min-width:0;overflow:hidden;border-radius:10px;background:rgba(255,255,255,.045);border:1px solid var(--person-border);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:transform .2s,border-color .2s,background .2s}
+.film-card:hover{transform:translateY(-3px);border-color:var(--person-accent);background:rgba(255,255,255,.075)}
+.film-poster{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;background:#202431}
+.film-poster-placeholder{width:100%;aspect-ratio:2/3;display:grid;place-items:center;color:var(--person-muted);background:#202431;font-size:25px}
 .film-info{padding:8px}
 .film-title{font-size:11px;line-height:1.35;font-weight:700}
 .film-year{color:var(--person-muted);font-size:10px;margin-top:4px}
-
-.show-all{
-  display:block;
-  margin:16px auto 0;
-  padding:10px 17px;
-  background:rgba(167,139,250,.07);
-  color:var(--person-accent);
-  border:1px solid rgba(167,139,250,.45);
-  border-radius:30px;
-  cursor:pointer;
-  font-size:12px;
-  transition:.2s;
-}
-
-.show-all:hover{
-  background:var(--person-accent);
-  color:#090b10;
-}
-
-.person-empty{
-  padding:30px;
-  text-align:center;
-  color:var(--person-muted);
-  border:1px dashed var(--person-border);
-  border-radius:15px;
-  font-size:13px;
-  background:rgba(255,255,255,.025);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-}
-
+.show-all{display:block;margin:16px auto 0;padding:10px 17px;background:rgba(167,139,250,.07);color:var(--person-accent);border:1px solid rgba(167,139,250,.45);border-radius:30px;cursor:pointer;font-size:12px;transition:.2s}
+.show-all:hover{background:var(--person-accent);color:#090b10}
+.person-empty{padding:30px;text-align:center;color:var(--person-muted);border:1px dashed var(--person-border);border-radius:15px;font-size:13px;background:rgba(255,255,255,.025);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .person-error{text-align:center;padding:100px 20px}
 .person-error h1{font-size:28px}
 .person-error p{color:var(--person-muted)}
-
-.person-footer{
-  border-top:1px solid var(--person-border);
-  margin-top:60px;
-  padding-top:20px;
-  color:var(--person-muted);
-  font-size:11px;
-  text-align:center;
-}
+.person-footer{border-top:1px solid var(--person-border);margin-top:60px;padding-top:20px;color:var(--person-muted);font-size:11px;text-align:center}
 
 /* SONG CONTRIBUTIONS */
-
-.songs-dropdown{
-  border:1px solid var(--person-border);
-  border-radius:15px;
-  background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
-  overflow:hidden;
-}
-
-.songs-dropdown summary{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:17px;
-  cursor:pointer;
-  list-style:none;
-  user-select:none;
-}
-
+.songs-dropdown{border:1px solid var(--person-border);border-radius:15px;background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,255,255,.018));overflow:hidden}
+.songs-dropdown summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px;cursor:pointer;list-style:none;user-select:none}
 .songs-dropdown summary::-webkit-details-marker{display:none}
-
-.songs-dropdown summary:hover{
-  background:rgba(255,255,255,.035);
-}
-
-.songs-summary-left{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  min-width:0;
-}
-
-.songs-icon{
-  width:39px;
-  height:39px;
-  display:grid;
-  place-items:center;
-  flex-shrink:0;
-  border-radius:11px;
-  background:rgba(167,139,250,.12);
-  border:1px solid rgba(167,139,250,.22);
-  color:#c4b5fd;
-  font-size:19px;
-}
-
-.songs-summary-title{
-  font-size:14px;
-  font-weight:700;
-}
-
-.songs-summary-count{
-  color:var(--person-muted);
-  font-size:11px;
-  margin-top:4px;
-}
-
-.songs-chevron{
-  color:var(--person-muted);
-  font-size:17px;
-  transition:transform .2s;
-}
-
-.songs-dropdown[open] .songs-chevron{
-  transform:rotate(180deg);
-}
-
-.songs-content{
-  border-top:1px solid var(--person-border);
-  padding:12px;
-}
-
-.song-entry{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:10px;
-  border-bottom:1px solid rgba(255,255,255,.065);
-}
-
+.songs-dropdown summary:hover{background:rgba(255,255,255,.035)}
+.songs-summary-left{display:flex;align-items:center;gap:12px;min-width:0}
+.songs-icon{width:39px;height:39px;display:grid;place-items:center;flex-shrink:0;border-radius:11px;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.22);color:#c4b5fd;font-size:19px}
+.songs-summary-title{font-size:14px;font-weight:700}
+.songs-summary-count{color:var(--person-muted);font-size:11px;margin-top:4px}
+.songs-chevron{color:var(--person-muted);font-size:17px;transition:transform .2s}
+.songs-dropdown[open] .songs-chevron{transform:rotate(180deg)}
+.songs-content{border-top:1px solid var(--person-border);padding:12px}
+.song-entry{display:flex;align-items:center;gap:12px;padding:10px;border-bottom:1px solid rgba(255,255,255,.065)}
 .song-entry:last-child{border-bottom:0}
-
-.song-cover{
-  width:53px;
-  height:53px;
-  flex-shrink:0;
-  border-radius:8px;
-  object-fit:cover;
-  background:#202431;
-  border:1px solid var(--person-border);
-}
-
-.song-cover-placeholder{
-  width:53px;
-  height:53px;
-  flex-shrink:0;
-  display:grid;
-  place-items:center;
-  border-radius:8px;
-  background:#202431;
-  color:var(--person-muted);
-  font-size:19px;
-}
-
+.song-cover{width:53px;height:53px;flex-shrink:0;border-radius:8px;object-fit:cover;background:#202431;border:1px solid var(--person-border)}
+.song-cover-placeholder{width:53px;height:53px;flex-shrink:0;display:grid;place-items:center;border-radius:8px;background:#202431;color:var(--person-muted);font-size:19px}
 .song-entry-info{min-width:0;flex:1}
-
-.song-entry-title{
-  font-size:12px;
-  font-weight:700;
-  line-height:1.5;
-  overflow-wrap:anywhere;
-}
-
-.song-entry-film{
-  display:inline-block;
-  color:var(--person-muted);
-  font-size:11px;
-  margin-top:4px;
-  line-height:1.5;
-}
-
+.song-entry-title{font-size:12px;font-weight:700;line-height:1.5;overflow-wrap:anywhere}
+.song-entry-film{display:inline-block;color:var(--person-muted);font-size:11px;margin-top:4px;line-height:1.5}
 .song-entry-film:hover{color:var(--person-accent)}
-
-.song-entry-meta{
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:7px;
-  margin-top:5px;
-}
-
-.song-role-tag{
-  color:#c4b5fd;
-  background:rgba(167,139,250,.09);
-  border:1px solid rgba(167,139,250,.2);
-  padding:3px 7px;
-  border-radius:20px;
-  font-size:9px;
-}
-
-.song-duration{
-  color:var(--person-muted);
-  font-size:10px;
-}
+.song-entry-meta{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:5px}
+.song-role-tag{color:#c4b5fd;background:rgba(167,139,250,.09);border:1px solid rgba(167,139,250,.2);padding:3px 7px;border-radius:20px;font-size:9px}
+.song-duration{color:var(--person-muted);font-size:10px}
 
 @media(max-width:650px){
   .person-page{padding-top:20px}
-
-  .person-hero{
-    grid-template-columns:1fr;
-    gap:22px;
-    padding:18px;
-    border-radius:20px;
-  }
-
-  .person-photo-wrap{
-    width:min(220px,75%);
-    margin:auto;
-  }
-
+  .person-hero{grid-template-columns:1fr;gap:22px;padding:18px;border-radius:20px}
+  .person-photo-wrap{width:min(220px,75%);margin:auto}
   .person-name{font-size:36px}
-
   .person-facts{grid-template-columns:1fr 1fr}
-
-  .film-grid{
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:9px;
-  }
-
+  .film-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
   .film-info{padding:7px}
   .film-title{font-size:10px}
   .film-year{font-size:9px}
 }
-
 @media(max-width:380px){
-  .song-cover,.song-cover-placeholder{
-    width:45px;
-    height:45px;
-  }
+  .song-cover,.song-cover-placeholder{width:45px;height:45px}
 }
 </style>
 </head>
@@ -497,49 +145,30 @@ const $=id=>document.getElementById(id);
 
 function esc(value){
   return String(value??"").replace(/[&<>"']/g,char=>({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#39;"
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
   })[char]);
 }
 
 function safeImage(url){
   if(!url)return "";
-
   try{
     const parsed=new URL(url,location.href);
-    return ["https:","http:"].includes(parsed.protocol)
-      ?parsed.href
-      :"";
-  }catch{
-    return "";
-  }
+    return ["https:","http:"].includes(parsed.protocol)?parsed.href:"";
+  }catch{return ""}
 }
 
 function getBlocks(article){
-  if(Array.isArray(article.content_blocks)){
-    return article.content_blocks;
-  }
-
-  if(article.content_blocks&&typeof article.content_blocks==="object"){
-    return [article.content_blocks];
-  }
-
+  if(Array.isArray(article.content_blocks))return article.content_blocks;
+  if(article.content_blocks&&typeof article.content_blocks==="object")return [article.content_blocks];
   return [];
 }
 
 function getPersonBlock(article){
-  return getBlocks(article).find(block=>block.kind==="person")
-    ||getBlocks(article)[0]
-    ||{};
+  return getBlocks(article).find(block=>block.kind==="person")||getBlocks(article)[0]||{};
 }
 
 function getFilmBlock(article){
-  return getBlocks(article).find(block=>block.kind==="film")
-    ||getBlocks(article)[0]
-    ||{};
+  return getBlocks(article).find(block=>block.kind==="film")||getBlocks(article)[0]||{};
 }
 
 function formatDate(value){
@@ -549,7 +178,6 @@ function formatDate(value){
 
 function getRoleEntries(film,personId){
   const entries=[];
-
   const sections=[
     {key:"crew",fallback:"Crew"},
     {key:"cast",fallback:"Actor"},
@@ -557,57 +185,35 @@ function getRoleEntries(film,personId){
   ];
 
   sections.forEach(section=>{
-    const people=Array.isArray(film[section.key])
-      ?film[section.key]
-      :[];
-
+    const people=Array.isArray(film[section.key])?film[section.key]:[];
     people.forEach(person=>{
-      if(String(person.person_id||"")!==String(personId)){
-        return;
-      }
+      if(String(person.person_id||"")!==String(personId))return;
 
       let roles=[];
-
       if(section.key==="cast"){
         roles=["Actor"];
       }else{
-        const role=String(
-          person.position||person.role||section.fallback
-        );
-
-        roles=role.split(",")
-          .map(item=>item.trim())
-          .filter(Boolean);
+        const role=String(person.position||person.role||section.fallback);
+        roles=role.split(",").map(item=>item.trim()).filter(Boolean);
       }
-
       entries.push(...roles);
     });
   });
-
   return [...new Set(entries)];
 }
 
 function renderFilmCard(film){
   const poster=safeImage(film.poster);
-
   const posterHTML=poster
-    ?`<img class="film-poster"
-        src="${esc(poster)}"
-        alt="${esc(film.title)}"
-        loading="lazy">`
+    ?`<img class="film-poster" src="${esc(poster)}" alt="${esc(film.title)}" loading="lazy">`
     :`<div class="film-poster-placeholder">🎬</div>`;
 
   return `
-    <a class="film-card"
-       href="film.html?id=${encodeURIComponent(film.id)}">
-
+    <a class="film-card" href="film.html?id=${encodeURIComponent(film.id)}">
       ${posterHTML}
-
       <div class="film-info">
         <div class="film-title">${esc(film.title)}</div>
-        ${film.year
-          ?`<div class="film-year">${esc(film.year)}</div>`
-          :""}
+        ${film.year?`<div class="film-year">${esc(film.year)}</div>`:""}
       </div>
     </a>
   `;
@@ -615,70 +221,41 @@ function renderFilmCard(film){
 
 function renderRoleGroups(entries){
   const host=$("filmographyContent");
-
   if(!entries.length){
-    host.innerHTML=`
-      <div class="person-empty">
-        No linked published films yet.
-      </div>
-    `;
+    host.innerHTML=`<div class="person-empty">No linked published films yet.</div>`;
     return;
   }
 
   const groups={};
-
   entries.forEach(entry=>{
     entry.roles.forEach(role=>{
       const key=role.trim().toLowerCase();
-
-      if(!groups[key]){
-        groups[key]={
-          name:role,
-          films:[]
-        };
-      }
-
-      if(!groups[key].films.some(film=>film.id===entry.id)){
-        groups[key].films.push(entry);
-      }
+      if(!groups[key])groups[key]={name:role,films:[]};
+      if(!groups[key].films.some(film=>film.id===entry.id))groups[key].films.push(entry);
     });
   });
 
-  const sortedGroups=Object.values(groups).sort((a,b)=>
-    a.name.localeCompare(b.name)
-  );
+  const sortedGroups=Object.values(groups).sort((a,b)=>a.name.localeCompare(b.name));
 
   host.innerHTML=sortedGroups.map((group,index)=>{
-    group.films.sort((a,b)=>
-      String(b.year||"").localeCompare(String(a.year||""))
-    );
-
+    group.films.sort((a,b)=>String(b.year||"").localeCompare(String(a.year||"")));
     const visible=group.films.slice(0,5);
 
     return `
       <section class="role-section">
-
         <div class="role-heading">
           <h3>${esc(group.name)}</h3>
           <div class="role-line"></div>
-          <span class="section-count">
-            ${group.films.length} films
-          </span>
+          <span class="section-count">${group.films.length} films</span>
         </div>
-
         <div class="film-grid" id="roleGrid${index}">
           ${visible.map(renderFilmCard).join("")}
         </div>
-
         ${group.films.length>5?`
-          <button class="show-all"
-            type="button"
-            onclick="toggleRoleFilms(${index})"
-            id="roleButton${index}">
+          <button class="show-all" type="button" onclick="toggleRoleFilms(${index})" id="roleButton${index}">
             Show all ${group.films.length} films
           </button>
         `:""}
-
       </section>
     `;
   }).join("");
@@ -690,98 +267,48 @@ window.toggleRoleFilms=function(index){
   const group=window.__kinoraRoleGroups[index];
   const grid=document.getElementById("roleGrid"+index);
   const button=document.getElementById("roleButton"+index);
-
   if(!group||!grid||!button)return;
 
   const expanded=button.dataset.expanded==="true";
-
-  grid.innerHTML=(expanded
-    ?group.films.slice(0,5)
-    :group.films
-  ).map(renderFilmCard).join("");
-
+  grid.innerHTML=(expanded?group.films.slice(0,5):group.films).map(renderFilmCard).join("");
   button.dataset.expanded=String(!expanded);
-
-  button.textContent=expanded
-    ?`Show all ${group.films.length} films`
-    :"Show less";
+  button.textContent=expanded?`Show all ${group.films.length} films`:"Show less";
 };
 
 /* SONG CONTRIBUTIONS */
-
 function getTrackCredits(song,arrayKey,legacyKey){
   const value=song[arrayKey];
-
   if(Array.isArray(value)){
     return value.map(person=>{
-      if(typeof person==="string"){
-        return {
-          name:person.trim(),
-          person_id:""
-        };
-      }
-
-      return {
-        name:String(person?.name||"").trim(),
-        person_id:String(person?.person_id||"")
-      };
+      if(typeof person==="string")return {name:person.trim(),person_id:""};
+      return {name:String(person?.name||"").trim(),person_id:String(person?.person_id||"")};
     }).filter(person=>person.name);
   }
 
   const legacyName=String(song[legacyKey]||"").trim();
   const legacyId=String(song[legacyKey+"_person_id"]||"");
-
-  if(!legacyName||!legacyId){
-    return [];
-  }
-
-  return [{
-    name:legacyName,
-    person_id:legacyId
-  }];
+  if(!legacyName||!legacyId)return [];
+  return [{name:legacyName,person_id:legacyId}];
 }
 
 function getSongContributions(film,article){
   const songs=[];
-  const tracks=Array.isArray(film.soundtrack)
-    ?film.soundtrack
-    :[];
-
+  const tracks=Array.isArray(film.soundtrack)?film.soundtrack:[];
   const roles=[
-    {
-      arrayKey:"singers",
-      legacyKey:"singer",
-      label:"Singer"
-    },
-    {
-      arrayKey:"lyricists",
-      legacyKey:"lyricist",
-      label:"Lyricist"
-    }
+    {arrayKey:"singers",legacyKey:"singer",label:"Singer"},
+    {arrayKey:"lyricists",legacyKey:"lyricist",label:"Lyricist"}
   ];
 
   tracks.forEach((track,index)=>{
     const matchedRoles=[];
-
     roles.forEach(role=>{
-      const people=getTrackCredits(
-        track,
-        role.arrayKey,
-        role.legacyKey
-      );
-
-      const matched=people.some(person=>
-        String(person.person_id)===String(personId)
-      );
-
-      if(matched){
+      const people=getTrackCredits(track,role.arrayKey,role.legacyKey);
+      if(people.some(person=>String(person.person_id)===String(personId))){
         matchedRoles.push(role.label);
       }
     });
 
-    // A song is added only once, even if the person has both credits.
     if(!matchedRoles.length)return;
-
     songs.push({
       id:article.id+"-"+index,
       title:track.title||track.name||"Untitled track",
@@ -789,30 +316,20 @@ function getSongContributions(film,article){
       filmTitle:article.title||"Untitled film",
       year:film.year||"",
       duration:track.duration||"",
-      albumCover:
-        film.soundtrack_cover||
-        track.album_cover||
-        "",
+      albumCover:film.soundtrack_cover||track.album_cover||"",
       roles:matchedRoles
     });
   });
-
   return songs;
 }
 
 function renderSongs(songs){
   const host=$("songsContent");
   const count=$("songsCount");
-
-  count.textContent=
-    `${songs.length} ${songs.length===1?"song":"songs"}`;
+  count.textContent=`${songs.length} ${songs.length===1?"song":"songs"}`;
 
   if(!songs.length){
-    host.innerHTML=`
-      <div class="person-empty">
-        No published soundtrack contributions yet.
-      </div>
-    `;
+    host.innerHTML=`<div class="person-empty">No published soundtrack contributions yet.</div>`;
     return;
   }
 
@@ -823,50 +340,28 @@ function renderSongs(songs){
           <div class="songs-icon">♫</div>
           <div>
             <div class="songs-summary-title">Songs</div>
-            <div class="songs-summary-count">
-              ${songs.length} ${songs.length===1?"song":"songs"} credited to this person
-            </div>
+            <div class="songs-summary-count">${songs.length} ${songs.length===1?"song":"songs"} credited to this person</div>
           </div>
         </div>
         <span class="songs-chevron">⌄</span>
       </summary>
-
       <div class="songs-content">
         ${songs.map(song=>{
           const cover=safeImage(song.albumCover);
-
           return `
             <article class="song-entry">
-
               ${cover
-                ?`<img class="song-cover"
-                    src="${esc(cover)}"
-                    alt="${esc(song.filmTitle)} soundtrack cover"
-                    loading="lazy">`
+                ?`<img class="song-cover" src="${esc(cover)}" alt="${esc(song.filmTitle)} soundtrack cover" loading="lazy">`
                 :`<div class="song-cover-placeholder">♫</div>`}
-
               <div class="song-entry-info">
-
-                <div class="song-entry-title">
-                  ${esc(song.title)}
-                </div>
-
-                <a class="song-entry-film"
-                   href="film.html?id=${encodeURIComponent(song.filmId)}">
-                  ${esc(song.filmTitle)}
-                  ${song.year?" · "+esc(song.year):""}
+                <div class="song-entry-title">${esc(song.title)}</div>
+                <a class="song-entry-film" href="film.html?id=${encodeURIComponent(song.filmId)}">
+                  ${esc(song.filmTitle)}${song.year?" · "+esc(song.year):""}
                 </a>
-
                 <div class="song-entry-meta">
-                  ${song.roles.map(role=>`
-                    <span class="song-role-tag">${esc(role)}</span>
-                  `).join("")}
-
-                  ${song.duration
-                    ?`<span class="song-duration">${esc(song.duration)}</span>`
-                    :""}
+                  ${song.roles.map(role=>`<span class="song-role-tag">${esc(role)}</span>`).join("")}
+                  ${song.duration?`<span class="song-duration">${esc(song.duration)}</span>`:""}
                 </div>
-
               </div>
             </article>
           `;
@@ -877,10 +372,7 @@ function renderSongs(songs){
 }
 
 function renderProfile(article,person){
-  const photo=safeImage(
-    person.photo_url||person.person_photo||""
-  );
-
+  const photo=safeImage(person.photo_url||person.person_photo||"");
   const occupation=person.occupation||person.subtitle||"";
 
   const facts=[
@@ -891,106 +383,51 @@ function renderProfile(article,person){
   ].filter(item=>item[1]);
 
   $("personPage").innerHTML=`
-    <a class="person-back" href="index.html">
-      ← Back to KINORA
-    </a>
-
+    <a class="person-back" href="index.html">← Back to KINORA</a>
     <section class="person-hero">
-
       <div class="person-photo-wrap">
         ${photo
-          ?`<img class="person-photo"
-              src="${esc(photo)}"
-              alt="${esc(article.title)}">`
-          :`<div class="person-photo-placeholder">👤</div>`
-        }
+          ?`<img class="person-photo" src="${esc(photo)}" alt="${esc(article.title)}">`
+          :`<div class="person-photo-placeholder">👤</div>`}
       </div>
-
       <div class="person-details">
-
         <div class="person-label">KINORA · PEOPLE</div>
-
-        <h1 class="person-name">
-          ${esc(article.title)}
-        </h1>
-
-        ${occupation
-          ?`<div class="person-occupation">
-              ${esc(occupation)}
-            </div>`
-          :""
-        }
-
-        ${person.bio||person.biography
-          ?`<div class="person-bio">
-              ${esc(person.bio||person.biography)}
-            </div>`
-          :""
-        }
-
+        <h1 class="person-name">${esc(article.title)}</h1>
+        ${occupation?`<div class="person-occupation">${esc(occupation)}</div>`:""}
+        ${person.bio||person.biography?`<div class="person-bio">${esc(person.bio||person.biography)}</div>`:""}
         ${facts.length?`
           <div class="person-facts">
             ${facts.map(fact=>`
               <div class="person-fact">
-                <div class="person-fact-label">
-                  ${esc(fact[0])}
-                </div>
-
-                <div class="person-fact-value">
-                  ${esc(fact[1])}
-                </div>
+                <div class="person-fact-label">${esc(fact[0])}</div>
+                <div class="person-fact-value">${esc(fact[1])}</div>
               </div>
             `).join("")}
           </div>
         `:""}
-
         <div class="person-actions">
-          <a class="edit-profile-btn"
-             href="person-editor.html?id=${encodeURIComponent(article.id)}">
-            ✎ Edit profile
-          </a>
+          <a class="edit-profile-btn" href="person-editor.html?id=${encodeURIComponent(article.id)}">✎ Edit profile</a>
         </div>
-
       </div>
     </section>
 
     <section class="person-section">
-
       <div class="section-heading">
         <h2>Filmography</h2>
-        <span class="section-count" id="filmCount">
-          Loading...
-        </span>
+        <span class="section-count" id="filmCount">Loading...</span>
       </div>
-
-      <div id="filmographyContent">
-        <div class="person-empty">
-          Finding linked films...
-        </div>
-      </div>
-
+      <div id="filmographyContent"><div class="person-empty">Finding linked films...</div></div>
     </section>
 
     <section class="person-section">
-
       <div class="section-heading">
         <h2>Music contributions</h2>
-        <span class="section-count" id="songsCount">
-          Loading...
-        </span>
+        <span class="section-count" id="songsCount">Loading...</span>
       </div>
-
-      <div id="songsContent">
-        <div class="person-empty">
-          Finding soundtrack contributions...
-        </div>
-      </div>
-
+      <div id="songsContent"><div class="person-empty">Finding soundtrack contributions...</div></div>
     </section>
 
-    <footer class="person-footer">
-      KINORA · An independent encyclopedia of cinema
-    </footer>
+    <footer class="person-footer">KINORA · An independent encyclopedia of cinema</footer>
   `;
 }
 
@@ -1009,7 +446,6 @@ async function loadFilmography(){
 
   (data||[]).forEach(article=>{
     const film=getFilmBlock(article);
-
     const roles=getRoleEntries(film,personId);
 
     if(roles.length){
@@ -1022,13 +458,10 @@ async function loadFilmography(){
       });
     }
 
-    const contributions=getSongContributions(film,article);
-    songEntries.push(...contributions);
+    songEntries.push(...getSongContributions(film,article));
   });
 
-  $("filmCount").textContent=
-    `${entries.length} ${entries.length===1?"film":"films"}`;
-
+  $("filmCount").textContent=`${entries.length} ${entries.length===1?"film":"films"}`;
   renderRoleGroups(entries);
   renderSongs(songEntries);
 }
@@ -1039,9 +472,7 @@ async function loadPerson(){
       <div class="person-error">
         <h1>Profile not found</h1>
         <p>No person ID was provided.</p>
-        <a class="person-back" href="index.html">
-          ← Back to KINORA
-        </a>
+        <a class="person-back" href="index.html">← Back to KINORA</a>
       </div>
     `;
     return;
@@ -1063,9 +494,7 @@ async function loadPerson(){
         <div class="person-error">
           <h1>Profile unavailable</h1>
           <p>This People article may not be published or may not exist.</p>
-          <a class="person-back" href="index.html">
-            ← Back to KINORA
-          </a>
+          <a class="person-back" href="index.html">← Back to KINORA</a>
         </div>
       `;
       return;
@@ -1073,28 +502,33 @@ async function loadPerson(){
 
     const person=getPersonBlock(article);
 
+    // Record a visit only after confirming the profile is published.
+    const {error:viewError}=await db
+      .from("page_views")
+      .insert({
+        article_id:article.id,
+        category:"People"
+      });
+
+    if(viewError){
+      console.warn("Could not record People page view:",viewError);
+    }
+
     renderProfile(article,person);
 
     try{
       await loadFilmography();
     }catch(error){
       console.error(error);
-
       $("filmographyContent").innerHTML=`
         <div class="person-empty">
-          Could not load filmography.
-          ${esc(error.message)}
+          Could not load filmography. ${esc(error.message)}
         </div>
       `;
-
       $("filmCount").textContent="";
-
       $("songsContent").innerHTML=`
-        <div class="person-empty">
-          Could not load soundtrack contributions.
-        </div>
+        <div class="person-empty">Could not load soundtrack contributions.</div>
       `;
-
       $("songsCount").textContent="";
     }
 
@@ -1102,14 +536,11 @@ async function loadPerson(){
 
   }catch(error){
     console.error(error);
-
     $("personPage").innerHTML=`
       <div class="person-error">
         <h1>Something went wrong</h1>
         <p>${esc(error.message)}</p>
-        <a class="person-back" href="index.html">
-          ← Back to KINORA
-        </a>
+        <a class="person-back" href="index.html">← Back to KINORA</a>
       </div>
     `;
   }
