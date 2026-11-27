@@ -296,11 +296,20 @@ function getPersonImage(article) {
 
           return `
             <a class="search-result" href="${articleURL(article)}">
-              <span class="search-result-icon">
-                ${poster
-                  ? `<img src="${esc(poster)}" alt="" loading="lazy">`
-                  : isPerson(article) ? "P" : "K"}
-              </span>
+              <span class="search-result-icon"
+  style="width:56px;height:76px;min-width:56px;flex:0 0 56px;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+
+  ${poster
+    ? `<img
+        src="${esc(poster)}"
+        alt="${esc(article.title)}"
+        loading="lazy"
+        style="width:100%;height:100%;object-fit:cover;display:block;"
+        onerror="this.style.display='none';this.parentElement.textContent='${isPerson(article) ? "P" : "K"}';"
+      >`
+    : isPerson(article) ? "P" : "K"}
+
+</span>
 
               <span class="search-result-main">
                 <strong>${esc(article.title)}</strong>
