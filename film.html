@@ -5,892 +5,757 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0b0d12">
-<title>Film — KINORA</title>
-
-<link rel="stylesheet" href="style.css">
+<title>Film Editor | KINORA</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-
 <style>
 :root{
-  --film-accent:var(--accent,#8b7cff);
-  --film-bg:#090b11;
-  --film-panel:rgba(22,27,39,.76);
-  --film-border:rgba(255,255,255,.09);
-  --film-text:#edf1f7;
-  --film-muted:#929bad;
-  --film-glow:color-mix(in srgb,var(--film-accent) 20%,transparent);
+  --bg:#090b12;--panel:rgba(25,31,46,.76);--inner:rgba(10,15,26,.78);
+  --border:rgba(180,195,225,.14);--text:#f3f5fb;--muted:#9ba7bd;
+  --accent:var(--kinora-accent,#c7f36b);--danger:#ff8997;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
 body{
-  margin:0;
-  background:
-    radial-gradient(ellipse at 10% 0%,var(--film-glow),transparent 36%),
-    radial-gradient(ellipse at 95% 35%,rgba(64,91,150,.10),transparent 32%),
-    var(--film-bg);
-  color:var(--film-text);
-  font-family:inherit;
-  min-height:100vh
+  margin:0;min-height:100vh;color:var(--text);font-family:Arial,sans-serif;
+  background:radial-gradient(ellipse at 15% 0%,rgba(110,105,255,.15),transparent 38%),
+  radial-gradient(ellipse at 90% 25%,rgba(80,190,170,.09),transparent 35%),
+  linear-gradient(145deg,#090b12,#101522 55%,#090b12);
 }
-button{font:inherit;cursor:pointer}
-
-.film-topbar{
-  min-height:65px;padding:0 22px;display:flex;align-items:center;
-  justify-content:space-between;border-bottom:1px solid var(--film-border);
-  background:rgba(10,13,20,.78);backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.topbar{
+  height:66px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;border-bottom:1px solid var(--border);
+  background:rgba(9,12,20,.76);backdrop-filter:blur(20px);
   position:sticky;top:0;z-index:10
 }
-.film-brand{color:var(--film-text);text-decoration:none;font-size:21px;font-weight:800;letter-spacing:2px}
-.film-brand span{color:var(--film-accent)}
-.film-nav{display:flex;align-items:center;gap:17px}
-.film-nav a{color:var(--film-muted);text-decoration:none;font-size:13px;transition:.2s}
-.film-nav a:hover{color:var(--film-text)}
-
-.film-main{width:min(1150px,100%);margin:auto;padding:25px 20px 70px}
-.film-breadcrumb{color:var(--film-muted);font-size:12px;margin-bottom:22px}
-.film-breadcrumb a{color:var(--film-muted);text-decoration:none}
-.film-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:20px}
-.film-heading h1{font-size:clamp(25px,5vw,37px);line-height:1.15;margin:0;overflow-wrap:anywhere;letter-spacing:-.7px}
-.film-year{color:var(--film-muted);font-size:14px;margin-top:7px}
-.film-info-button{
-  width:39px;height:39px;flex-shrink:0;border-radius:50%;
-  border:1px solid var(--film-border);
-  background:rgba(255,255,255,.055);color:var(--film-text);font-size:21px;
-  transition:.2s
+.logo{font-size:21px;font-weight:900;letter-spacing:2px;color:var(--text);text-decoration:none}
+.logo span{color:var(--accent)}
+.topbar a.back{color:var(--muted);font-size:13px;text-decoration:none}
+main{max-width:900px;margin:38px auto;padding:0 18px 75px}
+.eyebrow{color:var(--accent);font-size:10px;font-weight:900;letter-spacing:2.5px}
+h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
+.description,.help{color:var(--muted);font-size:13px;line-height:1.75}
+.editor-panel{
+  margin-top:26px;padding:25px;
+  background:linear-gradient(145deg,rgba(30,38,56,.88),rgba(15,20,32,.88));
+  border:1px solid var(--border);border-radius:22px;
+  box-shadow:0 22px 65px #0005,inset 0 1px 0 #ffffff0c;
+  backdrop-filter:blur(22px)
 }
-.film-info-button:hover{background:var(--film-glow);border-color:var(--film-accent)}
-
-.film-hero{
-  display:grid;grid-template-columns:230px minmax(0,1fr);gap:27px;
-  align-items:start;padding:20px;
-  background:linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.018));
-  border:1px solid var(--film-border);border-radius:18px;
-  box-shadow:0 18px 55px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.045);
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)
+.panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.panel-heading h2{font-size:21px;margin:0}
+.count{font-size:12px;color:var(--muted)}
+.help{margin:12px 0 24px}
+.field{margin:18px 0;position:relative}
+.field label,.field-label{
+  display:block;color:var(--muted);font-size:10px;font-weight:900;
+  letter-spacing:1.2px;margin-bottom:9px
 }
-.film-poster{
-  width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:12px;
-  background:#202633;border:1px solid var(--film-border);
-  box-shadow:0 12px 30px rgba(0,0,0,.28)
+.field input,.field textarea,.field select,.role-input{
+  width:100%;background:var(--inner);color:var(--text);
+  border:1px solid var(--border);border-radius:12px;padding:14px;
+  outline:none;transition:.2s;box-shadow:inset 0 1px 5px #0003
 }
-.film-poster-placeholder{
-  aspect-ratio:2/3;display:grid;place-items:center;
-  background:linear-gradient(145deg,#202633,#141923);
-  border-radius:12px;color:var(--film-muted);text-align:center;padding:15px
+.field textarea{min-height:115px;resize:vertical;line-height:1.7}
+.field input:focus,.field textarea:focus,.field select:focus,.role-input:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 13%,transparent)
 }
-.film-facts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:17px}
-.film-chip{
-  background:rgba(255,255,255,.055);color:#c7cede;
-  border:1px solid var(--film-border);padding:6px 10px;
-  border-radius:20px;font-size:11px
+.search-results{
+  display:none;margin-top:8px;background:#111827;
+  border:1px solid var(--border);border-radius:14px;overflow:hidden
 }
-.film-plot-title{font-size:15px;margin:0 0 9px}
-.film-plot{color:#c5ccd8;font-size:14px;line-height:1.8;white-space:pre-wrap}
-
-.film-section{margin-top:30px}
-.film-section-heading{
-  display:flex;align-items:center;justify-content:space-between;
-  gap:10px;margin-bottom:14px;flex-wrap:wrap
+.search-results.show{display:block}
+.result-item{
+  width:100%;display:flex;align-items:center;gap:12px;padding:12px;
+  border:0;border-bottom:1px solid var(--border);
+  background:transparent;color:var(--text);text-align:left
 }
-.film-section-heading h2{font-size:19px;margin:0}
-.film-section-heading h3{font-size:16px;margin:0}
-.film-edit-button{
-  border:1px solid var(--film-border);
-  background:rgba(255,255,255,.055);color:var(--film-text);
-  border-radius:9px;padding:8px 12px;font-size:11px;white-space:nowrap;
-  transition:all .2s
+.result-item:last-child{border-bottom:0}
+.result-item:hover{background:#ffffff09}
+.result-item img,.result-placeholder{
+  width:45px;height:55px;object-fit:cover;border-radius:8px;
+  background:#273143;flex-shrink:0
 }
-.film-edit-button:hover{
-  border-color:var(--film-accent);color:var(--film-accent);
-  background:var(--film-glow);transform:translateY(-1px)
+.result-placeholder{display:grid;place-items:center}
+.result-name{font-size:13px;font-weight:bold}
+.result-subtitle{display:block;font-size:11px;color:var(--muted);margin-top:5px}
+.member-list{display:flex;flex-direction:column;gap:13px;margin-top:22px}
+.member-card{
+  background:linear-gradient(145deg,rgba(22,29,43,.94),rgba(12,17,28,.94));
+  border:1px solid var(--border);border-radius:16px;padding:17px;
+  box-shadow:inset 0 1px 0 #ffffff08
 }
-
-.film-scroll{
-  display:flex;gap:14px;overflow-x:auto;padding:3px 2px 14px;
-  scroll-snap-type:x mandatory;scrollbar-width:thin
+.member-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.member-top strong{font-size:13px}
+.member-person{display:flex;align-items:center;gap:12px;margin-bottom:15px}
+.member-person img,.member-placeholder{
+  width:55px;height:66px;border-radius:9px;object-fit:cover;background:#273143
 }
-.film-person-card{flex:0 0 145px;scroll-snap-align:start;min-width:0}
-.film-person-photo{
-  width:100%;height:170px;object-fit:cover;border-radius:12px;
-  background:#202633;border:1px solid var(--film-border);
-  box-shadow:0 8px 22px rgba(0,0,0,.18)
+.member-placeholder{display:grid;place-items:center;font-size:22px}
+.member-name{font-weight:bold;font-size:14px}
+.member-subtitle{font-size:11px;color:var(--muted);margin-top:5px}
+.role-input{min-height:50px;resize:vertical}
+.remove-button{
+  background:#ff657510;color:var(--danger);
+  border:1px solid #ff65752c;border-radius:9px;padding:8px 12px;font-size:12px
 }
-.film-person-placeholder{
-  width:100%;height:170px;border-radius:12px;
-  background:linear-gradient(145deg,#202633,#141923);
-  display:grid;place-items:center;color:var(--film-muted);font-size:30px;
-  border:1px solid var(--film-border)
+.add-button{
+  width:100%;margin-top:20px;min-height:56px;
+  border:1px dashed color-mix(in srgb,var(--accent) 55%,transparent);
+  border-radius:14px;background:color-mix(in srgb,var(--accent) 8%,transparent);
+  color:var(--accent);font-weight:800;font-size:14px;transition:.2s
 }
-.film-person-name{
-  display:block;color:var(--film-text);font-size:13px;font-weight:700;
-  line-height:1.4;margin-top:9px;text-decoration:none;overflow-wrap:anywhere
+.add-button:hover{background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.footer-actions{display:flex;justify-content:space-between;gap:10px;margin-top:26px;flex-wrap:wrap}
+.cancel-button,.submit-button{border:1px solid var(--border);border-radius:11px;padding:14px 18px;font-weight:bold}
+.cancel-button{background:#ffffff08;color:var(--muted)}
+.submit-button{
+  background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 75%,white));
+  color:#10150a;border-color:transparent;
+  box-shadow:0 5px 22px color-mix(in srgb,var(--accent) 18%,transparent)
 }
-.film-person-name:hover{color:var(--film-accent)}
-.film-person-role{display:block;color:var(--film-muted);font-size:11px;margin-top:4px;line-height:1.5}
-
-.film-data-panel{
-  background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
-  border:1px solid var(--film-border);border-radius:13px;overflow:hidden;
-  box-shadow:0 10px 30px rgba(0,0,0,.12)
-}
-.film-data-row{
-  padding:14px 16px;display:flex;justify-content:space-between;
-  gap:20px;border-bottom:1px solid var(--film-border);font-size:13px
-}
-.film-data-row:last-child{border-bottom:0}
-.film-data-label{color:var(--film-muted)}
-.film-data-value{text-align:right;overflow-wrap:anywhere}
-
-.film-tabs{
-  display:flex;gap:7px;overflow-x:auto;padding-bottom:10px;margin-top:35px;
-  border-bottom:1px solid var(--film-border);scrollbar-width:thin
-}
-.film-tab{
-  flex-shrink:0;padding:11px 14px;background:rgba(255,255,255,.025);
-  color:var(--film-muted);border:1px solid transparent;
-  border-radius:9px 9px 0 0;font-size:12px;transition:.2s
-}
-.film-tab:hover{color:var(--film-text);background:rgba(255,255,255,.05)}
-.film-tab.active{
-  color:var(--film-text);border-color:var(--film-border);
-  border-bottom-color:var(--film-accent);
-  background:var(--film-glow)
-}
-.film-tab-content{padding-top:20px}
-.film-tab-content[hidden]{display:none}
-
-.film-list{display:flex;flex-direction:column;gap:10px}
-.film-list-item{
-  display:flex;align-items:center;gap:13px;padding:13px;
-  border-radius:12px;
-  background:linear-gradient(120deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
-  border:1px solid var(--film-border);
-  box-shadow:0 7px 20px rgba(0,0,0,.12);
-  transition:border-color .2s,transform .2s
-}
-.film-list-item:hover{border-color:rgba(255,255,255,.16);transform:translateY(-1px)}
-.film-list-item img{
-  width:52px;height:65px;border-radius:8px;object-fit:cover;
-  background:#202633;border:1px solid var(--film-border)
-}
-.film-list-icon{
-  width:43px;height:43px;flex-shrink:0;display:grid;place-items:center;
-  border-radius:12px;background:var(--film-glow);
-  border:1px solid var(--film-border);font-size:20px
-}
-.film-list-item strong{font-size:13px;display:block}
-.film-list-item small{color:var(--film-muted);display:block;margin-top:5px;font-size:11px;line-height:1.5}
-.film-award{
-  background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.018));
-  border:1px solid var(--film-border);border-radius:12px;padding:16px;
-  box-shadow:0 7px 20px rgba(0,0,0,.12)
-}
-.film-award strong{font-size:14px}
-.film-award p{color:var(--film-muted);font-size:12px;line-height:1.6;margin:7px 0 0}
-.film-empty{
-  color:var(--film-muted);background:rgba(255,255,255,.025);
-  border:1px dashed var(--film-border);border-radius:12px;
-  padding:25px 18px;font-size:13px;text-align:center
-}
-.film-article-body{color:#cbd2df;line-height:1.85;font-size:14px;overflow-wrap:anywhere}
-.film-article-body h2,.film-article-body h3{color:var(--film-text)}
-.film-article-body a{color:var(--film-accent)}
-.film-article-body img{max-width:100%;height:auto;border-radius:10px}
-.film-article-body table{width:100%;border-collapse:collapse;display:block;overflow-x:auto}
-.film-article-body td,.film-article-body th{padding:9px;border:1px solid var(--film-border)}
-
-.film-info-backdrop{
-  display:none;position:fixed;inset:0;z-index:30;
-  background:rgba(0,0,0,.72);backdrop-filter:blur(7px);
-  align-items:center;justify-content:center;padding:18px
-}
-.film-info-backdrop.open{display:flex}
-.film-info-modal{
-  width:min(440px,100%);
-  background:rgba(20,25,36,.96);backdrop-filter:blur(22px);
-  border:1px solid var(--film-border);border-radius:17px;
-  padding:21px;max-height:85vh;overflow-y:auto;
-  box-shadow:0 25px 80px rgba(0,0,0,.45)
-}
-.film-info-modal h2{margin:0 0 17px;font-size:19px}
-.film-info-close{float:right;background:transparent;border:0;color:var(--film-muted);font-size:22px}
-.film-loading,.film-error{text-align:center;padding:65px 15px;color:var(--film-muted)}
-.film-error{color:#ff8997}
-.film-footer{color:var(--film-muted);font-size:11px;text-align:center;padding:35px 10px 0}
-
-@media(max-width:650px){
-  .film-topbar{padding:0 14px}
-  .film-brand{font-size:18px}
-  .film-nav{gap:11px}
-  .film-nav a{font-size:12px}
-  .film-main{padding:20px 13px 50px}
-  .film-hero{grid-template-columns:115px minmax(0,1fr);gap:15px;padding:13px}
-  .film-person-card{flex-basis:120px}
-  .film-person-photo,.film-person-placeholder{height:145px}
-  .film-data-row{padding:13px}
-}
-@media(max-width:380px){
-  .film-hero{grid-template-columns:1fr}
-  .film-poster,.film-poster-placeholder{width:min(190px,100%);margin:auto}
+.submit-button:disabled{opacity:.5;cursor:wait}
+.status{margin-top:15px;font-size:12px;line-height:1.7;color:var(--muted);white-space:pre-wrap}
+.status.error{color:var(--danger)}
+.success-panel{display:none;text-align:center;padding:35px 10px}
+.success-panel.show{display:block}
+.success-icon{font-size:45px;color:var(--accent)}
+.success-panel p{color:var(--muted);font-size:14px;line-height:1.7}
+.success-panel a{display:inline-block;margin-top:15px;background:var(--accent);color:#10150a;text-decoration:none;padding:13px 18px;border-radius:10px;font-weight:bold}
+.loading,.error-page{text-align:center;padding:55px 15px;color:var(--muted);line-height:1.7}
+.error-page{color:var(--danger)}
+@media(max-width:550px){
+  .topbar{padding:0 14px}
+  main{margin:25px auto;padding:0 12px 50px}
+  .editor-panel{padding:17px;border-radius:17px}
+  .footer-actions>*{flex:1}
 }
 </style>
 </head>
-
 <body>
-
-<header class="film-topbar">
-  <a class="film-brand" href="index.html">KINO<span>RA.</span></a>
-  <nav class="film-nav">
-    <a href="index.html">Explore</a>
-    <a href="index.html#articles">Films</a>
-    <a href="profile.html">Profile</a>
-  </nav>
+<header class="topbar">
+  <a class="logo" href="index.html">KINO<span>RA.</span></a>
+  <a class="back" id="backLink" href="index.html">← Back to film</a>
 </header>
 
-<main class="film-main">
-  <div class="film-breadcrumb">
-    <a href="index.html">KINORA</a> / Films / <span id="breadcrumbTitle">Loading...</span>
-  </div>
+<main>
+  <div id="loading" class="loading">Loading film editor...</div>
+  <div id="pageError" class="error-page" hidden></div>
 
-  <div id="filmContent">
-    <div class="film-loading">Loading film article...</div>
-  </div>
+  <div id="editor" hidden>
+    <div>
+      <div class="eyebrow">KINORA · FILM EDITOR</div>
+      <h1 id="pageTitle">Edit section</h1>
+      <div class="description" id="filmTitle"></div>
+    </div>
 
-  <footer class="film-footer">KINORA — The Film &amp; Series Encyclopedia</footer>
+    <section class="editor-panel">
+      <div id="editorForm">
+        <div class="panel-heading">
+          <h2 id="sectionTitle"></h2>
+          <span class="count" id="entryCount"></span>
+        </div>
+        <p class="help" id="sectionHelp"></p>
+        <div id="formArea"></div>
+        <div id="memberList" class="member-list"></div>
+        <button id="addButton" class="add-button" type="button">+ Add entry</button>
+        <div class="footer-actions">
+          <button id="cancelButton" class="cancel-button" type="button">Cancel</button>
+          <button id="submitButton" class="submit-button" type="button">Submit for review →</button>
+        </div>
+        <div id="status" class="status"></div>
+      </div>
+
+      <div id="successPanel" class="success-panel">
+        <div class="success-icon">✓</div>
+        <h2>Suggestion submitted!</h2>
+        <p>Your proposed changes have been sent for moderator review. The public film page will only change after approval.</p>
+        <a id="returnLink" href="#">Return to film page</a>
+      </div>
+    </section>
+  </div>
 </main>
-
-<div class="film-info-backdrop" id="infoBackdrop">
-  <div class="film-info-modal">
-    <button class="film-info-close" id="closeInfo" aria-label="Close">×</button>
-    <h2>Page information</h2>
-    <div id="filmPageInfo"></div>
-  </div>
-</div>
 
 <script>
 (async function(){
+  const cfg=window.KINORA_CONFIG||{};
+  const params=new URLSearchParams(location.search);
+  const articleId=params.get("id");
+  const section=params.get("section")||"cast";
+  const $=id=>document.getElementById(id);
 
-  const cfg = window.KINORA_CONFIG || {};
-  const host = document.getElementById("filmContent");
-  const params = new URLSearchParams(location.search);
-  const articleId = params.get("id");
+  const musicPersonFields=["music_director","composer","singer","lyricist"];
+  const musicSearchTimers={};
+  const musicSearchSequences={};
 
-  if(!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY){
-    host.innerHTML = '<div class="film-error">KINORA configuration is missing. Check config.js.</div>';
-    return;
-  }
+  const definitions={
+    overview:{
+      title:"Overview",type:"object",
+      help:"Edit the film's main information. Existing values are loaded from the published film.",
+      fields:[
+        ["subtitle","Subtitle","text"],
+        ["year","Release year","text"],
+        ["language","Language","text"],
+        ["genre","Genre","text"],
+        ["runtime","Runtime","text"],
+        ["poster_url","Poster image URL","url"],
+        ["poster_credit","Poster credit","text"],
+        ["plot","Plot","textarea"]
+      ]
+    },
+    cast:{
+      title:"Cast",type:"people",roleKey:"role",roleLabel:"CHARACTER / ROLE",
+      help:"Search for published People articles and assign their character names."
+    },
+    crew:{
+      title:"Crew",type:"people",roleKey:"position",roleLabel:"POSITION / ROLE",
+      help:"Search for published People articles and assign their crew positions."
+    },
+    additional_crew:{
+      title:"Additional Crew",type:"people",roleKey:"position",roleLabel:"POSITION / ROLE",
+      help:"Search for published People articles and assign their positions."
+    },
+    studios:{
+      title:"Studios",type:"list",
+      help:"Add or remove production companies and studios.",
+      fields:[["name","Studio / production company","text"]]
+    },
+    soundtrack:{
+      title:"Music & Soundtrack",type:"list",
+      help:"Add soundtrack tracks and select published People profiles for music director, composer, singer and lyricist.",
+      fields:[
+        ["title","Song / track title","text"],
+        ["music_director","Music director","text"],
+        ["composer","Composer","text"],
+        ["singer","Singer(s)","text"],
+        ["lyricist","Lyricist","text"],
+        ["duration","Duration","text"]
+      ]
+    },
+    theatrical_releases:{
+      title:"Theatrical Releases",type:"list",
+      help:"Add theatrical release dates by country.",
+      fields:[
+        ["country","Country","text"],
+        ["date","Theatrical release date","date"],
+        ["certification","Certification","text"],
+        ["flag","Flag (optional emoji)","text"]
+      ]
+    },
+    digital_releases:{
+      title:"Digital Releases",type:"list",
+      help:"Add streaming platforms and their digital release dates.",
+      fields:[
+        ["platform","Platform","text"],
+        ["date","Digital release date","date"],
+        ["icon","Platform icon URL (optional)","url"]
+      ]
+    },
+    awards:{
+      title:"Awards",type:"list",
+      help:"Add awards, nominations, categories and recipients.",
+      fields:[
+        ["name","Award name","text"],
+        ["category","Category","text"],
+        ["result","Result (Won / Nominated)","text"],
+        ["recipient","Recipient","text"],
+        ["year","Year","text"]
+      ]
+    },
+    box_office:{
+      title:"Box Office",type:"object",
+      help:"Update the film's collection information.",
+      fields:[
+        ["budget","Budget","text"],
+        ["worldwide_gross","Worldwide gross","text"],
+        ["domestic_gross","Domestic gross","text"],
+        ["overseas_gross","Overseas gross","text"],
+        ["verdict","Verdict","text"],
+        ["source","Source / reference","text"]
+      ]
+    }
+  };
 
-  if(!window.supabase){
-    host.innerHTML = '<div class="film-error">Supabase could not load. Please refresh.</div>';
-    return;
-  }
-
-  if(!articleId){
-    host.innerHTML = '<div class="film-error">No film article ID was provided.</div>';
-    return;
-  }
-
-  const db = window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
-  const $ = id => document.getElementById(id);
-
-  let currentArticle = null;
-  let currentFilm = null;
+  const config=definitions[section];
+  let db,article,film;
+  let entries=[];
+  let searchTimer;
+  let searchSequence=0;
 
   function esc(value){
-    return String(value ?? "").replace(/[&<>"']/g,c=>({
+    return String(value??"").replace(/[&<>"']/g,c=>({
       "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
     }[c]));
   }
 
-  function firstBlock(article){
-    const blocks = article.content_blocks;
-    if(Array.isArray(blocks)){
-      return blocks.find(b=>b && b.kind==="film") || blocks[0] || {};
-    }
-    if(blocks && typeof blocks==="object") return blocks;
-    return {};
-  }
-
-  function firstPersonBlock(article){
-    const blocks=article.content_blocks;
-    if(Array.isArray(blocks)){
-      return blocks.find(b=>b && (b.kind==="person"||b.kind==="people")) || blocks[0] || {};
-    }
-    if(blocks && typeof blocks==="object") return blocks;
-    return {};
-  }
-
-  function list(value){
-    return Array.isArray(value) ? value : [];
-  }
-
-  function showEmpty(message){
-    return `<div class="film-empty">${esc(message)}</div>`;
-  }
-
-  function safeImage(url){
-    if(typeof url!=="string") return "";
+  function imageURL(url){
+    if(!url)return "";
     try{
-      const parsed = new URL(url,location.href);
-      return ["http:","https:"].includes(parsed.protocol) ? parsed.href : "";
+      const u=new URL(url,location.href);
+      return ["https:","http:"].includes(u.protocol)?u.href:"";
     }catch(e){return ""}
   }
 
-  // Fetch current profile photos so Film articles don't keep displaying old cached URLs.
-  async function refreshPeoplePhotos(film){
-    const sections=["cast","crew","additional_crew"];
-    const personIds=[...new Set(
-      sections.flatMap(section=>
-        list(film[section])
-          .map(person=>person.person_id)
-          .filter(id=>typeof id==="string" && id.trim())
-      )
-    )];
+  function showError(message){
+    $("loading").hidden=true;
+    $("editor").hidden=true;
+    $("pageError").hidden=false;
+    $("pageError").textContent=message;
+  }
 
-    if(!personIds.length) return film;
+  function getBlocks(a){
+    if(Array.isArray(a.content_blocks))return a.content_blocks;
+    if(a.content_blocks&&typeof a.content_blocks==="object")return [a.content_blocks];
+    return [];
+  }
 
-    try{
-      const {data:peopleRows,error}=await db
-        .from("articles")
-        .select("id,content_blocks")
-        .in("id",personIds)
-        .eq("category","People")
-        .eq("status","published");
+  function getPersonBlock(a){
+    return getBlocks(a).find(b=>b.kind==="person")||{};
+  }
 
-      if(error) throw error;
+  function updateCount(){
+    $("entryCount").textContent=config.type==="object"?"Section details":entries.length+" entries";
+  }
 
-      const photoMap=new Map();
+  function fieldHTML(key,label,type,value,idPrefix){
+    const id=idPrefix+"-"+key;
+    const safe=esc(value??"");
+    if(type==="textarea"){
+      return `<div class="field"><label for="${id}">${esc(label)}</label><textarea id="${id}" data-field="${key}">${safe}</textarea></div>`;
+    }
+    return `<div class="field"><label for="${id}">${esc(label)}</label><input id="${id}" data-field="${key}" type="${type}" value="${safe}"></div>`;
+  }
 
-      (peopleRows||[]).forEach(article=>{
-        const person=firstPersonBlock(article);
-        const photo=
-          person.photo_url ||
-          person.person_photo ||
-          person.profile_photo ||
-          person.photo ||
-          "";
+  function musicPersonFieldHTML(index,key,label,value){
+    const inputId=`music-${index}-${key}`;
+    const resultsId=`music-results-${index}-${key}`;
+    const selectedId=entries[index]?.[key+"_person_id"];
+    const subtitle=selectedId?"Selected from published People articles":"Search and select a published People profile";
 
-        photoMap.set(String(article.id),safeImage(photo));
-      });
+    return `
+      <div class="field">
+        <label for="${inputId}">${esc(label)} · PEOPLE SEARCH</label>
+        <input id="${inputId}" data-field="${key}" data-music-search="${key}"
+          data-music-entry="${index}" type="search" autocomplete="off"
+          placeholder="Type a person's name..." value="${esc(value||"")}">
+        <div class="search-results" id="${resultsId}"></div>
+        <div class="result-subtitle" id="music-hint-${index}-${key}">${subtitle}</div>
+      </div>`;
+  }
 
-      sections.forEach(section=>{
-        film[section]=list(film[section]).map(person=>{
-          const latestPhoto=photoMap.get(String(person.person_id));
-          if(latestPhoto){
-            return {...person,person_photo:latestPhoto};
+  function renderObject(){
+    $("formArea").innerHTML=config.fields.map(f=>
+      fieldHTML(f[0],f[1],f[2],entries[0]?.[f[0]],"object")
+    ).join("");
+    $("memberList").innerHTML="";
+    $("addButton").hidden=true;
+    updateCount();
+  }
+
+  function renderList(){
+    $("formArea").innerHTML="";
+    $("addButton").hidden=false;
+
+    $("memberList").innerHTML=entries.map((entry,index)=>`
+      <article class="member-card" data-entry="${index}">
+        <div class="member-top">
+          <strong>Entry ${index+1}</strong>
+          <button class="remove-button" type="button" data-remove="${index}">Remove</button>
+        </div>
+        ${config.fields.map(f=>{
+          if(section==="soundtrack"&&musicPersonFields.includes(f[0])){
+            return musicPersonFieldHTML(index,f[0],f[1],entry[f[0]]);
           }
-          return person;
-        });
-      });
+          return fieldHTML(f[0],f[1],f[2],entry[f[0]],"entry-"+index);
+        }).join("")}
+      </article>
+    `).join("");
 
-    }catch(error){
-      // If the People lookup fails, keep the saved image URLs as a fallback.
-      console.warn("Could not refresh People profile photos:",error);
+    $("memberList").querySelectorAll("[data-remove]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        readListFields();
+        entries.splice(Number(button.dataset.remove),1);
+        renderList();
+      });
+    });
+
+    if(section==="soundtrack"){
+      attachMusicSearch();
     }
 
-    return film;
+    updateCount();
   }
 
-  function renderPeople(items,type){
-    if(!items.length) return showEmpty("No "+type.toLowerCase()+" information available yet.");
+  function attachMusicSearch(){
+    $("memberList").querySelectorAll("[data-music-search]").forEach(input=>{
+      input.addEventListener("input",()=>{
+        const index=Number(input.dataset.musicEntry);
+        const key=input.dataset.musicSearch;
+        const query=input.value.trim();
 
-    return `
-      <div class="film-scroll">
-        ${items.map(person=>{
-          const name=person.name||"Unknown";
-          const photo=safeImage(person.person_photo||person.photo_url||"");
-          const personId=person.person_id;
-          const role=person.role||person.position||"";
-          const nameHTML=personId
-            ? `<a class="film-person-name" href="person.html?id=${encodeURIComponent(personId)}">${esc(name)}</a>`
-            : `<span class="film-person-name">${esc(name)}</span>`;
+        // Typing a different name clears the previously selected profile.
+        entries[index][key]=input.value;
+        entries[index][key+"_person_id"]="";
+        entries[index][key+"_person_photo"]="";
 
-          return `
-            <article class="film-person-card">
-              ${photo
-                ? `<img class="film-person-photo" src="${esc(photo)}" alt="${esc(name)}" loading="lazy" onerror="this.outerHTML='<div class=&quot;film-person-placeholder&quot;>👤</div>'">`
-                : `<div class="film-person-placeholder">👤</div>`}
-              ${nameHTML}
-              <span class="film-person-role">${esc(role)}</span>
-            </article>
-          `;
-        }).join("")}
-      </div>
-    `;
-  }
+        const hint=$(`music-hint-${index}-${key}`);
+        if(hint)hint.textContent="Select a matching published People profile.";
 
-  function dataRows(rows){
-    const valid=rows.filter(row=>row[1]!==undefined&&row[1]!==null&&row[1]!=="");
-    if(!valid.length) return showEmpty("No information available yet.");
+        const results=$(`music-results-${index}-${key}`);
+        clearTimeout(musicSearchTimers[index+"-"+key]);
 
-    return `
-      <div class="film-data-panel">
-        ${valid.map(row=>`
-          <div class="film-data-row">
-            <span class="film-data-label">${esc(row[0])}</span>
-            <span class="film-data-value">${esc(row[1])}</span>
-          </div>
-        `).join("")}
-      </div>
-    `;
-  }
+        const seq=(musicSearchSequences[index+"-"+key]||0)+1;
+        musicSearchSequences[index+"-"+key]=seq;
 
-  function renderAdditionalCrew(items){
-    if(!items.length) return showEmpty("No additional crew information available yet.");
-
-    return `
-      <div class="film-list">
-        ${items.map(person=>{
-          const photo=safeImage(person.person_photo||person.photo_url||"");
-          const personId=person.person_id;
-          const name=person.name||"Unknown";
-          const role=person.position||person.role||"";
-
-          return `
-            <div class="film-list-item">
-              ${photo
-                ? `<img src="${esc(photo)}" alt="" loading="lazy">`
-                : `<div class="film-list-icon">👤</div>`}
-              <div>
-                <strong>${personId
-                  ? `<a href="person.html?id=${encodeURIComponent(personId)}" style="color:inherit;text-decoration:none">${esc(name)}</a>`
-                  : esc(name)}</strong>
-                <small>${esc(role)}</small>
-              </div>
-            </div>
-          `;
-        }).join("")}
-      </div>
-    `;
-  }
-
-  function renderTheatrical(items){
-    if(!items.length) return showEmpty("No theatrical release details available.");
-
-    return `
-      <div class="film-list">
-        ${items.map(item=>`
-          <div class="film-list-item">
-            <div class="film-list-icon">${esc(item.flag||"🌍")}</div>
-            <div>
-              <strong>${esc(item.country||"Unknown country")}</strong>
-              <small>${esc(item.date||"Date unavailable")}${item.certification?" · "+esc(item.certification):""}</small>
-            </div>
-          </div>
-        `).join("")}
-      </div>
-    `;
-  }
-
-  function renderDigital(items){
-    if(!items.length) return showEmpty("No digital release details available.");
-
-    return `
-      <div class="film-list">
-        ${items.map(item=>{
-          const icon=safeImage(item.icon||"");
-          return `
-            <div class="film-list-item">
-              ${icon
-                ? `<img src="${esc(icon)}" alt="" style="width:43px;height:43px;border-radius:50%" loading="lazy">`
-                : `<div class="film-list-icon">${esc((item.platform||"?").charAt(0).toUpperCase())}</div>`}
-              <div>
-                <strong>${esc(item.platform||"Platform")}</strong>
-                <small>${esc(item.date||"Date unavailable")}</small>
-              </div>
-            </div>
-          `;
-        }).join("")}
-      </div>
-    `;
-  }
-
-  function renderAwards(items){
-    if(!items.length) return showEmpty("No awards or nominations listed yet.");
-
-    return `
-      <div class="film-list">
-        ${items.map(award=>`
-          <div class="film-award">
-            <strong>${esc(award.name||"Award")}</strong>
-            <p>${[award.category,award.result,award.recipient,award.year].filter(Boolean).map(esc).join(" · ")}</p>
-          </div>
-        `).join("")}
-      </div>
-    `;
-  }
-
-  function renderSoundtrack(items){
-    if(!items.length) return showEmpty("No music or soundtrack information available.");
-
-    return `
-      <div class="film-list">
-        ${items.map(song=>{
-          const details=[
-            song.music_director?"Music: "+song.music_director:"",
-            song.composer?"Composer: "+song.composer:"",
-            song.singer?"Singer: "+song.singer:"",
-            song.lyricist?"Lyrics: "+song.lyricist:"",
-            song.duration||""
-          ].filter(Boolean);
-
-          return `
-            <div class="film-list-item">
-              <div class="film-list-icon">♫</div>
-              <div>
-                <strong>${esc(song.title||song.name||"Untitled track")}</strong>
-                <small>${details.map(esc).join(" · ")}</small>
-              </div>
-            </div>
-          `;
-        }).join("")}
-      </div>
-    `;
-  }
-
-  function safeArticleHTML(source){
-    const template=document.createElement("template");
-    template.innerHTML=String(source||"");
-
-    const allowed=new Set([
-      "P","BR","H2","H3","H4","STRONG","B","I","EM","U",
-      "UL","OL","LI","BLOCKQUOTE","A","IMG","HR",
-      "TABLE","THEAD","TBODY","TR","TH","TD","CODE","PRE"
-    ]);
-
-    template.content.querySelectorAll("*").forEach(element=>{
-      if(!allowed.has(element.tagName)){
-        element.replaceWith(document.createTextNode(element.textContent||""));
-        return;
-      }
-
-      [...element.attributes].forEach(attribute=>{
-        const name=attribute.name.toLowerCase();
-        if(name.startsWith("on")||name==="style"||name==="srcdoc"){
-          element.removeAttribute(attribute.name);
+        if(query.length<2){
+          results.classList.remove("show");
+          results.innerHTML="";
+          return;
         }
-      });
 
-      if(element.tagName==="A"){
-        const href=element.getAttribute("href")||"";
-        if(!/^https?:\/\//i.test(href)) element.removeAttribute("href");
-        element.setAttribute("rel","noopener noreferrer");
-        element.setAttribute("target","_blank");
-      }
+        results.innerHTML='<div style="padding:13px;color:var(--muted)">Searching People...</div>';
+        results.classList.add("show");
 
-      if(element.tagName==="IMG"){
-        const src=safeImage(element.getAttribute("src")||"");
-        if(src) element.setAttribute("src",src);
-        else element.remove();
-        element.setAttribute("loading","lazy");
-      }
-    });
-
-    return template.innerHTML;
-  }
-
-  function switchTab(tabName){
-    document.querySelectorAll(".film-tab").forEach(button=>{
-      const active=button.dataset.tab===tabName;
-      button.classList.toggle("active",active);
-      button.setAttribute("aria-selected",String(active));
-    });
-
-    document.querySelectorAll(".film-tab-content").forEach(panel=>{
-      panel.hidden=panel.id!=="tab-"+tabName;
-    });
-  }
-
-  function addTab(name,label){
-    return `<button class="film-tab" type="button" data-tab="${esc(name)}" role="tab" aria-selected="false">${esc(label)}</button>`;
-  }
-
-  function openDedicatedEditor(key){
-    if(!currentArticle) return;
-
-    const allowedSections=[
-      "overview",
-      "cast",
-      "crew",
-      "additional_crew",
-      "studios",
-      "box_office",
-      "soundtrack",
-      "theatrical_releases",
-      "digital_releases",
-      "awards"
-    ];
-
-    if(!allowedSections.includes(key)) return;
-
-    const url=new URL("film-editor.html",location.href);
-    url.searchParams.set("id",currentArticle.id);
-    url.searchParams.set("section",key);
-    location.href=url.href;
-  }
-
-  function render(article,film){
-    currentArticle=article;
-    currentFilm=film;
-
-    const title=article.title||"Untitled film";
-    const year=film.year||"";
-    const poster=safeImage(film.poster_url||"");
-
-    document.title=title+" ("+year+") — KINORA";
-    $("breadcrumbTitle").textContent=title;
-
-    const cast=list(film.cast);
-    const crew=list(film.crew);
-    const additionalCrew=list(film.additional_crew);
-    const theatrical=list(film.theatrical_releases);
-    const digital=list(film.digital_releases);
-    const awards=list(film.awards);
-    const soundtrack=list(film.soundtrack);
-    const box=film.box_office||{};
-
-    const studios=film.studios||film.production_companies||film.production_company||"";
-    const hasArticle=Boolean(article.body_source||article.content);
-
-    // These tabs stay available even when their sections are empty.
-    const tabs=[
-      ["additional","Additional crew"],
-      ["releases","Release details"],
-      ["awards","Awards"],
-      ["soundtrack","Music & Soundtrack"]
-    ];
-
-    if(hasArticle) tabs.push(["article","Article"]);
-
-    const totalCharacters=[
-      article.title,article.summary,article.content,
-      JSON.stringify(article.content_blocks||[]),article.body_source
-    ].filter(Boolean).join("").length;
-
-    const pageSize=new TextEncoder().encode(JSON.stringify(article)).length;
-
-    host.innerHTML=`
-
-      <div class="film-heading">
-        <div>
-          <h1>${esc(title)}</h1>
-          <div class="film-year">${year?esc(year):"Year unavailable"}</div>
-        </div>
-        <button class="film-info-button" id="openInfo" type="button" aria-label="Page information">⋯</button>
-      </div>
-
-      <section class="film-hero">
-        <div>
-          ${poster
-            ? `<img class="film-poster" src="${esc(poster)}" alt="${esc(title)} poster">`
-            : `<div class="film-poster-placeholder">No poster available</div>`}
-        </div>
-
-        <div>
-          <div class="film-facts">
-            ${film.genre?`<span class="film-chip">${esc(film.genre)}</span>`:""}
-            ${film.language?`<span class="film-chip">${esc(film.language)}</span>`:""}
-            ${film.runtime?`<span class="film-chip">${esc(film.runtime)}</span>`:""}
-          </div>
-          <h2 class="film-plot-title">Plot</h2>
-          <div class="film-plot">${esc(film.plot||article.summary||"No plot information available yet.")}</div>
-        </div>
-      </section>
-
-      <div class="film-section-heading" style="justify-content:flex-end;margin-top:12px">
-        <button class="film-edit-button" data-edit="overview" type="button">Suggest overview edit</button>
-      </div>
-
-      <section class="film-section">
-        <div class="film-section-heading">
-          <h2>Cast</h2>
-          <span class="film-person-role">${cast.length} entries</span>
-          <button class="film-edit-button" data-edit="cast" type="button">Suggest edit</button>
-        </div>
-        ${renderPeople(cast,"Cast")}
-      </section>
-
-      <section class="film-section">
-        <div class="film-section-heading">
-          <h2>Crew</h2>
-          <span class="film-person-role">${crew.length} entries</span>
-          <button class="film-edit-button" data-edit="crew" type="button">Suggest edit</button>
-        </div>
-        ${renderPeople(crew,"Crew")}
-      </section>
-
-      <section class="film-section">
-        <div class="film-section-heading">
-          <h2>Box office</h2>
-          <button class="film-edit-button" data-edit="box_office" type="button">Suggest edit</button>
-        </div>
-        ${dataRows([
-          ["Budget",box.budget],
-          ["Worldwide gross",box.worldwide_gross],
-          ["Domestic gross",box.domestic_gross],
-          ["Overseas gross",box.overseas_gross],
-          ["Verdict",box.verdict]
-        ])}
-      </section>
-
-      <section class="film-section">
-        <div class="film-section-heading">
-          <h2>Production companies / Studios</h2>
-          <button class="film-edit-button" data-edit="studios" type="button">Suggest edit</button>
-        </div>
-        ${Array.isArray(studios)
-          ? dataRows(studios.map((s,i)=>["Studio "+(i+1),typeof s==="string"?s:s.name]))
-          : dataRows([["Studios",studios]])}
-      </section>
-
-      <nav class="film-tabs" role="tablist" aria-label="More film information">
-        ${tabs.map(t=>addTab(t[0],t[1])).join("")}
-      </nav>
-
-      <div class="film-tab-content" id="tab-additional" hidden>
-        <div class="film-section-heading">
-          <h3>Additional crew</h3>
-          <button class="film-edit-button" data-edit="additional_crew" type="button">Suggest edit</button>
-        </div>
-        ${renderAdditionalCrew(additionalCrew)}
-      </div>
-
-      <div class="film-tab-content" id="tab-releases" hidden>
-        <div class="film-section-heading">
-          <h3>Theatrical releases</h3>
-          <button class="film-edit-button" data-edit="theatrical_releases" type="button">Suggest edit</button>
-        </div>
-        ${renderTheatrical(theatrical)}
-
-        <div class="film-section-heading" style="margin-top:25px">
-          <h3>Digital releases</h3>
-          <button class="film-edit-button" data-edit="digital_releases" type="button">Suggest edit</button>
-        </div>
-        ${renderDigital(digital)}
-      </div>
-
-      <div class="film-tab-content" id="tab-awards" hidden>
-        <div class="film-section-heading">
-          <h3>Awards</h3>
-          <button class="film-edit-button" data-edit="awards" type="button">Suggest edit</button>
-        </div>
-        ${renderAwards(awards)}
-      </div>
-
-      <div class="film-tab-content" id="tab-soundtrack" hidden>
-        <div class="film-section-heading">
-          <h3>Music &amp; Soundtrack</h3>
-          <button class="film-edit-button" data-edit="soundtrack" type="button">Suggest edit</button>
-        </div>
-        ${renderSoundtrack(soundtrack)}
-      </div>
-
-      ${hasArticle?`
-        <div class="film-tab-content" id="tab-article" hidden>
-          <div class="film-article-body">
-            ${safeArticleHTML(article.body_source||article.content||"")}
-          </div>
-          ${Array.isArray(article.citations)&&article.citations.length
-            ? `<h3>References</h3><ol>${article.citations.map(c=>{
-                const citationUrl=safeImage(c.url||"");
-                return citationUrl
-                  ? `<li><a href="${esc(citationUrl)}" target="_blank" rel="noopener noreferrer">${esc(c.title||c.url)}</a></li>`
-                  : "";
-              }).join("")}</ol>`
-            : ""}
-        </div>
-      `:""}
-    `;
-
-    // Every film section opens its own dedicated editor page.
-    document.querySelectorAll("[data-edit]").forEach(button=>{
-      button.addEventListener("click",()=>{
-        openDedicatedEditor(button.dataset.edit);
+        musicSearchTimers[index+"-"+key]=setTimeout(()=>{
+          searchMusicPeople(index,key,query,seq);
+        },350);
       });
     });
-
-    document.querySelectorAll(".film-tab").forEach(button=>{
-      button.addEventListener("click",()=>{
-        switchTab(button.dataset.tab);
-      });
-    });
-
-    // Open Release Details by default.
-    switchTab("releases");
-
-    $("filmPageInfo").innerHTML=`
-      <div class="film-data-panel">
-        <div class="film-data-row"><span class="film-data-label">Page title</span><span class="film-data-value">${esc(title)}</span></div>
-        <div class="film-data-row"><span class="film-data-label">Category</span><span class="film-data-value">Film</span></div>
-        <div class="film-data-row"><span class="film-data-label">Characters</span><span class="film-data-value">${totalCharacters.toLocaleString()}</span></div>
-        <div class="film-data-row"><span class="film-data-label">Article data size</span><span class="film-data-value">${pageSize.toLocaleString()} bytes</span></div>
-        <div class="film-data-row"><span class="film-data-label">Cast entries</span><span class="film-data-value">${cast.length}</span></div>
-        <div class="film-data-row"><span class="film-data-label">Crew entries</span><span class="film-data-value">${crew.length}</span></div>
-        <div class="film-data-row"><span class="film-data-label">Created</span><span class="film-data-value">${esc(article.created_at?new Date(article.created_at).toLocaleDateString():"Unknown")}</span></div>
-        <div class="film-data-row"><span class="film-data-label">Last updated</span><span class="film-data-value">${esc(article.updated_at?new Date(article.updated_at).toLocaleDateString():"Not recorded")}</span></div>
-        <div class="film-data-row"><span class="film-data-label">Article ID</span><span class="film-data-value">${esc(article.id)}</span></div>
-      </div>
-    `;
-
-    $("openInfo").addEventListener("click",()=>{
-      $("infoBackdrop").classList.add("open");
-    });
   }
 
-  $("closeInfo").addEventListener("click",()=>{
-    $("infoBackdrop").classList.remove("open");
-  });
-
-  $("infoBackdrop").addEventListener("click",event=>{
-    if(event.target===$("infoBackdrop")){
-      $("infoBackdrop").classList.remove("open");
-    }
-  });
-
-  try{
-    const {data:article,error}=await db
-      .from("articles")
-      .select("id,title,summary,content,content_blocks,body_source,citations,category,status,created_at,updated_at")
-      .eq("id",articleId)
-      .eq("category","Film")
+  async function searchMusicPeople(index,key,query,seq){
+    const {data,error}=await db.from("articles")
+      .select("id,title,content_blocks")
+      .eq("category","People")
       .eq("status","published")
-      .maybeSingle();
+      .ilike("title","%"+query+"%")
+      .limit(10);
 
-    if(error) throw error;
+    const results=$(`music-results-${index}-${key}`);
+    if(!results)return;
+    if(seq!==musicSearchSequences[index+"-"+key])return;
 
-    if(!article){
-      host.innerHTML=`
-        <div class="film-error">
-          This film article is unavailable or has not been published yet.
-        </div>
-      `;
+    if(error){
+      results.innerHTML=`<div style="padding:13px;color:var(--danger)">Search failed: ${esc(error.message)}</div>`;
       return;
     }
 
-    const film=firstBlock(article);
-
-    if(film.kind!=="film"){
-      host.innerHTML='<div class="film-error">This article does not contain valid film information.</div>';
+    if(!data?.length){
+      results.innerHTML='<div style="padding:13px;color:var(--muted)">No published People articles found.</div>';
       return;
     }
 
-    await refreshPeoplePhotos(film);
-    render(article,film);
+    const people=data.map(a=>{
+      const p=getPersonBlock(a);
+      return {
+        person_id:a.id,
+        name:a.title,
+        person_photo:p.photo_url||p.person_photo||p.profile_photo||p.photo||""
+      };
+    });
 
-  }catch(error){
-    console.error(error);
-    host.innerHTML=`
-      <div class="film-error">
-        Could not load this film article.<br>
-        ${esc(error.message)}
-      </div>
-    `;
+    results.innerHTML=people.map((person,i)=>{
+      const photo=imageURL(person.person_photo);
+      return `
+        <button type="button" class="result-item" data-music-result="${i}">
+          ${photo?`<img src="${esc(photo)}" alt="">`:`<span class="result-placeholder">👤</span>`}
+          <span>
+            <span class="result-name">${esc(person.name)}</span>
+            <span class="result-subtitle">Published People article</span>
+          </span>
+        </button>`;
+    }).join("");
+
+    results.querySelectorAll("[data-music-result]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        const person=people[Number(button.dataset.musicResult)];
+        const entry=entries[index];
+        if(!entry)return;
+
+        entry[key]=person.name;
+        entry[key+"_person_id"]=person.person_id;
+        entry[key+"_person_photo"]=person.person_photo||"";
+
+        const input=$(`music-${index}-${key}`);
+        if(input)input.value=person.name;
+
+        const hint=$(`music-hint-${index}-${key}`);
+        if(hint)hint.textContent="✓ Selected: "+person.name;
+
+        results.classList.remove("show");
+        results.innerHTML="";
+      });
+    });
   }
 
+  function renderPeople(){
+    $("formArea").innerHTML=`
+      <div class="field">
+        <label for="peopleSearch">SEARCH PUBLISHED PEOPLE ARTICLES</label>
+        <input id="peopleSearch" type="search" placeholder="Type a person's name" autocomplete="off">
+        <div id="searchResults" class="search-results"></div>
+      </div>`;
+    $("addButton").hidden=true;
+    renderPeopleList();
+
+    $("peopleSearch").addEventListener("input",()=>{
+      clearTimeout(searchTimer);
+      const q=$("peopleSearch").value.trim();
+      const seq=++searchSequence;
+      if(q.length<2){$("searchResults").classList.remove("show");return}
+      $("searchResults").innerHTML='<div style="padding:13px;color:var(--muted)">Searching...</div>';
+      $("searchResults").classList.add("show");
+      searchTimer=setTimeout(()=>searchPeople(q,seq),350);
+    });
+  }
+
+  function renderPeopleList(){
+    $("memberList").innerHTML=entries.map((person,index)=>{
+      const photo=imageURL(person.person_photo);
+      return `
+        <article class="member-card">
+          <div class="member-top">
+            <strong>Entry ${index+1}</strong>
+            <button class="remove-button" type="button" data-remove="${index}">Remove</button>
+          </div>
+          <div class="member-person">
+            ${photo?`<img src="${esc(photo)}" alt="">`:`<div class="member-placeholder">👤</div>`}
+            <div>
+              <div class="member-name">${esc(person.name)}</div>
+              <div class="member-subtitle">Published People article</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>${esc(config.roleLabel)}</label>
+            <input class="role-input" data-role="${index}" value="${esc(person[config.roleKey]||"")}" placeholder="Enter ${section==="cast"?"character name":"position"}">
+          </div>
+        </article>`;
+    }).join("");
+
+    $("memberList").querySelectorAll("[data-remove]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        readPeopleFields();
+        entries.splice(Number(button.dataset.remove),1);
+        renderPeopleList();
+      });
+    });
+    $("memberList").querySelectorAll("[data-role]").forEach(input=>{
+      input.addEventListener("input",()=>{
+        entries[Number(input.dataset.role)][config.roleKey]=input.value;
+      });
+    });
+    updateCount();
+  }
+
+  function readListFields(){
+    $("memberList").querySelectorAll("[data-entry]").forEach(card=>{
+      const index=Number(card.dataset.entry);
+      card.querySelectorAll("[data-field]").forEach(input=>{
+        entries[index][input.dataset.field]=input.value.trim();
+      });
+    });
+  }
+
+  function readPeopleFields(){
+    $("memberList").querySelectorAll("[data-role]").forEach(input=>{
+      entries[Number(input.dataset.role)][config.roleKey]=input.value.trim();
+    });
+  }
+
+  function readObjectFields(){
+    const obj={};
+    $("formArea").querySelectorAll("[data-field]").forEach(input=>{
+      obj[input.dataset.field]=input.value.trim();
+    });
+    return obj;
+  }
+
+  async function searchPeople(query,seq){
+    const {data,error}=await db.from("articles")
+      .select("id,title,content_blocks")
+      .eq("category","People").eq("status","published")
+      .ilike("title","%"+query+"%").limit(10);
+
+    if(seq!==searchSequence)return;
+    const results=$("searchResults");
+    if(error){
+      results.innerHTML=`<div style="padding:13px;color:var(--danger)">Search failed: ${esc(error.message)}</div>`;
+      return;
+    }
+    if(!data?.length){
+      results.innerHTML='<div style="padding:13px;color:var(--muted)">No published People articles found.</div>';
+      return;
+    }
+
+    const people=data.map(a=>{
+      const p=getPersonBlock(a);
+      return {person_id:a.id,name:a.title,person_photo:p.photo_url||p.person_photo||""};
+    });
+
+    results.innerHTML=people.map((p,i)=>{
+      const photo=imageURL(p.person_photo);
+      return `<button type="button" class="result-item" data-result="${i}">
+        ${photo?`<img src="${esc(photo)}" alt="">`:`<span class="result-placeholder">👤</span>`}
+        <span><span class="result-name">${esc(p.name)}</span><span class="result-subtitle">Published People article</span></span>
+      </button>`;
+    }).join("");
+
+    results.querySelectorAll("[data-result]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        const p=people[Number(button.dataset.result)];
+        if(entries.some(x=>x.person_id===p.person_id)){
+          $("status").textContent="This person is already in the list.";
+          return;
+        }
+        readPeopleFields();
+        entries.push({...p,[config.roleKey]:""});
+        $("peopleSearch").value="";
+        results.classList.remove("show");
+        $("status").textContent="";
+        renderPeopleList();
+      });
+    });
+  }
+
+  $("addButton").addEventListener("click",()=>{
+    if(config.type==="list"){
+      readListFields();
+      const blank={};
+      config.fields.forEach(f=>blank[f[0]]="");
+
+      if(section==="soundtrack"){
+        musicPersonFields.forEach(key=>{
+          blank[key+"_person_id"]="";
+          blank[key+"_person_photo"]="";
+        });
+      }
+
+      entries.push(blank);
+      renderList();
+    }
+  });
+
+  $("cancelButton").addEventListener("click",()=>{
+    location.href="film.html?id="+encodeURIComponent(articleId);
+  });
+
+  $("submitButton").addEventListener("click",async()=>{
+    const status=$("status");
+    const button=$("submitButton");
+    status.classList.remove("error");
+
+    let proposed;
+
+    if(config.type==="object"){
+      proposed=readObjectFields();
+    }else if(config.type==="people"){
+      readPeopleFields();
+      proposed=entries.map(p=>({
+        name:p.name,
+        person_id:p.person_id,
+        person_photo:p.person_photo||"",
+        [config.roleKey]:String(p[config.roleKey]||"").trim()
+      }));
+      if(proposed.some(p=>!p.name||!p.person_id||!p[config.roleKey])){
+        status.textContent="Please complete every member's role or position.";
+        status.classList.add("error");return;
+      }
+    }else{
+      readListFields();
+      proposed=entries;
+
+      if(section==="soundtrack"){
+        const missingProfile=proposed.some(entry=>
+          musicPersonFields.some(key=>
+            String(entry[key]||"").trim()&&!entry[key+"_person_id"]
+          )
+        );
+
+        if(missingProfile){
+          status.textContent="Please select a matching published People profile for every music credit you have entered.";
+          status.classList.add("error");return;
+        }
+      }
+
+      if(proposed.some(entry=>config.fields.some(f=>!String(entry[f[0]]||"").trim()))){
+        status.textContent="Please complete all required fields in each entry.";
+        status.classList.add("error");return;
+      }
+    }
+
+    const {data:{user},error:userError}=await db.auth.getUser();
+    if(userError||!user){
+      status.textContent="Please log in before submitting an edit.";
+      status.classList.add("error");return;
+    }
+
+    button.disabled=true;
+    button.textContent="Submitting...";
+
+    const {error}=await db.from("film_section_edits").insert({
+      article_id:article.id,
+      section_key:section,
+      proposed_data:proposed,
+      status:"pending",
+      submitted_by:user.id
+    });
+
+    button.disabled=false;
+    button.textContent="Submit for review →";
+
+    if(error){
+      status.textContent="Submission failed: "+error.message;
+      status.classList.add("error");return;
+    }
+
+    $("editorForm").hidden=true;
+    $("successPanel").classList.add("show");
+    $("returnLink").href="film.html?id="+encodeURIComponent(articleId);
+  });
+
+  async function init(){
+    if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY){showError("KINORA configuration is missing.");return}
+    if(!window.supabase){showError("Supabase could not load.");return}
+    if(!articleId){showError("Film article ID is missing.");return}
+    if(!config){showError("This editing section is not supported.");return}
+
+    db=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
+
+    const {data:a,error}=await db.from("articles")
+      .select("id,title,content_blocks,category,status")
+      .eq("id",articleId).eq("category","Film").eq("status","published").maybeSingle();
+
+    if(error){showError("Could not load film: "+error.message);return}
+    if(!a){showError("Film article not found or not published.");return}
+
+    article=a;
+    film=getBlocks(a).find(b=>b.kind==="film");
+    if(!film){showError("Film data block not found.");return}
+
+    $("backLink").href="film.html?id="+encodeURIComponent(articleId);
+    $("filmTitle").textContent=a.title||"Untitled film";
+    $("pageTitle").textContent="Edit "+config.title;
+    $("sectionTitle").textContent=config.title;
+    $("sectionHelp").textContent=config.help;
+
+    if(config.type==="object"){
+      entries=[section==="overview" ? {...film} : {...(film[section]||{})}];
+    }else{
+      entries=Array.isArray(film[section])?film[section].map(x=>({...x})):[];
+    }
+
+    $("loading").hidden=true;
+    $("editor").hidden=false;
+
+    if(config.type==="people")renderPeople();
+    else if(config.type==="list")renderList();
+    else renderObject();
+  }
+
+  await init();
 })();
 </script>
-
 </body>
 </html>
