@@ -126,11 +126,50 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
 .success-panel a{display:inline-block;margin-top:15px;background:var(--accent);color:#10150a;text-decoration:none;padding:13px 18px;border-radius:10px;font-weight:bold}
 .loading,.error-page{text-align:center;padding:55px 15px;color:var(--muted);line-height:1.7}
 .error-page{color:var(--danger)}
+.album-cover-preview{
+  width:64px;height:64px;object-fit:cover;border-radius:9px;
+  background:#273143;border:1px solid var(--border)
+}
+.track-card{padding:14px}
+.track-card .member-top{margin-bottom:10px}
+.track-fields{display:grid;grid-template-columns:1fr 125px;gap:10px}
+.track-fields .field{margin:8px 0}
+.credit-group{margin-top:13px}
+.credit-heading{
+  color:var(--muted);font-size:10px;font-weight:900;
+  letter-spacing:1px;margin-bottom:7px
+}
+.credit-chips{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0}
+.credit-chip{
+  display:flex;align-items:center;gap:7px;
+  background:#ffffff0a;border:1px solid var(--border);
+  border-radius:20px;padding:5px 9px;font-size:11px
+}
+.credit-chip button{
+  border:0;background:none;color:var(--danger);padding:0;font-size:14px
+}
+.credit-add{
+  width:100%;padding:10px;border-radius:9px;
+  border:1px dashed var(--border);background:#ffffff05;
+  color:var(--accent);text-align:left;font-size:12px
+}
+.credit-search{margin-top:8px}
+.credit-search input{
+  width:100%;padding:11px;border-radius:9px;
+  background:var(--inner);border:1px solid var(--border);color:var(--text)
+}
+.album-area{
+  display:flex;align-items:center;gap:13px;
+  padding:12px;background:#ffffff06;border:1px solid var(--border);
+  border-radius:13px;margin-bottom:17px
+}
+.album-area .field{flex:1;margin:0}
 @media(max-width:550px){
   .topbar{padding:0 14px}
   main{margin:25px auto;padding:0 12px 50px}
   .editor-panel{padding:17px;border-radius:17px}
   .footer-actions>*{flex:1}
+  .track-fields{grid-template-columns:1fr 100px}
 }
 </style>
 </head>
@@ -186,9 +225,12 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
   const section=params.get("section")||"cast";
   const $=id=>document.getElementById(id);
 
-  const musicPersonFields=["music_director","composer","singer","lyricist"];
-  const musicSearchTimers={};
-  const musicSearchSequences={};
+  const creditFields={
+    music_directors:{label:"Music Director(s)",legacy:"music_director"},
+    composers:{label:"Composer(s)",legacy:"composer"},
+    singers:{label:"Singer(s)",legacy:"singer"},
+    lyricists:{label:"Lyricist(s)",legacy:"lyricist"}
+  };
 
   const definitions={
     overview:{
@@ -223,13 +265,9 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
     },
     soundtrack:{
       title:"Music & Soundtrack",type:"list",
-      help:"Add soundtrack tracks and select published People profiles for music director, composer, singer and lyricist.",
+      help:"Add songs and select multiple published People profiles for each music credit.",
       fields:[
         ["title","Song / track title","text"],
-        ["music_director","Music director","text"],
-        ["composer","Composer","text"],
-        ["singer","Singer(s)","text"],
-        ["lyricist","Lyricist","text"],
         ["duration","Duration","text"]
       ]
     },
@@ -280,8 +318,11 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
   const config=definitions[section];
   let db,article,film;
   let entries=[];
+  let albumCover="";
   let searchTimer;
   let searchSequence=0;
+  const creditTimers={};
+  const creditSequences={};
 
   function esc(value){
     return String(value??"").replace(/[&<>"']/g,c=>({
@@ -327,21 +368,26 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
     return `<div class="field"><label for="${id}">${esc(label)}</label><input id="${id}" data-field="${key}" type="${type}" value="${safe}"></div>`;
   }
 
-  function musicPersonFieldHTML(index,key,label,value){
-    const inputId=`music-${index}-${key}`;
-    const resultsId=`music-results-${index}-${key}`;
-    const selectedId=entries[index]?.[key+"_person_id"];
-    const subtitle=selectedId?"Selected from published People articles":"Search and select a published People profile";
+  function normalizeCreditPeople(entry,key){
+    if(Array.isArray(entry[key]))return entry[key];
 
-    return `
-      <div class="field">
-        <label for="${inputId}">${esc(label)} · PEOPLE SEARCH</label>
-        <input id="${inputId}" data-field="${key}" data-music-search="${key}"
-          data-music-entry="${index}" type="search" autocomplete="off"
-          placeholder="Type a person's name..." value="${esc(value||"")}">
-        <div class="search-results" id="${resultsId}"></div>
-        <div class="result-subtitle" id="music-hint-${index}-${key}">${subtitle}</div>
-      </div>`;
+    const legacy=creditFields[key].legacy;
+    const name=String(entry[legacy]||"").trim();
+
+    if(!name)return [];
+    return [{
+      name,
+      person_id:entry[legacy+"_person_id"]||"",
+      person_photo:entry[legacy+"_person_photo"]||""
+    }];
+  }
+
+  function normalizeTrack(entry){
+    const track={...entry};
+    Object.keys(creditFields).forEach(key=>{
+      track[key]=normalizeCreditPeople(track,key);
+    });
+    return track;
   }
 
   function renderObject(){
@@ -353,22 +399,66 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
     updateCount();
   }
 
-  function renderList(){
-    $("formArea").innerHTML="";
+  function renderAlbumCover(){
+    const preview=imageURL(albumCover);
+    return `
+      <div class="album-area">
+        ${preview
+          ? `<img class="album-cover-preview" id="albumPreview" src="${esc(preview)}" alt="Album cover">`
+          : `<div class="album-cover-preview" id="albumPreview"></div>`}
+        <div class="field">
+          <label for="albumCoverInput">ALBUM COVER IMAGE URL</label>
+          <input id="albumCoverInput" type="url" placeholder="https://..." value="${esc(albumCover)}">
+        </div>
+      </div>`;
+  }
+
+  function renderCreditGroup(index,key){
+    const label=creditFields[key].label;
+    const people=entries[index][key]||[];
+    const chips=people.map((person,i)=>`
+      <span class="credit-chip">
+        ${esc(person.name)}
+        <button type="button" data-credit-remove="${key}" data-track="${index}" data-person="${i}" aria-label="Remove">×</button>
+      </span>
+    `).join("");
+
+    return `
+      <div class="credit-group">
+        <div class="credit-heading">${esc(label.toUpperCase())}</div>
+        <div class="credit-chips">${chips||'<span class="result-subtitle">No people added</span>'}</div>
+        <button class="credit-add" type="button" data-credit-add="${key}" data-track="${index}">
+          + Add ${esc(label.replace(/\(s\)/,"").toLowerCase())}
+        </button>
+        <div class="credit-search" id="credit-search-${index}-${key}" hidden>
+          <input type="search" data-credit-input="${key}" data-track="${index}"
+            placeholder="Search published People..." autocomplete="off">
+          <div class="search-results" id="credit-results-${index}-${key}"></div>
+        </div>
+      </div>`;
+  }
+
+  function renderSoundtrack(){
+    $("formArea").innerHTML=renderAlbumCover();
     $("addButton").hidden=false;
 
     $("memberList").innerHTML=entries.map((entry,index)=>`
-      <article class="member-card" data-entry="${index}">
+      <article class="member-card track-card" data-entry="${index}">
         <div class="member-top">
-          <strong>Entry ${index+1}</strong>
+          <strong>Track ${String(index+1).padStart(2,"0")}</strong>
           <button class="remove-button" type="button" data-remove="${index}">Remove</button>
         </div>
-        ${config.fields.map(f=>{
-          if(section==="soundtrack"&&musicPersonFields.includes(f[0])){
-            return musicPersonFieldHTML(index,f[0],f[1],entry[f[0]]);
-          }
-          return fieldHTML(f[0],f[1],f[2],entry[f[0]],"entry-"+index);
-        }).join("")}
+        <div class="track-fields">
+          <div class="field">
+            <label>SONG / TRACK TITLE</label>
+            <input type="text" data-field="title" value="${esc(entry.title||"")}" placeholder="Song title">
+          </div>
+          <div class="field">
+            <label>DURATION</label>
+            <input type="text" data-field="duration" value="${esc(entry.duration||"")}" placeholder="3:45">
+          </div>
+        </div>
+        ${Object.keys(creditFields).map(key=>renderCreditGroup(index,key)).join("")}
       </article>
     `).join("");
 
@@ -376,37 +466,41 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
       button.addEventListener("click",()=>{
         readListFields();
         entries.splice(Number(button.dataset.remove),1);
-        renderList();
+        renderSoundtrack();
+        updateCount();
       });
     });
 
-    if(section==="soundtrack"){
-      attachMusicSearch();
-    }
+    $("memberList").querySelectorAll("[data-credit-add]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        const index=Number(button.dataset.track);
+        const key=button.dataset.creditAdd;
+        const area=$(`credit-search-${index}-${key}`);
+        area.hidden=!area.hidden;
+        if(!area.hidden)area.querySelector("input").focus();
+      });
+    });
 
-    updateCount();
-  }
+    $("memberList").querySelectorAll("[data-credit-remove]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        const index=Number(button.dataset.track);
+        const key=button.dataset.creditRemove;
+        entries[index][key].splice(Number(button.dataset.person),1);
+        renderSoundtrack();
+      });
+    });
 
-  function attachMusicSearch(){
-    $("memberList").querySelectorAll("[data-music-search]").forEach(input=>{
+    $("memberList").querySelectorAll("[data-credit-input]").forEach(input=>{
       input.addEventListener("input",()=>{
-        const index=Number(input.dataset.musicEntry);
-        const key=input.dataset.musicSearch;
+        const index=Number(input.dataset.track);
+        const key=input.dataset.creditInput;
         const query=input.value.trim();
+        const searchKey=index+"-"+key;
+        const results=$(`credit-results-${index}-${key}`);
 
-        // Typing a different name clears the previously selected profile.
-        entries[index][key]=input.value;
-        entries[index][key+"_person_id"]="";
-        entries[index][key+"_person_photo"]="";
-
-        const hint=$(`music-hint-${index}-${key}`);
-        if(hint)hint.textContent="Select a matching published People profile.";
-
-        const results=$(`music-results-${index}-${key}`);
-        clearTimeout(musicSearchTimers[index+"-"+key]);
-
-        const seq=(musicSearchSequences[index+"-"+key]||0)+1;
-        musicSearchSequences[index+"-"+key]=seq;
+        clearTimeout(creditTimers[searchKey]);
+        const seq=(creditSequences[searchKey]||0)+1;
+        creditSequences[searchKey]=seq;
 
         if(query.length<2){
           results.classList.remove("show");
@@ -417,14 +511,29 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
         results.innerHTML='<div style="padding:13px;color:var(--muted)">Searching People...</div>';
         results.classList.add("show");
 
-        musicSearchTimers[index+"-"+key]=setTimeout(()=>{
-          searchMusicPeople(index,key,query,seq);
+        creditTimers[searchKey]=setTimeout(()=>{
+          searchCreditPeople(index,key,query,seq);
         },350);
       });
     });
+
+    const coverInput=$("albumCoverInput");
+    coverInput.addEventListener("input",()=>{
+      albumCover=coverInput.value.trim();
+      const preview=$("albumPreview");
+      const url=imageURL(albumCover);
+      if(url){
+        preview.outerHTML=`<img class="album-cover-preview" id="albumPreview" src="${esc(url)}" alt="Album cover">`;
+      }else{
+        preview.outerHTML='<div class="album-cover-preview" id="albumPreview"></div>';
+      }
+    });
+
+    updateCount();
   }
 
-  async function searchMusicPeople(index,key,query,seq){
+  async function searchCreditPeople(index,key,query,seq){
+    const searchKey=index+"-"+key;
     const {data,error}=await db.from("articles")
       .select("id,title,content_blocks")
       .eq("category","People")
@@ -432,9 +541,8 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
       .ilike("title","%"+query+"%")
       .limit(10);
 
-    const results=$(`music-results-${index}-${key}`);
-    if(!results)return;
-    if(seq!==musicSearchSequences[index+"-"+key])return;
+    const results=$(`credit-results-${index}-${key}`);
+    if(!results||seq!==creditSequences[searchKey])return;
 
     if(error){
       results.innerHTML=`<div style="padding:13px;color:var(--danger)">Search failed: ${esc(error.message)}</div>`;
@@ -458,7 +566,7 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
     results.innerHTML=people.map((person,i)=>{
       const photo=imageURL(person.person_photo);
       return `
-        <button type="button" class="result-item" data-music-result="${i}">
+        <button type="button" class="result-item" data-credit-result="${i}">
           ${photo?`<img src="${esc(photo)}" alt="">`:`<span class="result-placeholder">👤</span>`}
           <span>
             <span class="result-name">${esc(person.name)}</span>
@@ -467,26 +575,51 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
         </button>`;
     }).join("");
 
-    results.querySelectorAll("[data-music-result]").forEach(button=>{
+    results.querySelectorAll("[data-credit-result]").forEach(button=>{
       button.addEventListener("click",()=>{
-        const person=people[Number(button.dataset.musicResult)];
-        const entry=entries[index];
-        if(!entry)return;
+        const person=people[Number(button.dataset.creditResult)];
+        const selected=entries[index][key]||[];
 
-        entry[key]=person.name;
-        entry[key+"_person_id"]=person.person_id;
-        entry[key+"_person_photo"]=person.person_photo||"";
+        if(selected.some(p=>p.person_id===person.person_id)){
+          results.innerHTML='<div style="padding:13px;color:var(--muted)">This person is already added.</div>';
+          return;
+        }
 
-        const input=$(`music-${index}-${key}`);
-        if(input)input.value=person.name;
-
-        const hint=$(`music-hint-${index}-${key}`);
-        if(hint)hint.textContent="✓ Selected: "+person.name;
-
-        results.classList.remove("show");
-        results.innerHTML="";
+        selected.push(person);
+        entries[index][key]=selected;
+        renderSoundtrack();
       });
     });
+  }
+
+  function renderList(){
+    if(section==="soundtrack"){
+      renderSoundtrack();
+      return;
+    }
+
+    $("formArea").innerHTML="";
+    $("addButton").hidden=false;
+
+    $("memberList").innerHTML=entries.map((entry,index)=>`
+      <article class="member-card" data-entry="${index}">
+        <div class="member-top">
+          <strong>Entry ${index+1}</strong>
+          <button class="remove-button" type="button" data-remove="${index}">Remove</button>
+        </div>
+        ${config.fields.map(f=>fieldHTML(f[0],f[1],f[2],entry[f[0]],"entry-"+index)).join("")}
+      </article>
+    `).join("");
+
+    $("memberList").querySelectorAll("[data-remove]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        readListFields();
+        entries.splice(Number(button.dataset.remove),1);
+        renderList();
+      });
+    });
+
+    updateCount();
   }
 
   function renderPeople(){
@@ -555,6 +688,10 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
         entries[index][input.dataset.field]=input.value.trim();
       });
     });
+
+    if(section==="soundtrack"){
+      albumCover=$("albumCoverInput")?.value.trim()||albumCover;
+    }
   }
 
   function readPeopleFields(){
@@ -625,14 +762,13 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
       config.fields.forEach(f=>blank[f[0]]="");
 
       if(section==="soundtrack"){
-        musicPersonFields.forEach(key=>{
-          blank[key+"_person_id"]="";
-          blank[key+"_person_photo"]="";
-        });
+        Object.keys(creditFields).forEach(key=>blank[key]=[]);
+        blank.album_cover=albumCover;
       }
 
       entries.push(blank);
-      renderList();
+      if(section==="soundtrack")renderSoundtrack();
+      else renderList();
     }
   });
 
@@ -666,19 +802,31 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
       proposed=entries;
 
       if(section==="soundtrack"){
-        const missingProfile=proposed.some(entry=>
-          musicPersonFields.some(key=>
-            String(entry[key]||"").trim()&&!entry[key+"_person_id"]
-          )
-        );
-
-        if(missingProfile){
-          status.textContent="Please select a matching published People profile for every music credit you have entered.";
+        if(proposed.some(entry=>!String(entry.title||"").trim())){
+          status.textContent="Please enter a title for every track.";
           status.classList.add("error");return;
         }
+
+        proposed=proposed.map(entry=>{
+          const track={...entry,album_cover:albumCover};
+
+          Object.keys(creditFields).forEach(key=>{
+            const people=Array.isArray(track[key])?track[key]:[];
+            const legacy=creditFields[key].legacy;
+
+            // Keep the original single-person fields for older page versions.
+            track[legacy]=people.map(p=>p.name).join(", ");
+            track[legacy+"_person_id"]=people[0]?.person_id||"";
+            track[legacy+"_person_photo"]=people[0]?.person_photo||"";
+          });
+
+          return track;
+        });
       }
 
-      if(proposed.some(entry=>config.fields.some(f=>!String(entry[f[0]]||"").trim()))){
+      if(section!=="soundtrack"&&proposed.some(entry=>
+        config.fields.some(f=>!String(entry[f[0]]||"").trim())
+      )){
         status.textContent="Please complete all required fields in each entry.";
         status.classList.add("error");return;
       }
@@ -743,6 +891,11 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
       entries=[section==="overview" ? {...film} : {...(film[section]||{})}];
     }else{
       entries=Array.isArray(film[section])?film[section].map(x=>({...x})):[];
+    }
+
+    if(section==="soundtrack"){
+      albumCover=film.soundtrack_cover||entries.find(x=>x.album_cover)?.album_cover||"";
+      entries=entries.map(normalizeTrack);
     }
 
     $("loading").hidden=true;
