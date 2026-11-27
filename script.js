@@ -32,20 +32,22 @@
       "'": "&#39;"
     }[c]));
 
-  const articleURL = article =>
-    `article.html?id=${encodeURIComponent(article.id)}`;
-
   const categoryOf = article =>
     String(article.category || "").trim().toLowerCase();
 
   const isPerson = article =>
-    categoryOf(article) === "people" ||
-    categoryOf(article) === "person";
+    ["people", "person"].includes(categoryOf(article));
 
   const isFilmOrSeries = article =>
     ["film", "films", "series", "tv series"].includes(
       categoryOf(article)
     );
+
+  // Direct links to dedicated pages.
+  const articleURL = article => {
+    const page = isPerson(article) ? "person.html" : "film.html";
+    return `${page}?id=${encodeURIComponent(article.id)}`;
+  };
 
   const formatDate = date => {
     if (!date) return "";
@@ -60,6 +62,63 @@
       year: "numeric"
     });
   };
+
+  // =====================================
+  // CONTENT BLOCK HELPERS
+  // =====================================
+
+  function findContentValue(value, wantedKeys) {
+    if (!value) return "";
+
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const result = findContentValue(item, wantedKeys);
+        if (result) return result;
+      }
+      return "";
+    }
+
+    if (typeof value !== "object") return "";
+
+    for (const [key, item] of Object.entries(value)) {
+      if (
+        wantedKeys.includes(key.toLowerCase()) &&
+        typeof item === "string" &&
+        item.trim()
+      ) {
+        return item.trim();
+      }
+    }
+
+    for (const item of Object.values(value)) {
+      if (item && typeof item === "object") {
+        const result = findContentValue(item, wantedKeys);
+        if (result) return result;
+      }
+    }
+
+    return "";
+  }
+
+  function getPoster(article) {
+    return findContentValue(
+      article.content_blocks,
+      ["poster_url", "poster"]
+    );
+  }
+
+  function getOccupation(article) {
+    return findContentValue(
+      article.content_blocks,
+      ["occupation", "profession", "primary_role", "designation"]
+    );
+  }
+
+  function isActor(article) {
+    const occupation = getOccupation(article).toLowerCase();
+
+    return /\b(actor|actress|performer)\b/.test(occupation);
+  }
 
   // =====================================
   // DYNAMIC ACCENT COLOURS
@@ -82,15 +141,8 @@
         Math.floor(Math.random() * accentColours.length)
       ];
 
-    document.documentElement.style.setProperty(
-      "--accent",
-      colour
-    );
-
-    document.documentElement.style.setProperty(
-      "--accent-soft",
-      `${colour}22`
-    );
+    document.documentElement.style.setProperty("--accent", colour);
+    document.documentElement.style.setProperty("--accent-soft", `${colour}22`);
   }
 
   randomiseAccent();
@@ -105,7 +157,6 @@
   if (menuBtn && menuPanel) {
     menuBtn.addEventListener("click", () => {
       const isOpen = menuPanel.classList.toggle("active");
-
       menuBtn.setAttribute("aria-expanded", String(isOpen));
     });
 
@@ -144,24 +195,18 @@
   }
 
   function closeSearchPanel() {
-    if (!searchPanel) return;
-
-    searchPanel.classList.remove("active");
+    searchPanel?.classList.remove("active");
   }
 
-  if (searchBtn) {
-    searchBtn.addEventListener("click", () => {
-      if (searchPanel?.classList.contains("active")) {
-        closeSearchPanel();
-      } else {
-        openSearch();
-      }
-    });
-  }
+  searchBtn?.addEventListener("click", () => {
+    if (searchPanel?.classList.contains("active")) {
+      closeSearchPanel();
+    } else {
+      openSearch();
+    }
+  });
 
-  if (closeSearch) {
-    closeSearch.addEventListener("click", closeSearchPanel);
-  }
+  closeSearch?.addEventListener("click", closeSearchPanel);
 
   function searchCategoryLabel(article) {
     if (isPerson(article)) return "PERSON";
@@ -169,7 +214,6 @@
     const category = categoryOf(article);
 
     if (category.includes("series")) return "SERIES";
-
     if (category.includes("film")) return "FILM";
 
     return String(article.category || "ARTICLE").toUpperCase();
@@ -198,19 +242,17 @@
       return;
     }
 
-    const matches = allArticles
-      .filter(article => {
-        const title = String(article.title || "").toLowerCase();
-        const summary = String(article.summary || "").toLowerCase();
-        const category = String(article.category || "").toLowerCase();
+    const matches = allArticles.filter(article => {
+      const title = String(article.title || "").toLowerCase();
+      const summary = String(article.summary || "").toLowerCase();
+      const category = String(article.category || "").toLowerCase();
 
-        return (
-          title.includes(normalized) ||
-          summary.includes(normalized) ||
-          category.includes(normalized)
-        );
-      })
-      .slice(0, 12);
+      return (
+        title.includes(normalized) ||
+        summary.includes(normalized) ||
+        category.includes(normalized)
+      );
+    }).slice(0, 12);
 
     if (!matches.length) {
       searchResults.innerHTML = `
@@ -228,73 +270,75 @@
       </p>
 
       <div class="search-result-list">
-        ${matches.map(article => `
-          <a class="search-result" href="${articleURL(article)}">
-            <span class="search-result-icon">
-              ${isPerson(article) ? "P" : "K"}
-            </span>
+        ${matches.map(article => {
+          const poster = isFilmOrSeries(article) ? getPoster(article) : "";
 
-            <span class="search-result-main">
-              <strong>${esc(article.title)}</strong>
-              <small>
-                ${esc(searchCategoryLabel(article))}
-                ${article.summary ? " · " + esc(article.summary) : ""}
-              </small>
-            </span>
+          return `
+            <a class="search-result" href="${articleURL(article)}">
+              <span class="search-result-icon">
+                ${poster
+                  ? `<img src="${esc(poster)}" alt="" loading="lazy">`
+                  : isPerson(article) ? "P" : "K"}
+              </span>
 
-            <span class="search-result-arrow">↗</span>
-          </a>
-        `).join("")}
+              <span class="search-result-main">
+                <strong>${esc(article.title)}</strong>
+                <small>
+                  ${esc(searchCategoryLabel(article))}
+                  ${article.summary ? " · " + esc(article.summary) : ""}
+                </small>
+              </span>
+
+              <span class="search-result-arrow">↗</span>
+            </a>
+          `;
+        }).join("")}
       </div>
     `;
   }
 
-  if (searchInput) {
-    searchInput.addEventListener("input", () => {
-      clearTimeout(searchTimer);
+  searchInput?.addEventListener("input", () => {
+    clearTimeout(searchTimer);
 
-      searchTimer = setTimeout(() => {
-        renderSearchResults(searchInput.value);
-      }, 150);
-    });
+    searchTimer = setTimeout(() => {
+      renderSearchResults(searchInput.value);
+    }, 150);
+  });
 
-    searchInput.addEventListener("keydown", event => {
-      if (event.key === "Escape") {
-        closeSearchPanel();
-      }
-    });
-  }
+  searchInput?.addEventListener("keydown", event => {
+    if (event.key === "Escape") closeSearchPanel();
+  });
 
   // =====================================
   // ARTICLE CARD HELPERS
   // =====================================
 
   function articleCard(article, type = "film") {
-    const label = isPerson(article)
-      ? "PERSON"
-      : searchCategoryLabel(article);
-
-    const summary = article.summary
-      ? esc(article.summary)
-      : "Explore this article on KINORA.";
+    const label = searchCategoryLabel(article);
+    const poster = getPoster(article);
 
     return `
       <a class="archive-card ${type}-archive-card"
          href="${articleURL(article)}">
 
-        <div class="archive-card-art">
-          <span class="archive-card-monogram">
-            ${esc((article.title || "K").trim().charAt(0).toUpperCase())}
-          </span>
+        <div class="archive-card-art"
+          ${poster
+            ? `style="background-image:url('${esc(poster)}');background-size:cover;background-position:center"`
+            : ""}>
+
+          ${poster
+            ? ""
+            : `<span class="archive-card-monogram">
+                ${esc((article.title || "K").trim().charAt(0).toUpperCase())}
+              </span>`}
 
           <span class="archive-card-type">${esc(label)}</span>
-
           <span class="archive-card-open">↗</span>
         </div>
 
         <div class="archive-card-info">
           <h3>${esc(article.title)}</h3>
-          <p>${summary}</p>
+          <p>${esc(article.summary || "Explore this article on KINORA.")}</p>
           <span class="archive-card-date">
             ${esc(formatDate(article.created_at))}
           </span>
@@ -325,9 +369,7 @@
           <div class="featured-content">
             <span class="featured-tag">KINORA ARCHIVE</span>
             <h2>Every story deserves to be discovered.</h2>
-            <p>
-              Published films and series will be featured here.
-            </p>
+            <p>Published films and series will be featured here.</p>
           </div>
         </div>
       `;
@@ -336,40 +378,40 @@
       return;
     }
 
-    featuredTrack.innerHTML = featuredItems.map((item, index) => `
-      <article class="featured-slide featured-dynamic"
-        style="--slide-index:${index}">
+    featuredTrack.innerHTML = featuredItems.map((item, index) => {
+      const poster = getPoster(item);
 
-        <div class="featured-slide-glow"></div>
+      return `
+        <article class="featured-slide featured-dynamic"
+          style="--slide-index:${index};
+          ${poster ? `background-image:linear-gradient(90deg,rgba(0,0,0,.92),rgba(0,0,0,.35)),url('${esc(poster)}');background-size:cover;background-position:center;` : ""}">
 
-        <div class="featured-content">
-          <span class="featured-tag">
-            ${esc(searchCategoryLabel(item))}
-          </span>
+          <div class="featured-slide-glow"></div>
 
-          <p class="featured-kicker">DISCOVER ON KINORA</p>
+          <div class="featured-content">
+            <span class="featured-tag">${esc(searchCategoryLabel(item))}</span>
+            <p class="featured-kicker">DISCOVER ON KINORA</p>
+            <h2>${esc(item.title)}</h2>
 
-          <h2>${esc(item.title)}</h2>
+            <div class="featured-meta">
+              ${esc(formatDate(item.created_at))}
+            </div>
 
-          <div class="featured-meta">
-            ${esc(formatDate(item.created_at))}
+            <p>
+              ${esc(item.summary || "Discover the story and the people behind this production.")}
+            </p>
+
+            <a href="${articleURL(item)}" class="featured-link">
+              EXPLORE FILM <span>↗</span>
+            </a>
           </div>
 
-          <p>
-            ${esc(item.summary || "Discover the story and the people behind this production.")}
-          </p>
-
-          <a href="${articleURL(item)}" class="featured-link">
-            EXPLORE ARTICLE <span>↗</span>
-          </a>
-        </div>
-
-        <div class="featured-number" aria-hidden="true">
-          ${String(index + 1).padStart(2, "0")}
-        </div>
-
-      </article>
-    `).join("");
+          <div class="featured-number" aria-hidden="true">
+            ${String(index + 1).padStart(2, "0")}
+          </div>
+        </article>
+      `;
+    }).join("");
 
     indicators.innerHTML = featuredItems.map((item, index) => `
       <button class="carousel-dot"
@@ -392,24 +434,14 @@
   function showSlide(index) {
     if (!featuredItems.length || !featuredTrack) return;
 
-    currentSlide =
-      (index + featuredItems.length) % featuredItems.length;
+    currentSlide = (index + featuredItems.length) % featuredItems.length;
 
     featuredTrack.style.transform =
       `translateX(-${currentSlide * 100}%)`;
 
-    indicators?.querySelectorAll(".carousel-dot")
-      .forEach((dot, i) => {
-        dot.classList.toggle("active", i === currentSlide);
-      });
-  }
-
-  function nextSlide() {
-    showSlide(currentSlide + 1);
-  }
-
-  function previousSlide() {
-    showSlide(currentSlide - 1);
+    indicators?.querySelectorAll(".carousel-dot").forEach((dot, i) => {
+      dot.classList.toggle("active", i === currentSlide);
+    });
   }
 
   function stopCarousel() {
@@ -424,7 +456,9 @@
 
     if (featuredItems.length < 2) return;
 
-    carouselTimer = setInterval(nextSlide, 6500);
+    carouselTimer = setInterval(() => {
+      showSlide(currentSlide + 1);
+    }, 6500);
   }
 
   function restartCarousel() {
@@ -432,12 +466,12 @@
   }
 
   $("nextFeatured")?.addEventListener("click", () => {
-    nextSlide();
+    showSlide(currentSlide + 1);
     restartCarousel();
   });
 
   $("prevFeatured")?.addEventListener("click", () => {
-    previousSlide();
+    showSlide(currentSlide - 1);
     restartCarousel();
   });
 
@@ -454,18 +488,17 @@
     }, { passive: true });
 
     carousel.addEventListener("touchend", event => {
-      const difference =
-        touchStartX - event.changedTouches[0].screenX;
+      const difference = touchStartX - event.changedTouches[0].screenX;
 
       if (Math.abs(difference) > 50) {
-        difference > 0 ? nextSlide() : previousSlide();
+        showSlide(currentSlide + (difference > 0 ? 1 : -1));
         restartCarousel();
       }
     }, { passive: true });
   }
 
   // =====================================
-  // HOMEPAGE ARTICLE SECTIONS
+  // FILM & PEOPLE SECTIONS
   // =====================================
 
   function renderFilmList(articles) {
@@ -502,7 +535,6 @@
 
     target.innerHTML = articles.slice(0, 8).map(person => `
       <a class="person-card" href="${articleURL(person)}">
-
         <div class="person-avatar">
           ${esc((person.title || "K").trim().charAt(0).toUpperCase())}
         </div>
@@ -510,50 +542,144 @@
         <div class="person-card-info">
           <span>PEOPLE OF KINORA</span>
           <h3>${esc(person.title)}</h3>
-          <p>
-            ${esc(person.summary || "Explore this profile and discover their work.")}
-          </p>
+          <p>${esc(person.summary || "Explore this profile and discover their work.")}</p>
         </div>
 
         <span class="person-arrow">↗</span>
-
       </a>
     `).join("");
   }
 
-  function renderRecent(articles) {
-    const target = $("recentList");
+  // =====================================
+  // WEEKLY TOP FILMS & ACTORS
+  // =====================================
+
+  function renderWeeklyEmpty(target, message) {
     if (!target) return;
 
-    if (!articles.length) {
-      target.innerHTML = `
-        <div class="empty-state">
-          New additions will appear here.
-        </div>
-      `;
+    target.innerHTML = `
+      <div class="empty-state">${esc(message)}</div>
+    `;
+  }
+
+  function renderWeeklyFilms(articles, views) {
+    const target = $("topFilmsWeekList");
+    if (!target) return;
+
+    const ranked = articles
+      .filter(isFilmOrSeries)
+      .map(article => ({
+        ...article,
+        weeklyViews: views[article.id] || 0
+      }))
+      .filter(article => article.weeklyViews > 0)
+      .sort((a, b) => b.weeklyViews - a.weeklyViews)
+      .slice(0, 8);
+
+    if (!ranked.length) {
+      renderWeeklyEmpty(target, "Film rankings will appear here as views are recorded.");
       return;
     }
 
-    target.innerHTML = articles.slice(0, 8).map(article => `
-      <a class="recent-card" href="${articleURL(article)}">
-
-        <div class="recent-card-top">
-          <span>${esc(searchCategoryLabel(article))}</span>
-          <span>↗</span>
+    target.innerHTML = ranked.map((article, index) => `
+      <a class="archive-card weekly-card" href="${articleURL(article)}">
+        <div class="archive-card-art"
+          ${getPoster(article)
+            ? `style="background-image:url('${esc(getPoster(article))}');background-size:cover;background-position:center"`
+            : ""}>
+          ${getPoster(article)
+            ? ""
+            : `<span class="archive-card-monogram">${index + 1}</span>`}
+          <span class="archive-card-type">#${index + 1}</span>
         </div>
 
-        <h3>${esc(article.title)}</h3>
-
-        <p>
-          ${esc(article.summary || "Explore this article on KINORA.")}
-        </p>
-
-        <div class="recent-card-date">
-          ${esc(formatDate(article.created_at))}
+        <div class="archive-card-info">
+          <h3>${esc(article.title)}</h3>
+          <p>${article.weeklyViews.toLocaleString()} views this week</p>
         </div>
-
       </a>
     `).join("");
+  }
+
+  function renderWeeklyActors(articles, views) {
+    const target = $("topActorsWeekList");
+    if (!target) return;
+
+    const ranked = articles
+      .filter(person => isPerson(person) && isActor(person))
+      .map(person => ({
+        ...person,
+        weeklyViews: views[person.id] || 0
+      }))
+      .filter(person => person.weeklyViews > 0)
+      .sort((a, b) => b.weeklyViews - a.weeklyViews)
+      .slice(0, 8);
+
+    if (!ranked.length) {
+      renderWeeklyEmpty(
+        target,
+        "Actor rankings will appear here as profile views are recorded."
+      );
+      return;
+    }
+
+    target.innerHTML = ranked.map((person, index) => `
+      <a class="person-card weekly-person-card" href="${articleURL(person)}">
+        <div class="person-avatar">
+          ${esc((person.title || "K").trim().charAt(0).toUpperCase())}
+        </div>
+
+        <div class="person-card-info">
+          <span>#${index + 1} · ${views[person.id].toLocaleString()} WEEKLY VIEWS</span>
+          <h3>${esc(person.title)}</h3>
+          <p>${esc(getOccupation(person) || "Actor")}</p>
+        </div>
+
+        <span class="person-arrow">↗</span>
+      </a>
+    `).join("");
+  }
+
+  async function loadWeeklyRankings() {
+    const filmTarget = $("topFilmsWeekList");
+    const actorTarget = $("topActorsWeekList");
+
+    if (!filmTarget && !actorTarget) return;
+
+    if (!db) {
+      renderWeeklyEmpty(filmTarget, "Weekly rankings are currently unavailable.");
+      renderWeeklyEmpty(actorTarget, "Weekly rankings are currently unavailable.");
+      return;
+    }
+
+    const { data, error } = await db
+      .from("weekly_article_views")
+      .select("article_id,category,views");
+
+    if (error) {
+      console.warn("KINORA weekly rankings:", error);
+
+      renderWeeklyEmpty(
+        filmTarget,
+        "Weekly rankings will appear once page-view tracking is configured."
+      );
+
+      renderWeeklyEmpty(
+        actorTarget,
+        "Weekly rankings will appear once page-view tracking is configured."
+      );
+
+      return;
+    }
+
+    const views = {};
+
+    (data || []).forEach(row => {
+      views[row.article_id] = Number(row.views || 0);
+    });
+
+    renderWeeklyFilms(allArticles, views);
+    renderWeeklyActors(allArticles, views);
   }
 
   // =====================================
@@ -564,8 +690,9 @@
     const targets = [
       "filmList",
       "peopleList",
-      "recentList",
-      "featuredTrack"
+      "featuredTrack",
+      "topFilmsWeekList",
+      "topActorsWeekList"
     ];
 
     if (!db) {
@@ -586,7 +713,7 @@
 
     const { data, error } = await db
       .from("articles")
-      .select("id,title,summary,category,created_at")
+      .select("id,title,summary,category,created_at,content_blocks")
       .eq("status", "published")
       .order("created_at", { ascending: false })
       .limit(1000);
@@ -619,13 +746,12 @@
     renderFeatured();
     renderFilmList(films);
     renderPeople(people);
-    renderRecent(allArticles);
 
-    // If a visitor already typed while the archive was loading,
-    // refresh the results once the data arrives.
     if (searchInput?.value.trim()) {
       renderSearchResults(searchInput.value);
     }
+
+    await loadWeeklyRankings();
   }
 
   // =====================================
@@ -665,7 +791,6 @@
   document.addEventListener("keydown", event => {
     if (event.key === "Escape") {
       closeSearchPanel();
-
       menuPanel?.classList.remove("active");
       menuBtn?.setAttribute("aria-expanded", "false");
     }
