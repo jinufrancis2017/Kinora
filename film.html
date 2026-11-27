@@ -12,7 +12,7 @@
 <script src="config.js"></script>
 
 <style>
-:root {
+:root{
   --film-accent:var(--accent,#8b7cff);
   --film-bg:#0b0d12;
   --film-panel:#131720;
@@ -20,424 +20,99 @@
   --film-text:#edf1f7;
   --film-muted:#929bad;
 }
-
 *{box-sizing:border-box}
-
-body{
-  margin:0;
-  background:var(--film-bg);
-  color:var(--film-text);
-  font-family:inherit;
-}
-
+body{margin:0;background:var(--film-bg);color:var(--film-text);font-family:inherit}
 button{font:inherit;cursor:pointer}
 
 .film-topbar{
-  min-height:65px;
-  padding:0 22px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  border-bottom:1px solid var(--film-border);
-  background:#10141c;
-  position:sticky;
-  top:0;
-  z-index:10;
+  min-height:65px;padding:0 22px;display:flex;align-items:center;
+  justify-content:space-between;border-bottom:1px solid var(--film-border);
+  background:#10141c;position:sticky;top:0;z-index:10
 }
-
-.film-brand{
-  color:var(--film-text);
-  text-decoration:none;
-  font-size:21px;
-  font-weight:800;
-  letter-spacing:2px;
-}
-
+.film-brand{color:var(--film-text);text-decoration:none;font-size:21px;font-weight:800;letter-spacing:2px}
 .film-brand span{color:var(--film-accent)}
-
-.film-nav{
-  display:flex;
-  align-items:center;
-  gap:17px;
-}
-
-.film-nav a{
-  color:var(--film-muted);
-  text-decoration:none;
-  font-size:13px;
-}
-
+.film-nav{display:flex;align-items:center;gap:17px}
+.film-nav a{color:var(--film-muted);text-decoration:none;font-size:13px}
 .film-nav a:hover{color:var(--film-text)}
 
-.film-main{
-  width:min(1150px,100%);
-  margin:auto;
-  padding:25px 20px 70px;
-}
-
-.film-breadcrumb{
-  color:var(--film-muted);
-  font-size:12px;
-  margin-bottom:22px;
-}
-
-.film-breadcrumb a{
-  color:var(--film-muted);
-  text-decoration:none;
-}
-
-.film-heading{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:15px;
-  margin-bottom:20px;
-}
-
-.film-heading h1{
-  font-size:clamp(25px,5vw,37px);
-  line-height:1.15;
-  margin:0;
-  overflow-wrap:anywhere;
-}
-
-.film-year{
-  color:var(--film-muted);
-  font-size:14px;
-  margin-top:7px;
-}
-
+.film-main{width:min(1150px,100%);margin:auto;padding:25px 20px 70px}
+.film-breadcrumb{color:var(--film-muted);font-size:12px;margin-bottom:22px}
+.film-breadcrumb a{color:var(--film-muted);text-decoration:none}
+.film-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:20px}
+.film-heading h1{font-size:clamp(25px,5vw,37px);line-height:1.15;margin:0;overflow-wrap:anywhere}
+.film-year{color:var(--film-muted);font-size:14px;margin-top:7px}
 .film-info-button{
-  width:39px;
-  height:39px;
-  flex-shrink:0;
-  border-radius:50%;
-  border:1px solid var(--film-border);
-  background:var(--film-panel);
-  color:var(--film-text);
-  font-size:21px;
+  width:39px;height:39px;flex-shrink:0;border-radius:50%;
+  border:1px solid var(--film-border);background:var(--film-panel);
+  color:var(--film-text);font-size:21px
 }
-
 .film-hero{
-  display:grid;
-  grid-template-columns:230px minmax(0,1fr);
-  gap:27px;
-  align-items:start;
-  padding:20px;
-  background:var(--film-panel);
-  border:1px solid var(--film-border);
-  border-radius:15px;
+  display:grid;grid-template-columns:230px minmax(0,1fr);gap:27px;
+  align-items:start;padding:20px;background:var(--film-panel);
+  border:1px solid var(--film-border);border-radius:15px
 }
-
-.film-poster{
-  width:100%;
-  aspect-ratio:2/3;
-  object-fit:cover;
-  border-radius:10px;
-  background:#202633;
-  border:1px solid var(--film-border);
-}
-
+.film-poster{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:10px;background:#202633;border:1px solid var(--film-border)}
 .film-poster-placeholder{
-  aspect-ratio:2/3;
-  display:grid;
-  place-items:center;
-  background:#202633;
-  border-radius:10px;
-  color:var(--film-muted);
-  text-align:center;
-  padding:15px;
+  aspect-ratio:2/3;display:grid;place-items:center;background:#202633;
+  border-radius:10px;color:var(--film-muted);text-align:center;padding:15px
 }
+.film-facts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:17px}
+.film-chip{background:#202633;color:#c7cede;border:1px solid var(--film-border);padding:6px 10px;border-radius:20px;font-size:11px}
+.film-plot-title{font-size:15px;margin:0 0 9px}
+.film-plot{color:#c5ccd8;font-size:14px;line-height:1.8;white-space:pre-wrap}
 
-.film-facts{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-bottom:17px;
+.film-section{margin-top:30px}
+.film-section-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.film-section-heading h2{font-size:19px;margin:0}
+.film-section-heading h3{font-size:16px;margin:0}
+.film-edit-button{
+  border:1px solid var(--film-border);background:#202633;color:var(--film-text);
+  border-radius:8px;padding:7px 10px;font-size:11px;white-space:nowrap
 }
+.film-edit-button:hover{border-color:var(--film-accent);color:var(--film-accent)}
 
-.film-chip{
-  background:#202633;
-  color:#c7cede;
-  border:1px solid var(--film-border);
-  padding:6px 10px;
-  border-radius:20px;
-  font-size:11px;
-}
+.film-scroll{display:flex;gap:14px;overflow-x:auto;padding:2px 2px 13px;scroll-snap-type:x mandatory;scrollbar-width:thin}
+.film-person-card{flex:0 0 145px;scroll-snap-align:start;min-width:0}
+.film-person-photo{width:100%;height:170px;object-fit:cover;border-radius:10px;background:#202633;border:1px solid var(--film-border)}
+.film-person-placeholder{width:100%;height:170px;border-radius:10px;background:#202633;display:grid;place-items:center;color:var(--film-muted);font-size:30px}
+.film-person-name{display:block;color:var(--film-text);font-size:13px;font-weight:700;line-height:1.4;margin-top:9px;text-decoration:none;overflow-wrap:anywhere}
+.film-person-role{display:block;color:var(--film-muted);font-size:11px;margin-top:4px;line-height:1.5}
 
-.film-plot-title{
-  font-size:15px;
-  margin:0 0 9px;
-}
-
-.film-plot{
-  color:#c5ccd8;
-  font-size:14px;
-  line-height:1.8;
-  white-space:pre-wrap;
-}
-
-.film-section{
-  margin-top:30px;
-}
-
-.film-section-heading{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:14px;
-}
-
-.film-section-heading h2{
-  font-size:19px;
-  margin:0;
-}
-
-.film-scroll{
-  display:flex;
-  gap:14px;
-  overflow-x:auto;
-  padding:2px 2px 13px;
-  scroll-snap-type:x mandatory;
-  scrollbar-width:thin;
-}
-
-.film-person-card{
-  flex:0 0 145px;
-  scroll-snap-align:start;
-  min-width:0;
-}
-
-.film-person-photo{
-  width:100%;
-  height:170px;
-  object-fit:cover;
-  border-radius:10px;
-  background:#202633;
-  border:1px solid var(--film-border);
-}
-
-.film-person-placeholder{
-  width:100%;
-  height:170px;
-  border-radius:10px;
-  background:#202633;
-  display:grid;
-  place-items:center;
-  color:var(--film-muted);
-  font-size:30px;
-}
-
-.film-person-name{
-  display:block;
-  color:var(--film-text);
-  font-size:13px;
-  font-weight:700;
-  line-height:1.4;
-  margin-top:9px;
-  text-decoration:none;
-  overflow-wrap:anywhere;
-}
-
-.film-person-role{
-  display:block;
-  color:var(--film-muted);
-  font-size:11px;
-  margin-top:4px;
-  line-height:1.5;
-}
-
-.film-data-panel{
-  background:var(--film-panel);
-  border:1px solid var(--film-border);
-  border-radius:12px;
-  overflow:hidden;
-}
-
-.film-data-row{
-  padding:14px 16px;
-  display:flex;
-  justify-content:space-between;
-  gap:20px;
-  border-bottom:1px solid var(--film-border);
-  font-size:13px;
-}
-
+.film-data-panel{background:var(--film-panel);border:1px solid var(--film-border);border-radius:12px;overflow:hidden}
+.film-data-row{padding:14px 16px;display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid var(--film-border);font-size:13px}
 .film-data-row:last-child{border-bottom:0}
-
 .film-data-label{color:var(--film-muted)}
 .film-data-value{text-align:right;overflow-wrap:anywhere}
 
-.film-tabs{
-  display:flex;
-  gap:7px;
-  overflow-x:auto;
-  padding-bottom:10px;
-  margin-top:35px;
-  border-bottom:1px solid var(--film-border);
-  scrollbar-width:thin;
-}
-
-.film-tab{
-  flex-shrink:0;
-  padding:11px 14px;
-  background:transparent;
-  color:var(--film-muted);
-  border:0;
-  border-bottom:2px solid transparent;
-  font-size:13px;
-}
-
-.film-tab.active{
-  color:var(--film-text);
-  border-bottom-color:var(--film-accent);
-}
-
+.film-tabs{display:flex;gap:7px;overflow-x:auto;padding-bottom:10px;margin-top:35px;border-bottom:1px solid var(--film-border);scrollbar-width:thin}
+.film-tab{flex-shrink:0;padding:11px 14px;background:transparent;color:var(--film-muted);border:0;border-bottom:2px solid transparent;font-size:13px}
+.film-tab.active{color:var(--film-text);border-bottom-color:var(--film-accent)}
 .film-tab-content{padding-top:20px}
 .film-tab-content[hidden]{display:none}
 
-.film-list{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-.film-list-item{
-  display:flex;
-  align-items:center;
-  gap:13px;
-  padding:12px;
-  border-radius:11px;
-  background:var(--film-panel);
-  border:1px solid var(--film-border);
-}
-
-.film-list-item img{
-  width:52px;
-  height:65px;
-  border-radius:7px;
-  object-fit:cover;
-  background:#202633;
-}
-
-.film-list-icon{
-  width:43px;
-  height:43px;
-  flex-shrink:0;
-  display:grid;
-  place-items:center;
-  border-radius:50%;
-  background:#202633;
-  font-size:20px;
-}
-
-.film-list-item strong{
-  font-size:13px;
-  display:block;
-}
-
-.film-list-item small{
-  color:var(--film-muted);
-  display:block;
-  margin-top:5px;
-  font-size:11px;
-}
-
-.film-award{
-  background:var(--film-panel);
-  border:1px solid var(--film-border);
-  border-radius:11px;
-  padding:15px;
-}
-
+.film-list{display:flex;flex-direction:column;gap:10px}
+.film-list-item{display:flex;align-items:center;gap:13px;padding:12px;border-radius:11px;background:var(--film-panel);border:1px solid var(--film-border)}
+.film-list-item img{width:52px;height:65px;border-radius:7px;object-fit:cover;background:#202633}
+.film-list-icon{width:43px;height:43px;flex-shrink:0;display:grid;place-items:center;border-radius:50%;background:#202633;font-size:20px}
+.film-list-item strong{font-size:13px;display:block}
+.film-list-item small{color:var(--film-muted);display:block;margin-top:5px;font-size:11px}
+.film-award{background:var(--film-panel);border:1px solid var(--film-border);border-radius:11px;padding:15px}
 .film-award strong{font-size:14px}
-.film-award p{
-  color:var(--film-muted);
-  font-size:12px;
-  line-height:1.6;
-  margin:7px 0 0;
-}
+.film-award p{color:var(--film-muted);font-size:12px;line-height:1.6;margin:7px 0 0}
+.film-empty{color:var(--film-muted);background:var(--film-panel);border:1px dashed var(--film-border);border-radius:11px;padding:22px;font-size:13px;text-align:center}
+.film-article-body{color:#cbd2df;line-height:1.85;font-size:14px;overflow-wrap:anywhere}
+.film-article-body h2,.film-article-body h3{color:var(--film-text)}
+.film-article-body a{color:var(--film-accent)}
+.film-article-body img{max-width:100%;height:auto}
 
-.film-empty{
-  color:var(--film-muted);
-  background:var(--film-panel);
-  border:1px dashed var(--film-border);
-  border-radius:11px;
-  padding:22px;
-  font-size:13px;
-  text-align:center;
-}
-
-.film-article-body{
-  color:#cbd2df;
-  line-height:1.85;
-  font-size:14px;
-  overflow-wrap:anywhere;
-}
-
-.film-article-body h2,
-.film-article-body h3{color:var(--film-text)}
-
-.film-article-body a{
-  color:var(--film-accent);
-}
-
-.film-article-body img{
-  max-width:100%;
-  height:auto;
-}
-
-.film-info-backdrop{
-  display:none;
-  position:fixed;
-  inset:0;
-  z-index:30;
-  background:#000b;
-  align-items:center;
-  justify-content:center;
-  padding:18px;
-}
-
+.film-info-backdrop{display:none;position:fixed;inset:0;z-index:30;background:#000b;align-items:center;justify-content:center;padding:18px}
 .film-info-backdrop.open{display:flex}
-
-.film-info-modal{
-  width:min(440px,100%);
-  background:var(--film-panel);
-  border:1px solid var(--film-border);
-  border-radius:15px;
-  padding:21px;
-  max-height:85vh;
-  overflow-y:auto;
-}
-
-.film-info-modal h2{
-  margin:0 0 17px;
-  font-size:19px;
-}
-
-.film-info-close{
-  float:right;
-  background:transparent;
-  border:0;
-  color:var(--film-muted);
-  font-size:22px;
-}
-
-.film-loading,.film-error{
-  text-align:center;
-  padding:65px 15px;
-  color:var(--film-muted);
-}
-
+.film-info-modal{width:min(440px,100%);background:var(--film-panel);border:1px solid var(--film-border);border-radius:15px;padding:21px;max-height:85vh;overflow-y:auto}
+.film-info-modal h2{margin:0 0 17px;font-size:19px}
+.film-info-close{float:right;background:transparent;border:0;color:var(--film-muted);font-size:22px}
+.film-loading,.film-error{text-align:center;padding:65px 15px;color:var(--film-muted)}
 .film-error{color:#ff8997}
-
-.film-footer{
-  color:var(--film-muted);
-  font-size:11px;
-  text-align:center;
-  padding:35px 10px 0;
-}
+.film-footer{color:var(--film-muted);font-size:11px;text-align:center;padding:35px 10px 0}
 
 @media(max-width:650px){
   .film-topbar{padding:0 14px}
@@ -445,110 +120,14 @@ button{font:inherit;cursor:pointer}
   .film-nav{gap:11px}
   .film-nav a{font-size:12px}
   .film-main{padding:20px 13px 50px}
-  .film-hero{
-    grid-template-columns:115px minmax(0,1fr);
-    gap:15px;
-    padding:13px;
-  }
+  .film-hero{grid-template-columns:115px minmax(0,1fr);gap:15px;padding:13px}
   .film-person-card{flex-basis:120px}
   .film-person-photo,.film-person-placeholder{height:145px}
   .film-data-row{padding:13px}
 }
-
 @media(max-width:380px){
   .film-hero{grid-template-columns:1fr}
-  .film-poster,.film-poster-placeholder{
-    width:min(190px,100%);
-    margin:auto;
-  }
-}
-
-.film-edit-button{
-  border:1px solid var(--film-border);
-  background:#202633;
-  color:var(--film-text);
-  border-radius:8px;
-  padding:7px 10px;
-  font-size:11px;
-  white-space:nowrap;
-}
-
-.film-section-heading{flex-wrap:wrap}
-
-.film-edit-backdrop{
-  display:none;
-  position:fixed;
-  inset:0;
-  z-index:50;
-  background:#000c;
-  align-items:center;
-  justify-content:center;
-  padding:14px;
-}
-
-.film-edit-backdrop.open{display:flex}
-
-.film-edit-modal{
-  width:min(620px,100%);
-  max-height:90vh;
-  overflow:auto;
-  background:var(--film-panel);
-  border:1px solid var(--film-border);
-  border-radius:15px;
-  padding:18px;
-}
-
-.film-edit-modal h2{
-  margin:0 0 8px;
-  font-size:19px;
-}
-
-.film-edit-modal p{
-  color:var(--film-muted);
-  font-size:12px;
-  line-height:1.5;
-}
-
-.film-edit-modal textarea{
-  width:100%;
-  min-height:230px;
-  resize:vertical;
-  background:#0b0d12;
-  color:var(--film-text);
-  border:1px solid var(--film-border);
-  border-radius:9px;
-  padding:12px;
-  font:12px/1.6 monospace;
-}
-
-.film-edit-actions{
-  display:flex;
-  gap:9px;
-  justify-content:flex-end;
-  margin-top:12px;
-  flex-wrap:wrap;
-}
-
-.film-edit-actions button{
-  padding:9px 13px;
-  border-radius:8px;
-  border:1px solid var(--film-border);
-  background:#202633;
-  color:var(--film-text);
-}
-
-.film-edit-actions .primary{
-  background:var(--film-accent);
-  color:#080910;
-  border-color:var(--film-accent);
-  font-weight:700;
-}
-
-.film-edit-status{
-  font-size:12px;
-  color:var(--film-muted);
-  margin-top:10px;
-  white-space:pre-wrap;
+  .film-poster,.film-poster-placeholder{width:min(190px,100%);margin:auto}
 }
 </style>
 </head>
@@ -565,7 +144,6 @@ button{font:inherit;cursor:pointer}
 </header>
 
 <main class="film-main">
-
   <div class="film-breadcrumb">
     <a href="index.html">KINORA</a> / Films / <span id="breadcrumbTitle">Loading...</span>
   </div>
@@ -574,10 +152,7 @@ button{font:inherit;cursor:pointer}
     <div class="film-loading">Loading film article...</div>
   </div>
 
-  <footer class="film-footer">
-    KINORA — The Film & Series Encyclopedia
-  </footer>
-
+  <footer class="film-footer">KINORA — The Film &amp; Series Encyclopedia</footer>
 </main>
 
 <div class="film-info-backdrop" id="infoBackdrop">
@@ -588,26 +163,11 @@ button{font:inherit;cursor:pointer}
   </div>
 </div>
 
-<div class="film-edit-backdrop" id="editBackdrop">
-  <div class="film-edit-modal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
-    <button class="film-info-close" id="closeEdit" type="button" aria-label="Close">×</button>
-    <h2 id="editTitle">Suggest an edit</h2>
-    <p>Edit only this section. Keep the JSON format valid. Your suggestion will be sent for moderation; the published page will not change immediately.</p>
-    <textarea id="editJSON" spellcheck="false" aria-label="Section data in JSON format"></textarea>
-    <div class="film-edit-status" id="editStatus"></div>
-    <div class="film-edit-actions">
-      <button id="cancelEdit" type="button">Cancel</button>
-      <button class="primary" id="submitEdit" type="button">Submit for review</button>
-    </div>
-  </div>
-</div>
-
 <script>
 (async function(){
 
   const cfg = window.KINORA_CONFIG || {};
   const host = document.getElementById("filmContent");
-
   const params = new URLSearchParams(location.search);
   const articleId = params.get("id");
 
@@ -626,121 +186,24 @@ button{font:inherit;cursor:pointer}
     return;
   }
 
-  const db = window.supabase.createClient(
-    cfg.SUPABASE_URL,
-    cfg.SUPABASE_ANON_KEY
-  );
-
+  const db = window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
   const $ = id => document.getElementById(id);
 
   let currentArticle = null;
   let currentFilm = null;
-  let editingSection = null;
-
-  function sectionValue(key,film){
-    if(key === "overview") return {
-      subtitle: film.subtitle || "",
-      year: film.year || "",
-      language: film.language || "",
-      genre: film.genre || "",
-      runtime: film.runtime || "",
-      poster_url: film.poster_url || "",
-      poster_credit: film.poster_credit || "",
-      plot: film.plot || ""
-    };
-
-    if(key === "box_office") return film.box_office || {};
-
-    if(key === "studios") {
-      return film.studios || film.production_companies || [];
-    }
-
-    return film[key] ?? [];
-  }
-
-  function openSectionEditor(key,label){
-    if(!currentFilm || !currentArticle) return;
-
-    editingSection = key;
-    $("editTitle").textContent = "Suggest edit: " + label;
-    $("editJSON").value = JSON.stringify(
-      sectionValue(key,currentFilm),
-      null,
-      2
-    );
-    $("editStatus").textContent = "";
-    $("editBackdrop").classList.add("open");
-  }
-
-  function closeSectionEditor(){
-    $("editBackdrop").classList.remove("open");
-  }
-
-  async function submitSectionEdit(){
-    const status = $("editStatus");
-    let proposed;
-
-    try {
-      proposed = JSON.parse($("editJSON").value);
-    } catch(e){
-      status.textContent = "Invalid JSON. Please correct the formatting.";
-      return;
-    }
-
-    if(proposed === null || typeof proposed !== "object"){
-      status.textContent = "Enter a JSON object or array.";
-      return;
-    }
-
-    const {data:{user},error:userError} = await db.auth.getUser();
-
-    if(userError || !user){
-      status.textContent = "Please log in before suggesting an edit.";
-      return;
-    }
-
-    const button = $("submitEdit");
-    button.disabled = true;
-    status.textContent = "Submitting your suggestion…";
-
-    const {error} = await db.from("film_section_edits").insert({
-      article_id: currentArticle.id,
-      section_key: editingSection,
-      proposed_data: proposed,
-      status: "pending",
-      submitted_by: user.id
-    });
-
-    button.disabled = false;
-
-    if(error){
-      status.textContent = "Submission failed: " + error.message;
-      return;
-    }
-
-    status.textContent = "Submitted! Your suggestion is pending moderator review.";
-    setTimeout(closeSectionEditor,1200);
-  }
 
   function esc(value){
     return String(value ?? "").replace(/[&<>"']/g,c=>({
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#39;"
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
     }[c]));
   }
 
   function firstBlock(article){
     const blocks = article.content_blocks;
-
     if(Array.isArray(blocks)){
       return blocks.find(b=>b && b.kind==="film") || blocks[0] || {};
     }
-
     if(blocks && typeof blocks==="object") return blocks;
-
     return {};
   }
 
@@ -753,43 +216,32 @@ button{font:inherit;cursor:pointer}
   }
 
   function safeImage(url){
-    if(typeof url !== "string") return "";
-
+    if(typeof url!=="string") return "";
     try{
       const parsed = new URL(url,location.href);
-
-      return ["http:","https:"].includes(parsed.protocol)
-        ? parsed.href
-        : "";
-    }catch(e){
-      return "";
-    }
+      return ["http:","https:"].includes(parsed.protocol) ? parsed.href : "";
+    }catch(e){return ""}
   }
 
   function renderPeople(items,type){
-    if(!items.length){
-      return showEmpty("No "+type.toLowerCase()+" information available yet.");
-    }
+    if(!items.length) return showEmpty("No "+type.toLowerCase()+" information available yet.");
 
     return `
       <div class="film-scroll">
         ${items.map(person=>{
-          const name = person.name || "Unknown";
-          const photo = safeImage(person.person_photo || person.photo_url || "");
-          const personId = person.person_id;
-          const role = person.role || person.position || "";
-
-          const nameHTML = personId
+          const name=person.name||"Unknown";
+          const photo=safeImage(person.person_photo||person.photo_url||"");
+          const personId=person.person_id;
+          const role=person.role||person.position||"";
+          const nameHTML=personId
             ? `<a class="film-person-name" href="person.html?id=${encodeURIComponent(personId)}">${esc(name)}</a>`
             : `<span class="film-person-name">${esc(name)}</span>`;
 
           return `
             <article class="film-person-card">
-              ${
-                photo
-                  ? `<img class="film-person-photo" src="${esc(photo)}" alt="${esc(name)}" loading="lazy" onerror="this.outerHTML='<div class=&quot;film-person-placeholder&quot;>👤</div>'">`
-                  : `<div class="film-person-placeholder">👤</div>`
-              }
+              ${photo
+                ? `<img class="film-person-photo" src="${esc(photo)}" alt="${esc(name)}" loading="lazy" onerror="this.outerHTML='<div class=&quot;film-person-placeholder&quot;>👤</div>'">`
+                : `<div class="film-person-placeholder">👤</div>`}
               ${nameHTML}
               <span class="film-person-role">${esc(role)}</span>
             </article>
@@ -800,15 +252,8 @@ button{font:inherit;cursor:pointer}
   }
 
   function dataRows(rows){
-    const valid = rows.filter(row=>
-      row[1] !== undefined &&
-      row[1] !== null &&
-      row[1] !== ""
-    );
-
-    if(!valid.length){
-      return showEmpty("No information available yet.");
-    }
+    const valid=rows.filter(row=>row[1]!==undefined&&row[1]!==null&&row[1]!=="");
+    if(!valid.length) return showEmpty("No information available yet.");
 
     return `
       <div class="film-data-panel">
@@ -823,31 +268,25 @@ button{font:inherit;cursor:pointer}
   }
 
   function renderAdditionalCrew(items){
-    if(!items.length){
-      return showEmpty("No additional crew information available yet.");
-    }
+    if(!items.length) return showEmpty("No additional crew information available yet.");
 
     return `
       <div class="film-list">
         ${items.map(person=>{
-          const photo = safeImage(person.person_photo || person.photo_url || "");
-          const personId = person.person_id;
-          const name = person.name || "Unknown";
-          const role = person.position || person.role || "";
+          const photo=safeImage(person.person_photo||person.photo_url||"");
+          const personId=person.person_id;
+          const name=person.name||"Unknown";
+          const role=person.position||person.role||"";
 
           return `
             <div class="film-list-item">
-              ${
-                photo
-                  ? `<img src="${esc(photo)}" alt="" loading="lazy">`
-                  : `<div class="film-list-icon">👤</div>`
-              }
+              ${photo
+                ? `<img src="${esc(photo)}" alt="" loading="lazy">`
+                : `<div class="film-list-icon">👤</div>`}
               <div>
-                <strong>
-                  ${personId
-                    ? `<a href="person.html?id=${encodeURIComponent(personId)}" style="color:inherit;text-decoration:none">${esc(name)}</a>`
-                    : esc(name)}
-                </strong>
+                <strong>${personId
+                  ? `<a href="person.html?id=${encodeURIComponent(personId)}" style="color:inherit;text-decoration:none">${esc(name)}</a>`
+                  : esc(name)}</strong>
                 <small>${esc(role)}</small>
               </div>
             </div>
@@ -858,21 +297,16 @@ button{font:inherit;cursor:pointer}
   }
 
   function renderTheatrical(items){
-    if(!items.length){
-      return showEmpty("No theatrical release details available.");
-    }
+    if(!items.length) return showEmpty("No theatrical release details available.");
 
     return `
       <div class="film-list">
         ${items.map(item=>`
           <div class="film-list-item">
-            <div class="film-list-icon">${esc(item.flag || "🌍")}</div>
+            <div class="film-list-icon">${esc(item.flag||"🌍")}</div>
             <div>
-              <strong>${esc(item.country || "Unknown country")}</strong>
-              <small>
-                ${esc(item.date || "Date unavailable")}
-                ${item.certification ? " · "+esc(item.certification) : ""}
-              </small>
+              <strong>${esc(item.country||"Unknown country")}</strong>
+              <small>${esc(item.date||"Date unavailable")}${item.certification?" · "+esc(item.certification):""}</small>
             </div>
           </div>
         `).join("")}
@@ -881,25 +315,20 @@ button{font:inherit;cursor:pointer}
   }
 
   function renderDigital(items){
-    if(!items.length){
-      return showEmpty("No digital release details available.");
-    }
+    if(!items.length) return showEmpty("No digital release details available.");
 
     return `
       <div class="film-list">
         ${items.map(item=>{
-          const icon = safeImage(item.icon || "");
-
+          const icon=safeImage(item.icon||"");
           return `
             <div class="film-list-item">
-              ${
-                icon
-                  ? `<img src="${esc(icon)}" alt="" style="width:43px;height:43px;border-radius:50%" loading="lazy">`
-                  : `<div class="film-list-icon">${esc((item.platform || "?").charAt(0).toUpperCase())}</div>`
-              }
+              ${icon
+                ? `<img src="${esc(icon)}" alt="" style="width:43px;height:43px;border-radius:50%" loading="lazy">`
+                : `<div class="film-list-icon">${esc((item.platform||"?").charAt(0).toUpperCase())}</div>`}
               <div>
-                <strong>${esc(item.platform || "Platform")}</strong>
-                <small>${esc(item.date || "Date unavailable")}</small>
+                <strong>${esc(item.platform||"Platform")}</strong>
+                <small>${esc(item.date||"Date unavailable")}</small>
               </div>
             </div>
           `;
@@ -909,23 +338,14 @@ button{font:inherit;cursor:pointer}
   }
 
   function renderAwards(items){
-    if(!items.length){
-      return showEmpty("No awards or nominations listed yet.");
-    }
+    if(!items.length) return showEmpty("No awards or nominations listed yet.");
 
     return `
       <div class="film-list">
         ${items.map(award=>`
           <div class="film-award">
-            <strong>${esc(award.name || "Award")}</strong>
-            <p>
-              ${[
-                award.category,
-                award.result,
-                award.recipient,
-                award.year
-              ].filter(Boolean).map(esc).join(" · ")}
-            </p>
+            <strong>${esc(award.name||"Award")}</strong>
+            <p>${[award.category,award.result,award.recipient,award.year].filter(Boolean).map(esc).join(" · ")}</p>
           </div>
         `).join("")}
       </div>
@@ -933,9 +353,7 @@ button{font:inherit;cursor:pointer}
   }
 
   function renderSoundtrack(items){
-    if(!items.length){
-      return showEmpty("No soundtrack information available.");
-    }
+    if(!items.length) return showEmpty("No soundtrack information available.");
 
     return `
       <div class="film-list">
@@ -943,14 +361,8 @@ button{font:inherit;cursor:pointer}
           <div class="film-list-item">
             <div class="film-list-icon">♫</div>
             <div>
-              <strong>${esc(song.title || song.name || "Untitled track")}</strong>
-              <small>
-                ${[
-                  song.singer,
-                  song.composer,
-                  song.lyricist
-                ].filter(Boolean).map(esc).join(" · ")}
-              </small>
+              <strong>${esc(song.title||song.name||"Untitled track")}</strong>
+              <small>${[song.singer,song.composer,song.lyricist].filter(Boolean).map(esc).join(" · ")}</small>
             </div>
           </div>
         `).join("")}
@@ -959,10 +371,10 @@ button{font:inherit;cursor:pointer}
   }
 
   function safeArticleHTML(source){
-    const template = document.createElement("template");
-    template.innerHTML = String(source || "");
+    const template=document.createElement("template");
+    template.innerHTML=String(source||"");
 
-    const allowed = new Set([
+    const allowed=new Set([
       "P","BR","H2","H3","H4","STRONG","B","I","EM","U",
       "UL","OL","LI","BLOCKQUOTE","A","IMG","HR",
       "TABLE","THEAD","TBODY","TR","TH","TD","CODE","PRE"
@@ -970,37 +382,28 @@ button{font:inherit;cursor:pointer}
 
     template.content.querySelectorAll("*").forEach(element=>{
       if(!allowed.has(element.tagName)){
-        element.replaceWith(
-          document.createTextNode(element.textContent || "")
-        );
+        element.replaceWith(document.createTextNode(element.textContent||""));
         return;
       }
 
       [...element.attributes].forEach(attribute=>{
-        const name = attribute.name.toLowerCase();
-
-        if(name.startsWith("on") || name==="style" || name==="srcdoc"){
+        const name=attribute.name.toLowerCase();
+        if(name.startsWith("on")||name==="style"||name==="srcdoc"){
           element.removeAttribute(attribute.name);
         }
       });
 
       if(element.tagName==="A"){
-        const href = element.getAttribute("href") || "";
-
-        if(!/^https?:\/\//i.test(href)){
-          element.removeAttribute("href");
-        }
-
+        const href=element.getAttribute("href")||"";
+        if(!/^https?:\/\//i.test(href)) element.removeAttribute("href");
         element.setAttribute("rel","noopener noreferrer");
         element.setAttribute("target","_blank");
       }
 
       if(element.tagName==="IMG"){
-        const src = safeImage(element.getAttribute("src") || "");
-
+        const src=safeImage(element.getAttribute("src")||"");
         if(src) element.setAttribute("src",src);
         else element.remove();
-
         element.setAttribute("loading","lazy");
       }
     });
@@ -1010,104 +413,107 @@ button{font:inherit;cursor:pointer}
 
   function switchTab(tabName){
     document.querySelectorAll(".film-tab").forEach(button=>{
-      const active = button.dataset.tab===tabName;
-
+      const active=button.dataset.tab===tabName;
       button.classList.toggle("active",active);
       button.setAttribute("aria-selected",String(active));
     });
 
     document.querySelectorAll(".film-tab-content").forEach(panel=>{
-      panel.hidden = panel.id !== "tab-"+tabName;
+      panel.hidden=panel.id!=="tab-"+tabName;
     });
   }
 
-  function addTab(name,label,content){
-    return `
-      <button class="film-tab" type="button"
-        data-tab="${esc(name)}" role="tab"
-        aria-selected="false">${esc(label)}</button>
-    `;
+  function addTab(name,label){
+    return `<button class="film-tab" type="button" data-tab="${esc(name)}" role="tab" aria-selected="false">${esc(label)}</button>`;
+  }
+
+  function openDedicatedEditor(key){
+    if(!currentArticle) return;
+
+    const allowedSections=[
+      "overview",
+      "cast",
+      "crew",
+      "additional_crew",
+      "studios",
+      "box_office",
+      "soundtrack",
+      "theatrical_releases",
+      "digital_releases",
+      "awards"
+    ];
+
+    if(!allowedSections.includes(key)) return;
+
+    const url=new URL("film-editor.html",location.href);
+    url.searchParams.set("id",currentArticle.id);
+    url.searchParams.set("section",key);
+    location.href=url.href;
   }
 
   function render(article,film){
+    currentArticle=article;
+    currentFilm=film;
 
-    currentArticle = article;
-    currentFilm = film;
+    const title=article.title||"Untitled film";
+    const year=film.year||"";
+    const poster=safeImage(film.poster_url||"");
 
-    const title = article.title || "Untitled film";
-    const year = film.year || "";
-    const poster = safeImage(film.poster_url || "");
+    document.title=title+" ("+year+") — KINORA";
+    $("breadcrumbTitle").textContent=title;
 
-    document.title = title+" ("+year+") — KINORA";
-    $("breadcrumbTitle").textContent = title;
+    const cast=list(film.cast);
+    const crew=list(film.crew);
+    const additionalCrew=list(film.additional_crew);
+    const theatrical=list(film.theatrical_releases);
+    const digital=list(film.digital_releases);
+    const awards=list(film.awards);
+    const soundtrack=list(film.soundtrack);
+    const box=film.box_office||{};
 
-    const cast = list(film.cast);
-    const crew = list(film.crew);
-    const additionalCrew = list(film.additional_crew);
-    const theatrical = list(film.theatrical_releases);
-    const digital = list(film.digital_releases);
-    const awards = list(film.awards);
-    const soundtrack = list(film.soundtrack);
+    const studios=film.studios||film.production_companies||film.production_company||"";
 
-    const box = film.box_office || {};
-
-    const studios = film.studios ||
-      film.production_companies ||
-      film.production_company ||
-      "";
-
-    const tabs = [
+    const tabs=[
       ["additional","Additional crew",additionalCrew.length],
-      ["releases","Release details",theatrical.length || digital.length],
+      ["releases","Release details",theatrical.length||digital.length],
       ["awards","Awards",awards.length],
       ["soundtrack","Soundtrack",soundtrack.length],
-      ["article","Article",article.body_source || article.content]
+      ["article","Article",article.body_source||article.content]
     ].filter(item=>item[2]);
 
-    const totalCharacters = [
-      article.title,
-      article.summary,
-      article.content,
-      JSON.stringify(article.content_blocks || []),
-      article.body_source
+    const totalCharacters=[
+      article.title,article.summary,article.content,
+      JSON.stringify(article.content_blocks||[]),article.body_source
     ].filter(Boolean).join("").length;
 
-    const pageSize = new TextEncoder().encode(
-      JSON.stringify(article)
-    ).length;
+    const pageSize=new TextEncoder().encode(JSON.stringify(article)).length;
 
-    host.innerHTML = `
+    host.innerHTML=`
 
       <div class="film-heading">
         <div>
           <h1>${esc(title)}</h1>
-          <div class="film-year">${year ? esc(year) : "Year unavailable"}</div>
+          <div class="film-year">${year?esc(year):"Year unavailable"}</div>
         </div>
-        <button class="film-info-button" id="openInfo"
-          type="button" aria-label="Page information">⋯</button>
+        <button class="film-info-button" id="openInfo" type="button" aria-label="Page information">⋯</button>
       </div>
 
       <section class="film-hero">
-
         <div>
-          ${
-            poster
-              ? `<img class="film-poster" src="${esc(poster)}" alt="${esc(title)} poster">`
-              : `<div class="film-poster-placeholder">No poster available</div>`
-          }
+          ${poster
+            ? `<img class="film-poster" src="${esc(poster)}" alt="${esc(title)} poster">`
+            : `<div class="film-poster-placeholder">No poster available</div>`}
         </div>
 
         <div>
           <div class="film-facts">
-            ${film.genre ? `<span class="film-chip">${esc(film.genre)}</span>` : ""}
-            ${film.language ? `<span class="film-chip">${esc(film.language)}</span>` : ""}
-            ${film.runtime ? `<span class="film-chip">${esc(film.runtime)}</span>` : ""}
+            ${film.genre?`<span class="film-chip">${esc(film.genre)}</span>`:""}
+            ${film.language?`<span class="film-chip">${esc(film.language)}</span>`:""}
+            ${film.runtime?`<span class="film-chip">${esc(film.runtime)}</span>`:""}
           </div>
-
           <h2 class="film-plot-title">Plot</h2>
-          <div class="film-plot">${esc(film.plot || article.summary || "No plot information available yet.")}</div>
+          <div class="film-plot">${esc(film.plot||article.summary||"No plot information available yet.")}</div>
         </div>
-
       </section>
 
       <div class="film-section-heading" style="justify-content:flex-end;margin-top:10px">
@@ -1151,19 +557,14 @@ button{font:inherit;cursor:pointer}
           <h2>Production companies / Studios</h2>
           <button class="film-edit-button" data-edit="studios" type="button">Suggest edit</button>
         </div>
-        ${
-          Array.isArray(studios)
-            ? dataRows(studios.map((s,i)=>[
-                "Studio "+(i+1),
-                typeof s==="string"?s:s.name
-              ]))
-            : dataRows([["Studios",studios]])
-        }
+        ${Array.isArray(studios)
+          ? dataRows(studios.map((s,i)=>["Studio "+(i+1),typeof s==="string"?s:s.name]))
+          : dataRows([["Studios",studios]])}
       </section>
 
-      ${tabs.length ? `
+      ${tabs.length?`
         <nav class="film-tabs" role="tablist">
-          ${tabs.map(t=>addTab(t[0],t[1],t[2])).join("")}
+          ${tabs.map(t=>addTab(t[0],t[1])).join("")}
         </nav>
 
         <div class="film-tab-content" id="tab-additional" hidden>
@@ -1206,51 +607,23 @@ button{font:inherit;cursor:pointer}
 
         <div class="film-tab-content" id="tab-article" hidden>
           <div class="film-article-body">
-            ${safeArticleHTML(article.body_source || article.content || "")}
+            ${safeArticleHTML(article.body_source||article.content||"")}
           </div>
-          ${
-            Array.isArray(article.citations) && article.citations.length
-              ? `<h3>References</h3><ol>${article.citations.map(c=>`
-                  <li><a href="${esc(safeImage(c.url))}" target="_blank" rel="noopener noreferrer">${esc(c.title || c.url)}</a></li>
-                `).join("")}</ol>`
-              : ""
-          }
+          ${Array.isArray(article.citations)&&article.citations.length
+            ? `<h3>References</h3><ol>${article.citations.map(c=>`
+                <li><a href="${esc(safeImage(c.url))}" target="_blank" rel="noopener noreferrer">${esc(c.title||c.url)}</a></li>
+              `).join("")}</ol>`
+            : ""}
         </div>
-      ` : ""}
-
+      `:""}
     `;
 
+    // Every film section now opens its own dedicated editor page.
     document.querySelectorAll("[data-edit]").forEach(button=>{
-  button.addEventListener("click",()=>{
-    const key = button.dataset.edit;
-
-    const dedicatedSections = [
-      "cast",
-      "crew",
-      "additional_crew"
-    ];
-
-    if(dedicatedSections.includes(key)){
-      const url = new URL("film-editor.html",location.href);
-      url.searchParams.set("id",currentArticle.id);
-      url.searchParams.set("section",key);
-      location.href = url.href;
-      return;
-    }
-
-    const labels = {
-      overview:"Overview",
-      box_office:"Box office",
-      studios:"Studios",
-      theatrical_releases:"Theatrical releases",
-      digital_releases:"Digital releases",
-      awards:"Awards",
-      soundtrack:"Soundtrack"
-    };
-
-    openSectionEditor(key,labels[key] || key);
-  });
-});
+      button.addEventListener("click",()=>{
+        openDedicatedEditor(button.dataset.edit);
+      });
+    });
 
     document.querySelectorAll(".film-tab").forEach(button=>{
       button.addEventListener("click",()=>{
@@ -1258,46 +631,17 @@ button{font:inherit;cursor:pointer}
       });
     });
 
-    const info = $("filmPageInfo");
-
-    info.innerHTML = `
+    $("filmPageInfo").innerHTML=`
       <div class="film-data-panel">
-        <div class="film-data-row">
-          <span class="film-data-label">Page title</span>
-          <span class="film-data-value">${esc(title)}</span>
-        </div>
-        <div class="film-data-row">
-          <span class="film-data-label">Category</span>
-          <span class="film-data-value">Film</span>
-        </div>
-        <div class="film-data-row">
-          <span class="film-data-label">Characters</span>
-          <span class="film-data-value">${totalCharacters.toLocaleString()}</span>
-        </div>
-        <div class="film-data-row">
-          <span class="film-data-label">Article data size</span>
-          <span class="film-data-value">${pageSize.toLocaleString()} bytes</span>
-        </div>
-        <div class="film-data-row">
-          <span class="film-data-label">Cast entries</span>
-          <span class="film-data-value">${cast.length}</span>
-        </div>
-        <div class="film-data-row">
-          <span class="film-data-label">Crew entries</span>
-          <span class="film-data-value">${crew.length}</span>
-        </div>
-        <div class="film-data-row">
-          <span class="film-data-label">Created</span>
-          <span class="film-data-value">${esc(article.created_at ? new Date(article.created_at).toLocaleDateString() : "Unknown")}</span>
-        </div>
-        <div class="film-data-row">
-          <span class="film-data-label">Last updated</span>
-          <span class="film-data-value">${esc(article.updated_at ? new Date(article.updated_at).toLocaleDateString() : "Not recorded")}</span>
-        </div>
-        <div class="film-data-row">
-          <span class="film-data-label">Article ID</span>
-          <span class="film-data-value">${esc(article.id)}</span>
-        </div>
+        <div class="film-data-row"><span class="film-data-label">Page title</span><span class="film-data-value">${esc(title)}</span></div>
+        <div class="film-data-row"><span class="film-data-label">Category</span><span class="film-data-value">Film</span></div>
+        <div class="film-data-row"><span class="film-data-label">Characters</span><span class="film-data-value">${totalCharacters.toLocaleString()}</span></div>
+        <div class="film-data-row"><span class="film-data-label">Article data size</span><span class="film-data-value">${pageSize.toLocaleString()} bytes</span></div>
+        <div class="film-data-row"><span class="film-data-label">Cast entries</span><span class="film-data-value">${cast.length}</span></div>
+        <div class="film-data-row"><span class="film-data-label">Crew entries</span><span class="film-data-value">${crew.length}</span></div>
+        <div class="film-data-row"><span class="film-data-label">Created</span><span class="film-data-value">${esc(article.created_at?new Date(article.created_at).toLocaleDateString():"Unknown")}</span></div>
+        <div class="film-data-row"><span class="film-data-label">Last updated</span><span class="film-data-value">${esc(article.updated_at?new Date(article.updated_at).toLocaleDateString():"Not recorded")}</span></div>
+        <div class="film-data-row"><span class="film-data-label">Article ID</span><span class="film-data-value">${esc(article.id)}</span></div>
       </div>
     `;
 
@@ -1305,17 +649,6 @@ button{font:inherit;cursor:pointer}
       $("infoBackdrop").classList.add("open");
     });
   }
-
-  $("closeEdit").addEventListener("click",closeSectionEditor);
-  $("cancelEdit").addEventListener("click",closeSectionEditor);
-
-  $("submitEdit").addEventListener("click",submitSectionEdit);
-
-  $("editBackdrop").addEventListener("click",event=>{
-    if(event.target === $("editBackdrop")){
-      closeSectionEditor();
-    }
-  });
 
   $("closeInfo").addEventListener("click",()=>{
     $("infoBackdrop").classList.remove("open");
@@ -1328,8 +661,7 @@ button{font:inherit;cursor:pointer}
   });
 
   try{
-
-    const {data:article,error} = await db
+    const {data:article,error}=await db
       .from("articles")
       .select("id,title,summary,content,content_blocks,body_source,citations,category,status,created_at,updated_at")
       .eq("id",articleId)
@@ -1340,7 +672,7 @@ button{font:inherit;cursor:pointer}
     if(error) throw error;
 
     if(!article){
-      host.innerHTML = `
+      host.innerHTML=`
         <div class="film-error">
           This film article is unavailable or has not been published yet.
         </div>
@@ -1348,10 +680,10 @@ button{font:inherit;cursor:pointer}
       return;
     }
 
-    const film = firstBlock(article);
+    const film=firstBlock(article);
 
-    if(film.kind !== "film"){
-      host.innerHTML = '<div class="film-error">This article does not contain valid film information.</div>';
+    if(film.kind!=="film"){
+      host.innerHTML='<div class="film-error">This article does not contain valid film information.</div>';
       return;
     }
 
@@ -1359,8 +691,7 @@ button{font:inherit;cursor:pointer}
 
   }catch(error){
     console.error(error);
-
-    host.innerHTML = `
+    host.innerHTML=`
       <div class="film-error">
         Could not load this film article.<br>
         ${esc(error.message)}
