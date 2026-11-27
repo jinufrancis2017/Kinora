@@ -1,0 +1,852 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0d12">
+<title>Film Editor | KINORA</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<style>
+:root{
+  --bg:#0b0d12;
+  --panel:#1b2331;
+  --inner:#10151f;
+  --border:#303b4e;
+  --text:#f0f2f7;
+  --muted:#9ba5b6;
+  --accent:#c7f36b;
+  --danger:#ff858e;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial, sans-serif;
+}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.topbar{
+  height:65px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 22px;
+  border-bottom:1px solid var(--border);
+  background:#10141c;
+}
+.logo{
+  font-size:21px;
+  font-weight:900;
+  letter-spacing:2px;
+  color:var(--text);
+  text-decoration:none;
+}
+.logo span{color:var(--accent)}
+.topbar a.back{
+  color:var(--muted);
+  font-size:13px;
+  text-decoration:none;
+}
+main{
+  max-width:850px;
+  margin:35px auto;
+  padding:0 18px 70px;
+}
+.heading{
+  margin-bottom:25px;
+}
+.eyebrow{
+  color:var(--accent);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+h1{
+  font-size:30px;
+  margin:10px 0;
+}
+.description{
+  color:var(--muted);
+  line-height:1.7;
+  font-size:14px;
+}
+.editor-panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:25px;
+}
+.panel-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.panel-heading h2{
+  font-size:21px;
+  margin:0;
+}
+.count{
+  color:var(--muted);
+  font-size:12px;
+}
+.help{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.7;
+  margin:12px 0 25px;
+}
+.search-label,.field-label{
+  display:block;
+  font-size:12px;
+  font-weight:800;
+  color:var(--muted);
+  letter-spacing:1px;
+  margin-bottom:10px;
+}
+.search-wrap{position:relative}
+.search-input,.role-input{
+  width:100%;
+  background:var(--panel);
+  color:var(--text);
+  border:2px solid var(--border);
+  border-radius:13px;
+  padding:17px;
+  outline:none;
+  font-size:16px;
+}
+.search-input:focus,.role-input:focus{
+  border-color:var(--accent);
+}
+.search-results{
+  display:none;
+  margin-top:9px;
+  background:var(--inner);
+  border:1px solid var(--border);
+  border-radius:13px;
+  overflow:hidden;
+}
+.search-results.show{display:block}
+.result-item{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:13px;
+  padding:12px;
+  border:0;
+  border-bottom:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  text-align:left;
+}
+.result-item:last-child{border-bottom:0}
+.result-item:hover{background:#202a39}
+.result-item img,.result-placeholder{
+  width:48px;
+  height:58px;
+  border-radius:7px;
+  object-fit:cover;
+  background:#273143;
+  flex-shrink:0;
+}
+.result-placeholder{
+  display:grid;
+  place-items:center;
+  color:var(--muted);
+  font-size:20px;
+}
+.result-name{font-weight:700;font-size:14px}
+.result-subtitle{
+  display:block;
+  margin-top:5px;
+  color:var(--muted);
+  font-size:11px;
+}
+.member-list{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+  margin-top:28px;
+}
+.member-card{
+  background:var(--inner);
+  border:2px solid var(--border);
+  border-radius:18px;
+  padding:18px;
+}
+.member-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:20px;
+}
+.member-top strong{font-size:17px}
+.remove-button{
+  background:transparent;
+  color:var(--danger);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:9px 13px;
+}
+.member-person{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  margin-bottom:20px;
+}
+.member-person img,.member-placeholder{
+  width:65px;
+  height:78px;
+  border-radius:9px;
+  object-fit:cover;
+  background:#273143;
+  flex-shrink:0;
+}
+.member-placeholder{
+  display:grid;
+  place-items:center;
+  font-size:25px;
+  color:var(--muted);
+}
+.member-name{
+  font-weight:800;
+  font-size:15px;
+  overflow-wrap:anywhere;
+}
+.member-subtitle{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:6px;
+}
+.role-input{
+  min-height:65px;
+  resize:vertical;
+  font-size:15px;
+}
+.add-button{
+  width:100%;
+  margin-top:25px;
+  min-height:80px;
+  border:2px dashed #718c3c;
+  border-radius:18px;
+  background:#252e30;
+  color:var(--accent);
+  font-weight:800;
+  font-size:20px;
+}
+.add-button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+.footer-actions{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-top:25px;
+  flex-wrap:wrap;
+}
+.cancel-button,.submit-button{
+  border:1px solid var(--border);
+  border-radius:11px;
+  padding:14px 19px;
+  font-weight:700;
+}
+.cancel-button{
+  background:transparent;
+  color:var(--muted);
+}
+.submit-button{
+  background:var(--accent);
+  color:#10150a;
+  border-color:var(--accent);
+}
+.submit-button:disabled{opacity:.5;cursor:not-allowed}
+.status{
+  margin-top:17px;
+  font-size:13px;
+  line-height:1.6;
+  color:var(--muted);
+  white-space:pre-wrap;
+}
+.status.error{color:var(--danger)}
+.success-panel{
+  display:none;
+  text-align:center;
+  padding:30px 10px;
+}
+.success-panel.show{display:block}
+.success-icon{
+  font-size:45px;
+  color:var(--accent);
+}
+.success-panel h2{font-size:23px}
+.success-panel p{
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.7;
+}
+.success-panel a{
+  display:inline-block;
+  margin-top:15px;
+  background:var(--accent);
+  color:#10150a;
+  text-decoration:none;
+  padding:13px 18px;
+  border-radius:10px;
+  font-weight:800;
+}
+.loading,.error-page{
+  text-align:center;
+  padding:55px 15px;
+  color:var(--muted);
+  line-height:1.7;
+}
+.error-page{color:var(--danger)}
+@media(max-width:550px){
+  .topbar{padding:0 15px}
+  main{margin:25px auto;padding:0 12px 50px}
+  .editor-panel{padding:16px}
+  h1{font-size:25px}
+  .add-button{font-size:17px}
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <a class="logo" href="index.html">KINO<span>RA.</span></a>
+  <a class="back" id="backLink" href="index.html">← Back to film</a>
+</header>
+
+<main>
+  <div id="loading" class="loading">Loading film editor...</div>
+
+  <div id="editor" hidden>
+    <div class="heading">
+      <div class="eyebrow">KINORA · ARTICLE EDITOR</div>
+      <h1 id="pageTitle">Edit Cast</h1>
+      <div class="description" id="filmTitle"></div>
+    </div>
+
+    <section class="editor-panel">
+      <div id="editorForm">
+        <div class="panel-heading">
+          <h2 id="sectionTitle">Cast</h2>
+          <span class="count" id="memberCount">0 members</span>
+        </div>
+
+        <p class="help" id="sectionHelp">
+          Search for a published People article; the actor photo loads automatically.
+        </p>
+
+        <label class="search-label" for="peopleSearch">
+          SEARCH PEOPLE ARTICLE
+        </label>
+
+        <div class="search-wrap">
+          <input
+            id="peopleSearch"
+            class="search-input"
+            type="search"
+            placeholder="Type a name to find a People article"
+            autocomplete="off"
+          >
+          <div id="searchResults" class="search-results"></div>
+        </div>
+
+        <div id="memberList" class="member-list"></div>
+
+        <button id="addButton" class="add-button" type="button">
+          + Add member
+        </button>
+
+        <div class="footer-actions">
+          <button id="cancelButton" class="cancel-button" type="button">
+            Cancel
+          </button>
+          <button id="submitButton" class="submit-button" type="button">
+            Submit for review →
+          </button>
+        </div>
+
+        <div id="status" class="status"></div>
+      </div>
+
+      <div id="successPanel" class="success-panel">
+        <div class="success-icon">✓</div>
+        <h2>Suggestion submitted!</h2>
+        <p>
+          Your changes have been sent to the KINORA moderation queue.
+          They will appear on the public film page only after approval.
+        </p>
+        <a id="returnLink" href="#">Return to film page</a>
+      </div>
+    </section>
+  </div>
+
+  <div id="pageError" class="error-page" hidden></div>
+</main>
+
+<script>
+(async function(){
+
+  const cfg = window.KINORA_CONFIG || {};
+  const params = new URLSearchParams(location.search);
+
+  const articleId = params.get("id");
+  const section = params.get("section") || "cast";
+
+  const allowedSections = {
+    cast:{
+      title:"Cast",
+      singular:"cast member",
+      roleLabel:"CHARACTER / ROLE",
+      roleKey:"role",
+      help:"Search for a published People article; the actor photo loads automatically."
+    },
+    crew:{
+      title:"Crew",
+      singular:"crew member",
+      roleLabel:"POSITION / ROLE",
+      roleKey:"position",
+      help:"Search for a published People article; their photo loads automatically."
+    },
+    additional_crew:{
+      title:"Additional Crew",
+      singular:"crew member",
+      roleLabel:"POSITION / ROLE",
+      roleKey:"position",
+      help:"Search for a published People article and add their crew position."
+    }
+  };
+
+  const settings = allowedSections[section];
+
+  const $ = id => document.getElementById(id);
+
+  const loading = $("loading");
+  const editor = $("editor");
+  const pageError = $("pageError");
+
+  let db;
+  let filmArticle;
+  let filmBlock;
+  let members = [];
+  let searchTimer = null;
+  let searchSequence = 0;
+
+  function escapeHTML(value){
+    return String(value ?? "").replace(/[&<>"']/g,char=>({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[char]));
+  }
+
+  function safeImage(url){
+    if(typeof url !== "string" || !url.trim()) return "";
+
+    try{
+      const parsed = new URL(url,location.href);
+      return ["http:","https:"].includes(parsed.protocol)
+        ? parsed.href
+        : "";
+    }catch(e){
+      return "";
+    }
+  }
+
+  function getBlocks(article){
+    const blocks = article.content_blocks;
+
+    if(Array.isArray(blocks)) return blocks;
+
+    if(blocks && typeof blocks==="object") return [blocks];
+
+    return [];
+  }
+
+  function getFilmBlock(article){
+    return getBlocks(article).find(block=>block.kind==="film");
+  }
+
+  function getPersonBlock(article){
+    return getBlocks(article).find(block=>block.kind==="person") || {};
+  }
+
+  function showError(message){
+    loading.hidden = true;
+    editor.hidden = true;
+    pageError.hidden = false;
+    pageError.textContent = message;
+  }
+
+  function updateCount(){
+    $("memberCount").textContent =
+      members.length + (members.length===1 ? " member" : " members");
+  }
+
+  function renderMembers(){
+    const list = $("memberList");
+
+    updateCount();
+
+    if(!members.length){
+      list.innerHTML = `
+        <div class="description" style="text-align:center;padding:20px 5px">
+          No members added yet. Search for a People article above.
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = members.map((member,index)=>{
+      const photo = safeImage(member.person_photo);
+
+      return `
+        <article class="member-card" data-index="${index}">
+          <div class="member-top">
+            <strong>Entry ${index+1}</strong>
+            <button class="remove-button" type="button"
+              data-remove="${index}">Remove</button>
+          </div>
+
+          <div class="member-person">
+            ${
+              photo
+                ? `<img src="${escapeHTML(photo)}" alt="${escapeHTML(member.name)}">`
+                : `<div class="member-placeholder">👤</div>`
+            }
+            <div>
+              <div class="member-name">${escapeHTML(member.name)}</div>
+              <div class="member-subtitle">Published People article</div>
+            </div>
+          </div>
+
+          <label class="field-label" for="role-${index}">
+            ${escapeHTML(settings.roleLabel)}
+          </label>
+
+          <textarea
+            class="role-input"
+            id="role-${index}"
+            data-role="${index}"
+            placeholder="Enter ${section==="cast" ? "character name" : "position"}"
+          >${escapeHTML(member[settings.roleKey] || "")}</textarea>
+        </article>
+      `;
+    }).join("");
+
+    list.querySelectorAll("[data-remove]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        members.splice(Number(button.dataset.remove),1);
+        renderMembers();
+      });
+    });
+
+    list.querySelectorAll("[data-role]").forEach(input=>{
+      input.addEventListener("input",()=>{
+        const index = Number(input.dataset.role);
+        members[index][settings.roleKey] = input.value;
+      });
+    });
+  }
+
+  function renderSearchResults(results){
+    const container = $("searchResults");
+
+    if(!results.length){
+      container.innerHTML = `
+        <div style="padding:15px;color:var(--muted);font-size:13px">
+          No published People articles found.
+        </div>
+      `;
+      container.classList.add("show");
+      return;
+    }
+
+    container.innerHTML = results.map((person,index)=>{
+      const photo = safeImage(person.person_photo);
+
+      return `
+        <button type="button" class="result-item"
+          data-result="${index}">
+          ${
+            photo
+              ? `<img src="${escapeHTML(photo)}" alt="">`
+              : `<span class="result-placeholder">👤</span>`
+          }
+          <span>
+            <span class="result-name">${escapeHTML(person.name)}</span>
+            <span class="result-subtitle">Published People article</span>
+          </span>
+        </button>
+      `;
+    }).join("");
+
+    container.classList.add("show");
+
+    container.querySelectorAll("[data-result]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        const person = results[Number(button.dataset.result)];
+
+        if(members.some(member=>member.person_id===person.person_id)){
+          $("status").textContent = "This person is already in the list.";
+          container.classList.remove("show");
+          return;
+        }
+
+        members.push({
+          name:person.name,
+          person_id:person.person_id,
+          person_photo:person.person_photo,
+          [settings.roleKey]:""
+        });
+
+        $("peopleSearch").value = "";
+        container.classList.remove("show");
+        $("status").textContent = "";
+        renderMembers();
+      });
+    });
+  }
+
+  async function searchPeople(query,sequence){
+    const {data,error} = await db
+      .from("articles")
+      .select("id,title,content_blocks")
+      .eq("category","People")
+      .eq("status","published")
+      .ilike("title","%"+query+"%")
+      .limit(10);
+
+    if(sequence!==searchSequence) return;
+
+    if(error){
+      $("searchResults").innerHTML = `
+        <div style="padding:15px;color:var(--danger);font-size:13px">
+          Search failed: ${escapeHTML(error.message)}
+        </div>
+      `;
+      $("searchResults").classList.add("show");
+      return;
+    }
+
+    const results = (data || []).map(article=>{
+      const person = getPersonBlock(article);
+
+      return {
+        person_id:article.id,
+        name:article.title,
+        person_photo:person.photo_url || person.person_photo || ""
+      };
+    });
+
+    renderSearchResults(results);
+  }
+
+  $("peopleSearch").addEventListener("input",()=>{
+    clearTimeout(searchTimer);
+
+    const query = $("peopleSearch").value.trim();
+    const sequence = ++searchSequence;
+
+    if(query.length<2){
+      $("searchResults").classList.remove("show");
+      return;
+    }
+
+    $("searchResults").innerHTML = `
+      <div style="padding:15px;color:var(--muted);font-size:13px">
+        Searching published People articles...
+      </div>
+    `;
+    $("searchResults").classList.add("show");
+
+    searchTimer = setTimeout(()=>{
+      searchPeople(query,sequence);
+    },350);
+  });
+
+  document.addEventListener("click",event=>{
+    if(!event.target.closest(".search-wrap")){
+      $("searchResults").classList.remove("show");
+    }
+  });
+
+  $("addButton").addEventListener("click",()=>{
+    $("peopleSearch").focus();
+    $("status").textContent = "Search for a published People article to add a member.";
+    window.scrollTo({
+      top:$("peopleSearch").getBoundingClientRect().top + window.scrollY - 100,
+      behavior:"smooth"
+    });
+  });
+
+  $("cancelButton").addEventListener("click",()=>{
+    location.href = "film.html?id="+encodeURIComponent(articleId);
+  });
+
+  $("submitButton").addEventListener("click",async()=>{
+    const status = $("status");
+    const button = $("submitButton");
+
+    status.classList.remove("error");
+
+    if(!members.length){
+      status.textContent = "Add at least one member before submitting.";
+      status.classList.add("error");
+      return;
+    }
+
+    const invalid = members.find(member=>
+      !member.name ||
+      !member.person_id ||
+      !String(member[settings.roleKey] || "").trim()
+    );
+
+    if(invalid){
+      status.textContent = "Please complete the role/position for every member.";
+      status.classList.add("error");
+      return;
+    }
+
+    const {data:{user},error:userError} = await db.auth.getUser();
+
+    if(userError || !user){
+      status.textContent = "Please log in before submitting an edit.";
+      status.classList.add("error");
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = "Submitting...";
+
+    const proposedData = members.map(member=>({
+      name:member.name,
+      person_id:member.person_id,
+      person_photo:member.person_photo || "",
+      [settings.roleKey]:String(member[settings.roleKey]).trim()
+    }));
+
+    const {error} = await db
+      .from("film_section_edits")
+      .insert({
+        article_id:filmArticle.id,
+        section_key:section,
+        proposed_data:proposedData,
+        status:"pending",
+        submitted_by:user.id
+      });
+
+    button.disabled = false;
+    button.textContent = "Submit for review →";
+
+    if(error){
+      status.textContent = "Submission failed: "+error.message;
+      status.classList.add("error");
+      return;
+    }
+
+    $("editorForm").hidden = true;
+    $("successPanel").classList.add("show");
+    $("returnLink").href =
+      "film.html?id="+encodeURIComponent(articleId);
+  });
+
+  async function init(){
+
+    if(!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY){
+      showError("KINORA configuration is missing. Check config.js.");
+      return;
+    }
+
+    if(!window.supabase){
+      showError("Supabase could not load. Refresh the page.");
+      return;
+    }
+
+    if(!articleId){
+      showError("Film article ID is missing from the URL.");
+      return;
+    }
+
+    if(!settings){
+      showError("This editing section is not available yet.");
+      return;
+    }
+
+    db = window.supabase.createClient(
+      cfg.SUPABASE_URL,
+      cfg.SUPABASE_ANON_KEY
+    );
+
+    const {data:article,error} = await db
+      .from("articles")
+      .select("id,title,content_blocks,category,status")
+      .eq("id",articleId)
+      .eq("category","Film")
+      .eq("status","published")
+      .maybeSingle();
+
+    if(error){
+      showError("Could not load film article: "+error.message);
+      return;
+    }
+
+    if(!article){
+      showError("Film article not found or not published.");
+      return;
+    }
+
+    filmArticle = article;
+    filmBlock = getFilmBlock(article);
+
+    if(!filmBlock){
+      showError("This article does not contain a film data block.");
+      return;
+    }
+
+    const existing = filmBlock[section];
+
+    members = Array.isArray(existing)
+      ? existing.map(member=>({
+          name:member.name || "",
+          person_id:member.person_id || "",
+          person_photo:member.person_photo || "",
+          [settings.roleKey]:member[settings.roleKey] || ""
+        }))
+      : [];
+
+    $("pageTitle").textContent = "Edit "+settings.title;
+    $("sectionTitle").textContent = settings.title;
+    $("sectionHelp").textContent = settings.help;
+    $("filmTitle").textContent = article.title || "Untitled film";
+    $("addButton").textContent = "+ Add "+settings.singular;
+
+    $("backLink").href =
+      "film.html?id="+encodeURIComponent(articleId);
+
+    $("loading").hidden = true;
+    $("editor").hidden = false;
+
+    renderMembers();
+  }
+
+  init();
+
+})();
+</script>
+</body>
+</html>
