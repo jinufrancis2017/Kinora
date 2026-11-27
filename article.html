@@ -2,335 +2,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0b0d12">
-<title>Article | KINORA</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
-<style>
-:root{
-  --bg:#0b0d12;--panel:#151a24;--line:#30394a;
-  --muted:#9aa3b2;--white:#f4f5f7;--accent:#c9f06b;
-}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--white);font-family:system-ui,sans-serif}
-header{height:62px;padding:0 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
-.logo{font-size:22px;font-weight:850;letter-spacing:1px;text-decoration:none;color:var(--white)}
-.logo span{color:var(--accent)}
-nav{display:flex;gap:16px;align-items:center}
-nav a{color:var(--muted);text-decoration:none;font-size:13px}
-main{max-width:900px;margin:auto;padding:35px 18px 70px}
-.eyebrow{font-size:10px;letter-spacing:2px;color:var(--accent);font-weight:800}
-h1{font-size:36px;line-height:1.2;margin:8px 0}
-.subtitle{color:var(--muted);font-size:15px;line-height:1.6}
-.meta{font-size:12px;color:var(--muted);margin:18px 0 25px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:18px;margin:20px 0}
-.panel h2{font-size:17px;margin:0 0 15px}
-.poster{display:block;width:min(240px,75%);max-height:360px;object-fit:contain;margin:20px auto;border-radius:9px}
-.article-body{font-size:15px;line-height:1.85;overflow-wrap:anywhere}
-.article-body h2{font-size:22px;margin:32px 0 12px;border-bottom:1px solid var(--line);padding-bottom:8px}
-.article-body h3{font-size:18px;margin:24px 0 10px}
-.article-body a{color:var(--accent)}
-.article-body img{max-width:100%;height:auto;border-radius:8px}
-.article-body blockquote{border-left:3px solid var(--accent);padding-left:15px;color:var(--muted);margin:20px 0}
-.person-profile{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
-.person-photo{width:150px;max-height:200px;object-fit:cover;border-radius:9px}
-.facts{flex:1;min-width:180px}
-.facts p{font-size:13px;line-height:1.6;margin:7px 0}
-.facts strong{color:var(--muted)}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:12px}
-.person-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center;color:var(--white);text-decoration:none}
-.person-card img{width:100%;height:125px;object-fit:cover;border-radius:7px;margin-bottom:8px}
-.person-card strong,.person-card small{display:block}
-.person-card small{font-size:11px;color:var(--muted);margin-top:4px}
-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
-th,td{border:1px solid var(--line);padding:10px;text-align:left}
-th{color:var(--muted)}
-details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin:12px 0}
-summary{cursor:pointer;font-weight:750}
-.release-icon{width:23px;height:23px;object-fit:contain;vertical-align:middle;margin-right:7px;border-radius:50%}
-.references li{margin:12px 0;font-size:13px;line-height:1.6}
-.references a{color:var(--accent);overflow-wrap:anywhere}
-.message{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:25px;color:var(--muted)}
-footer{text-align:center;padding:25px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
-@media(max-width:520px){
-  main{padding:25px 14px 55px}
-  h1{font-size:29px}
-  .person-photo{width:115px}
-  table{font-size:11px}
-  th,td{padding:7px}
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d12">
+  <title>Redirecting | KINORA</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
 </head>
 <body>
-<header>
-  <a class="logo" href="index.html">KINORA<span>.</span></a>
-  <nav>
-    <a href="index.html">Explore</a>
-    <a href="my-article.html">My Articles</a>
-  </nav>
-</header>
+  <p>Redirecting to KINORA...</p>
 
-<main id="article">
-  <div class="message">Loading article...</div>
-</main>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
 
-<footer>KINORA · An independent knowledge project</footer>
+    async function redirectArticle() {
+      if (!id) {
+        window.location.replace("index.html");
+        return;
+      }
 
-<script>
-(async()=>{
-  const host=document.getElementById("article");
-  const cfg=window.KINORA_CONFIG||{};
-  const params=new URLSearchParams(location.search);
-  const id=params.get("id");
+      const db = window.supabase.createClient(
+        cfg.SUPABASE_URL,
+        cfg.SUPABASE_ANON_KEY
+      );
 
-  const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  }[c]));
+      const { data, error } = await db
+        .from("articles")
+        .select("category")
+        .eq("id", id)
+        .eq("status", "published")
+        .maybeSingle();
 
-  function safeUrl(value){
-    try{
-      const url=new URL(value,location.href);
-      return ["http:","https:"].includes(url.protocol)?url.href:"";
-    }catch(e){return "";}
-  }
+      if (error || !data) {
+        window.location.replace("index.html");
+        return;
+      }
 
-  function cleanHTML(html){
-    const doc=new DOMParser().parseFromString(String(html||""),"text/html");
-    const allowed=new Set([
-      "P","BR","H2","H3","H4","STRONG","B","EM","I","U",
-      "UL","OL","LI","BLOCKQUOTE","A","IMG","TABLE","THEAD",
-      "TBODY","TR","TH","TD","HR","DIV","SPAN","SUP","SUB"
-    ]);
+      const category = data.category.toLowerCase();
 
-    function clean(node){
-      [...node.childNodes].forEach(child=>{
-        if(child.nodeType===Node.ELEMENT_NODE){
-          if(!allowed.has(child.tagName)){
-            child.replaceWith(...child.childNodes);
-            return;
-          }
-
-          [...child.attributes].forEach(attr=>{
-            if(child.tagName==="A"&&attr.name==="href"){
-              const url=safeUrl(attr.value);
-              if(url)child.setAttribute("href",url);
-              else child.removeAttribute("href");
-            }else if(child.tagName==="IMG"&&attr.name==="src"){
-              const url=safeUrl(attr.value);
-              if(url)child.setAttribute("src",url);
-              else child.removeAttribute("src");
-            }else if(
-              child.tagName==="IMG"&&["alt","title"].includes(attr.name)
-            ){
-              // Keep these image attributes.
-            }else{
-              child.removeAttribute(attr.name);
-            }
-          });
-
-          if(child.tagName==="A"){
-            child.setAttribute("target","_blank");
-            child.setAttribute("rel","noopener noreferrer");
-          }
-          if(child.tagName==="IMG"){
-            child.setAttribute("loading","lazy");
-          }
-          clean(child);
-        }
-      });
+      if (category === "film" || category === "films" ||
+          category === "series" || category === "tv series") {
+        window.location.replace("film.html?id=" + encodeURIComponent(id));
+      } else if (category === "people" || category === "person") {
+        window.location.replace("person.html?id=" + encodeURIComponent(id));
+      } else {
+        window.location.replace("index.html");
+      }
     }
 
-    clean(doc.body);
-    return doc.body.innerHTML;
-  }
-
-  function renderBody(source){
-    const text=String(source||"");
-    if(!text.trim())return "";
-    if(/<\s*[a-z][^>]*>/i.test(text))return cleanHTML(text);
-
-    return text.split(/\n/).map(line=>{
-      const h3=line.match(/^===\s*(.*?)\s*===$/);
-      const h2=line.match(/^==\s*(.*?)\s*==$/);
-      if(h3)return "<h3>"+esc(h3[1])+"</h3>";
-      if(h2)return "<h2>"+esc(h2[1])+"</h2>";
-      return line.trim()?"<p>"+esc(line)+"</p>":"";
-    }).join("");
-  }
-
-  function renderPeople(arr,role){
-    if(!arr?.length)return "";
-    return `
-      <section class="panel">
-        <h2>${role==="position"?"Crew":"Cast"}</h2>
-        <div class="cards">
-          ${arr.map(p=>{
-            const photo=safeUrl(p.person_photo||p.photo||"");
-            const link=p.person_id
-              ?"article.html?id="+encodeURIComponent(p.person_id)
-              :"";
-            return `
-              <a class="person-card" href="${link||"#"}"
-                ${link?"":"onclick='return false'"}>
-                ${photo?`<img src="${esc(photo)}" alt="${esc(p.name)}">`:""}
-                <strong>${esc(p.name)}</strong>
-                <small>${esc(p[role]||"")}</small>
-              </a>`;
-          }).join("")}
-        </div>
-      </section>`;
-  }
-
-  function renderFilm(f){
-    let html="";
-    const poster=safeUrl(f.poster_url||"");
-    if(poster)html+=`<img class="poster" src="${esc(poster)}" alt="Film poster">`;
-
-    const facts=[
-      ["Year",f.year],["Language",f.language],
-      ["Genre",f.genre],["Runtime",f.runtime]
-    ].filter(x=>x[1]);
-
-    if(facts.length){
-      html+=`<section class="panel"><h2>Film information</h2><table>
-      ${facts.map(x=>`<tr><th>${esc(x[0])}</th><td>${esc(x[1])}</td></tr>`).join("")}
-      </table></section>`;
-    }
-
-    if(f.plot)html+=`<section class="panel"><h2>Plot</h2><p>${esc(f.plot)}</p></section>`;
-    html+=renderPeople(f.crew,"position");
-    html+=renderPeople(f.cast,"role");
-
-    if(f.soundtrack?.length){
-      html+=`<details><summary>Soundtrack</summary><table>
-      <tr><th>#</th><th>Title</th><th>Lyrics</th><th>Singer</th><th>Length</th></tr>
-      ${f.soundtrack.map((s,i)=>`<tr><td>${i+1}</td><td>${esc(s.title)}</td><td>${esc(s.lyrics)}</td><td>${esc(s.singer)}</td><td>${esc(s.duration)}</td></tr>`).join("")}
-      </table></details>`;
-    }
-
-    if(f.theatrical_releases?.length){
-      html+=`<details><summary>Theatrical release</summary><table>
-      <tr><th>Country</th><th>Release date</th><th>Certification</th></tr>
-      ${f.theatrical_releases.map(r=>`<tr><td>${r.flag?`<img class="release-icon" src="${esc(safeUrl(r.flag))}" alt="">`:""}${esc(r.country)}</td><td>${esc(r.date)}</td><td>${esc(r.certification)}</td></tr>`).join("")}
-      </table></details>`;
-    }
-
-    if(f.digital_releases?.length){
-      html+=`<details><summary>Digital release</summary><table>
-      <tr><th>Platform</th><th>Release date</th></tr>
-      ${f.digital_releases.map(r=>`<tr><td>${r.icon?`<img class="release-icon" src="${esc(safeUrl(r.icon))}" alt="">`:""}${esc(r.platform)}</td><td>${esc(r.date)}</td></tr>`).join("")}
-      </table></details>`;
-    }
-
-    const b=f.box_office||{};
-    const box=[
-      ["Production budget",b.budget],
-      ["Worldwide gross",b.worldwide_gross],
-      ["Domestic gross",b.domestic_gross],
-      ["Overseas gross",b.overseas_gross],
-      ["Verdict",b.verdict]
-    ].filter(x=>x[1]);
-
-    if(box.length){
-      html+=`<details><summary>Box office</summary><table>
-      ${box.map(x=>`<tr><th>${esc(x[0])}</th><td>${esc(x[1])}</td></tr>`).join("")}
-      ${b.source?`<tr><th>Source</th><td><a href="${esc(safeUrl(b.source))}" target="_blank" rel="noopener">View source</a></td></tr>`:""}
-      </table></details>`;
-    }
-
-    if(f.awards?.length){
-      html+=`<details><summary>Awards and nominations</summary><table>
-      <tr><th>Award</th><th>Category</th><th>Result</th><th>Recipient</th><th>Year</th></tr>
-      ${f.awards.map(a=>`<tr><td>${esc(a.name)}</td><td>${esc(a.category)}</td><td>${esc(a.result)}</td><td>${esc(a.recipient)}</td><td>${esc(a.year)}</td></tr>`).join("")}
-      </table></details>`;
-    }
-    return html;
-  }
-
-  function renderPerson(p){
-    const photo=safeUrl(p.photo_url||"");
-    const facts=[
-      ["Occupation",p.occupation],
-      ["Date of birth",p.date_of_birth],
-      ["Date of death",p.date_of_death],
-      ["Birthplace",p.birthplace],
-      ["Death place",p.deathplace]
-    ].filter(x=>x[1]);
-
-    return `<section class="panel">
-      <h2>Personal information</h2>
-      <div class="person-profile">
-        ${photo?`<img class="person-photo" src="${esc(photo)}" alt="">`:""}
-        <div class="facts">
-          ${facts.map(x=>`<p><strong>${esc(x[0])}:</strong> ${esc(x[1])}</p>`).join("")}
-        </div>
-      </div>
-    </section>`;
-  }
-
-  function renderReferences(refs){
-    if(!Array.isArray(refs)||!refs.length)return "";
-    return `<section class="panel"><h2>References</h2><ol class="references">
-      ${refs.map(c=>{
-        const url=safeUrl(c.url||"");
-        return `<li>${url?`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(c.title||c.url)}</a>`:esc(c.title||"Reference")}
-        ${c.publisher?" — "+esc(c.publisher):""}
-        ${c.date?" ("+esc(c.date)+")":""}</li>`;
-      }).join("")}
-    </ol></section>`;
-  }
-
-  try{
-    if(!id)throw new Error("No article ID was provided. Open an article from the homepage.");
-
-    if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY){
-      throw new Error("Supabase configuration is missing.");
-    }
-
-    const db=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
-    const {data:a,error}=await db.from("articles")
-      .select("id,title,summary,content,body_source,content_blocks,citations,category,status,created_at")
-      .eq("id",id)
-      .eq("status","published")
-      .single();
-
-    if(error||!a)throw new Error("Article not found, or it has not been published.");
-
-    const blocks=Array.isArray(a.content_blocks)?a.content_blocks:[];
-    const film=blocks.find(b=>b.kind==="film");
-    const person=blocks.find(b=>b.kind==="person");
-
-    let subtitle="";
-    if(film){
-      subtitle=film.subtitle||[film.year,film.language,film.genre].filter(Boolean).join(" · ");
-    }else if(person){
-      subtitle=[person.occupation,person.date_of_birth,person.date_of_death].filter(Boolean).join(" · ");
-    }
-
-    let special="";
-    if(film)special=renderFilm(film);
-    if(person)special=renderPerson(person);
-
-    const body=renderBody(a.body_source||a.content||"");
-    const refs=renderReferences(a.citations);
-
-    document.title=a.title+" | KINORA";
-    host.innerHTML=`
-      <p class="eyebrow">${esc(a.category||"ARTICLE")} / KINORA</p>
-      <h1>${esc(a.title)}</h1>
-      ${subtitle?`<p class="subtitle">${esc(subtitle)}</p>`:""}
-      ${a.summary?`<p class="subtitle">${esc(a.summary)}</p>`:""}
-      <div class="meta">Published ${a.created_at?new Date(a.created_at).toLocaleDateString():""}</div>
-      ${special}
-      <section class="panel article-body">${body||"<p>No article body has been added.</p>"}</section>
-      ${refs}
-    `;
-  }catch(e){
-    host.innerHTML=`<div class="message">${esc(e.message||"Could not load this article.")}<p><a href="index.html" style="color:var(--accent)">Return to KINORA homepage</a></p></div>`;
-  }
-})();
-</script>
+    redirectArticle();
+  </script>
 </body>
 </html>
