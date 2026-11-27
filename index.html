@@ -39,6 +39,7 @@
     </div>
   </header>
 
+  <!-- SEARCH -->
   <div class="search-panel" id="searchPanel">
     <div class="search-inner">
       <div class="search-input-wrap">
@@ -65,14 +66,16 @@
     </div>
   </div>
 
+  <!-- NAVIGATION -->
   <nav class="menu-panel" id="menuPanel">
     <a href="profile.html" id="profileLink" hidden>My Profile</a>
     <a href="#" id="watchlistLink" hidden>My Watchlist</a>
     <button id="logoutBtn" class="menu-action" hidden>Log out</button>
 
     <a href="#films">Films & Series</a>
+    <a href="#top-films">Top Films of the Week</a>
     <a href="#people">People</a>
-    <a href="#recent">Recently Added</a>
+    <a href="#top-actors">Top Actors of the Week</a>
     <a href="#cinemas">Currently in Cinemas</a>
     <a href="#about">About KINORA</a>
 
@@ -116,7 +119,7 @@
         </div>
 
         <div class="cinema-decoration" aria-hidden="true">
-          <span> K </span>
+          <span>K</span>
         </div>
       </div>
 
@@ -160,6 +163,27 @@
       <div class="carousel-indicators" id="carouselIndicators"></div>
     </section>
 
+    <!-- TOP FILMS OF THE WEEK -->
+    <section class="section discovery-section" id="top-films">
+
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">WEEKLY TRENDS</p>
+          <h2>Top Films of the Week</h2>
+          <p class="subheading">
+            The productions getting the most attention on KINORA.
+          </p>
+        </div>
+      </div>
+
+      <div class="horizontal-list" id="topFilmsWeekList">
+        <div class="loading-card">
+          Loading weekly film rankings...
+        </div>
+      </div>
+
+    </section>
+
     <!-- FILMS AND SERIES -->
     <section class="section discovery-section" id="films">
 
@@ -198,21 +222,23 @@
 
     </section>
 
-    <!-- RECENTLY ADDED -->
-    <section class="section recent-section" id="recent">
+    <!-- TOP ACTORS OF THE WEEK -->
+    <section class="section people-section" id="top-actors">
 
       <div class="section-heading">
         <div>
-          <p class="eyebrow">FRESH FROM THE ARCHIVE</p>
-          <h2>Recently added</h2>
+          <p class="eyebrow">WEEKLY SPOTLIGHT</p>
+          <h2>Top Actors of the Week</h2>
           <p class="subheading">
-            The latest additions to the KINORA encyclopedia.
+            The actors receiving the most profile views this week.
           </p>
         </div>
       </div>
 
-      <div class="recent-grid" id="recentList">
-        <div class="loading-card">Loading recent additions...</div>
+      <div class="people-grid" id="topActorsWeekList">
+        <div class="loading-card">
+          Loading weekly actor rankings...
+        </div>
       </div>
 
     </section>
