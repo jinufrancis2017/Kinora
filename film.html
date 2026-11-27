@@ -462,6 +462,94 @@ button{font:inherit;cursor:pointer}
     margin:auto;
   }
 }
+
+.film-edit-button{
+  border:1px solid var(--film-border);
+  background:#202633;
+  color:var(--film-text);
+  border-radius:8px;
+  padding:7px 10px;
+  font-size:11px;
+  white-space:nowrap;
+}
+
+.film-section-heading{flex-wrap:wrap}
+
+.film-edit-backdrop{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:50;
+  background:#000c;
+  align-items:center;
+  justify-content:center;
+  padding:14px;
+}
+
+.film-edit-backdrop.open{display:flex}
+
+.film-edit-modal{
+  width:min(620px,100%);
+  max-height:90vh;
+  overflow:auto;
+  background:var(--film-panel);
+  border:1px solid var(--film-border);
+  border-radius:15px;
+  padding:18px;
+}
+
+.film-edit-modal h2{
+  margin:0 0 8px;
+  font-size:19px;
+}
+
+.film-edit-modal p{
+  color:var(--film-muted);
+  font-size:12px;
+  line-height:1.5;
+}
+
+.film-edit-modal textarea{
+  width:100%;
+  min-height:230px;
+  resize:vertical;
+  background:#0b0d12;
+  color:var(--film-text);
+  border:1px solid var(--film-border);
+  border-radius:9px;
+  padding:12px;
+  font:12px/1.6 monospace;
+}
+
+.film-edit-actions{
+  display:flex;
+  gap:9px;
+  justify-content:flex-end;
+  margin-top:12px;
+  flex-wrap:wrap;
+}
+
+.film-edit-actions button{
+  padding:9px 13px;
+  border-radius:8px;
+  border:1px solid var(--film-border);
+  background:#202633;
+  color:var(--film-text);
+}
+
+.film-edit-actions .primary{
+  background:var(--film-accent);
+  color:#080910;
+  border-color:var(--film-accent);
+  font-weight:700;
+}
+
+.film-edit-status{
+  font-size:12px;
+  color:var(--film-muted);
+  margin-top:10px;
+  white-space:pre-wrap;
+}
 </style>
 </head>
 
@@ -500,6 +588,20 @@ button{font:inherit;cursor:pointer}
   </div>
 </div>
 
+<div class="film-edit-backdrop" id="editBackdrop">
+  <div class="film-edit-modal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+    <button class="film-info-close" id="closeEdit" type="button" aria-label="Close">×</button>
+    <h2 id="editTitle">Suggest an edit</h2>
+    <p>Edit only this section. Keep the JSON format valid. Your suggestion will be sent for moderation; the published page will not change immediately.</p>
+    <textarea id="editJSON" spellcheck="false" aria-label="Section data in JSON format"></textarea>
+    <div class="film-edit-status" id="editStatus"></div>
+    <div class="film-edit-actions">
+      <button id="cancelEdit" type="button">Cancel</button>
+      <button class="primary" id="submitEdit" type="button">Submit for review</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (async function(){
 
@@ -530,6 +632,95 @@ button{font:inherit;cursor:pointer}
   );
 
   const $ = id => document.getElementById(id);
+
+  let currentArticle = null;
+  let currentFilm = null;
+  let editingSection = null;
+
+  function sectionValue(key,film){
+    if(key === "overview") return {
+      subtitle: film.subtitle || "",
+      year: film.year || "",
+      language: film.language || "",
+      genre: film.genre || "",
+      runtime: film.runtime || "",
+      poster_url: film.poster_url || "",
+      poster_credit: film.poster_credit || "",
+      plot: film.plot || ""
+    };
+
+    if(key === "box_office") return film.box_office || {};
+
+    if(key === "studios") {
+      return film.studios || film.production_companies || [];
+    }
+
+    return film[key] ?? [];
+  }
+
+  function openSectionEditor(key,label){
+    if(!currentFilm || !currentArticle) return;
+
+    editingSection = key;
+    $("editTitle").textContent = "Suggest edit: " + label;
+    $("editJSON").value = JSON.stringify(
+      sectionValue(key,currentFilm),
+      null,
+      2
+    );
+    $("editStatus").textContent = "";
+    $("editBackdrop").classList.add("open");
+  }
+
+  function closeSectionEditor(){
+    $("editBackdrop").classList.remove("open");
+  }
+
+  async function submitSectionEdit(){
+    const status = $("editStatus");
+    let proposed;
+
+    try {
+      proposed = JSON.parse($("editJSON").value);
+    } catch(e){
+      status.textContent = "Invalid JSON. Please correct the formatting.";
+      return;
+    }
+
+    if(proposed === null || typeof proposed !== "object"){
+      status.textContent = "Enter a JSON object or array.";
+      return;
+    }
+
+    const {data:{user},error:userError} = await db.auth.getUser();
+
+    if(userError || !user){
+      status.textContent = "Please log in before suggesting an edit.";
+      return;
+    }
+
+    const button = $("submitEdit");
+    button.disabled = true;
+    status.textContent = "Submitting your suggestion…";
+
+    const {error} = await db.from("film_section_edits").insert({
+      article_id: currentArticle.id,
+      section_key: editingSection,
+      proposed_data: proposed,
+      status: "pending",
+      submitted_by: user.id
+    });
+
+    button.disabled = false;
+
+    if(error){
+      status.textContent = "Submission failed: " + error.message;
+      return;
+    }
+
+    status.textContent = "Submitted! Your suggestion is pending moderator review.";
+    setTimeout(closeSectionEditor,1200);
+  }
 
   function esc(value){
     return String(value ?? "").replace(/[&<>"']/g,c=>({
@@ -563,16 +754,22 @@ button{font:inherit;cursor:pointer}
 
   function safeImage(url){
     if(typeof url !== "string") return "";
+
     try{
       const parsed = new URL(url,location.href);
-      return ["http:","https:"].includes(parsed.protocol) ? parsed.href : "";
+
+      return ["http:","https:"].includes(parsed.protocol)
+        ? parsed.href
+        : "";
     }catch(e){
       return "";
     }
   }
 
   function renderPeople(items,type){
-    if(!items.length) return showEmpty("No "+type.toLowerCase()+" information available yet.");
+    if(!items.length){
+      return showEmpty("No "+type.toLowerCase()+" information available yet.");
+    }
 
     return `
       <div class="film-scroll">
@@ -603,9 +800,15 @@ button{font:inherit;cursor:pointer}
   }
 
   function dataRows(rows){
-    const valid = rows.filter(row=>row[1] !== undefined && row[1] !== null && row[1] !== "");
+    const valid = rows.filter(row=>
+      row[1] !== undefined &&
+      row[1] !== null &&
+      row[1] !== ""
+    );
 
-    if(!valid.length) return showEmpty("No information available yet.");
+    if(!valid.length){
+      return showEmpty("No information available yet.");
+    }
 
     return `
       <div class="film-data-panel">
@@ -620,7 +823,9 @@ button{font:inherit;cursor:pointer}
   }
 
   function renderAdditionalCrew(items){
-    if(!items.length) return showEmpty("No additional crew information available yet.");
+    if(!items.length){
+      return showEmpty("No additional crew information available yet.");
+    }
 
     return `
       <div class="film-list">
@@ -653,7 +858,9 @@ button{font:inherit;cursor:pointer}
   }
 
   function renderTheatrical(items){
-    if(!items.length) return showEmpty("No theatrical release details available.");
+    if(!items.length){
+      return showEmpty("No theatrical release details available.");
+    }
 
     return `
       <div class="film-list">
@@ -674,7 +881,9 @@ button{font:inherit;cursor:pointer}
   }
 
   function renderDigital(items){
-    if(!items.length) return showEmpty("No digital release details available.");
+    if(!items.length){
+      return showEmpty("No digital release details available.");
+    }
 
     return `
       <div class="film-list">
@@ -700,7 +909,9 @@ button{font:inherit;cursor:pointer}
   }
 
   function renderAwards(items){
-    if(!items.length) return showEmpty("No awards or nominations listed yet.");
+    if(!items.length){
+      return showEmpty("No awards or nominations listed yet.");
+    }
 
     return `
       <div class="film-list">
@@ -722,7 +933,9 @@ button{font:inherit;cursor:pointer}
   }
 
   function renderSoundtrack(items){
-    if(!items.length) return showEmpty("No soundtrack information available.");
+    if(!items.length){
+      return showEmpty("No soundtrack information available.");
+    }
 
     return `
       <div class="film-list">
@@ -757,7 +970,9 @@ button{font:inherit;cursor:pointer}
 
     template.content.querySelectorAll("*").forEach(element=>{
       if(!allowed.has(element.tagName)){
-        element.replaceWith(document.createTextNode(element.textContent || ""));
+        element.replaceWith(
+          document.createTextNode(element.textContent || "")
+        );
         return;
       }
 
@@ -771,15 +986,21 @@ button{font:inherit;cursor:pointer}
 
       if(element.tagName==="A"){
         const href = element.getAttribute("href") || "";
-        if(!/^https?:\/\//i.test(href)) element.removeAttribute("href");
+
+        if(!/^https?:\/\//i.test(href)){
+          element.removeAttribute("href");
+        }
+
         element.setAttribute("rel","noopener noreferrer");
         element.setAttribute("target","_blank");
       }
 
       if(element.tagName==="IMG"){
         const src = safeImage(element.getAttribute("src") || "");
+
         if(src) element.setAttribute("src",src);
         else element.remove();
+
         element.setAttribute("loading","lazy");
       }
     });
@@ -790,6 +1011,7 @@ button{font:inherit;cursor:pointer}
   function switchTab(tabName){
     document.querySelectorAll(".film-tab").forEach(button=>{
       const active = button.dataset.tab===tabName;
+
       button.classList.toggle("active",active);
       button.setAttribute("aria-selected",String(active));
     });
@@ -808,6 +1030,9 @@ button{font:inherit;cursor:pointer}
   }
 
   function render(article,film){
+
+    currentArticle = article;
+    currentFilm = film;
 
     const title = article.title || "Untitled film";
     const year = film.year || "";
@@ -885,10 +1110,15 @@ button{font:inherit;cursor:pointer}
 
       </section>
 
+      <div class="film-section-heading" style="justify-content:flex-end;margin-top:10px">
+        <button class="film-edit-button" data-edit="overview" type="button">Suggest overview edit</button>
+      </div>
+
       <section class="film-section">
         <div class="film-section-heading">
           <h2>Cast</h2>
           <span class="film-person-role">${cast.length} entries</span>
+          <button class="film-edit-button" data-edit="cast" type="button">Suggest edit</button>
         </div>
         ${renderPeople(cast,"Cast")}
       </section>
@@ -897,6 +1127,7 @@ button{font:inherit;cursor:pointer}
         <div class="film-section-heading">
           <h2>Crew</h2>
           <span class="film-person-role">${crew.length} entries</span>
+          <button class="film-edit-button" data-edit="crew" type="button">Suggest edit</button>
         </div>
         ${renderPeople(crew,"Crew")}
       </section>
@@ -904,6 +1135,7 @@ button{font:inherit;cursor:pointer}
       <section class="film-section">
         <div class="film-section-heading">
           <h2>Box office</h2>
+          <button class="film-edit-button" data-edit="box_office" type="button">Suggest edit</button>
         </div>
         ${dataRows([
           ["Budget",box.budget],
@@ -917,10 +1149,14 @@ button{font:inherit;cursor:pointer}
       <section class="film-section">
         <div class="film-section-heading">
           <h2>Production companies / Studios</h2>
+          <button class="film-edit-button" data-edit="studios" type="button">Suggest edit</button>
         </div>
         ${
           Array.isArray(studios)
-            ? dataRows(studios.map((s,i)=>["Studio "+(i+1),typeof s==="string"?s:s.name]))
+            ? dataRows(studios.map((s,i)=>[
+                "Studio "+(i+1),
+                typeof s==="string"?s:s.name
+              ]))
             : dataRows([["Studios",studios]])
         }
       </section>
@@ -931,21 +1167,40 @@ button{font:inherit;cursor:pointer}
         </nav>
 
         <div class="film-tab-content" id="tab-additional" hidden>
+          <div class="film-section-heading">
+            <h3>Additional crew</h3>
+            <button class="film-edit-button" data-edit="additional_crew" type="button">Suggest edit</button>
+          </div>
           ${renderAdditionalCrew(additionalCrew)}
         </div>
 
         <div class="film-tab-content" id="tab-releases" hidden>
-          <h3>Theatrical releases</h3>
+          <div class="film-section-heading">
+            <h3>Theatrical releases</h3>
+            <button class="film-edit-button" data-edit="theatrical_releases" type="button">Suggest edit</button>
+          </div>
           ${renderTheatrical(theatrical)}
-          <h3 style="margin-top:25px">Digital releases</h3>
+
+          <div class="film-section-heading" style="margin-top:25px">
+            <h3>Digital releases</h3>
+            <button class="film-edit-button" data-edit="digital_releases" type="button">Suggest edit</button>
+          </div>
           ${renderDigital(digital)}
         </div>
 
         <div class="film-tab-content" id="tab-awards" hidden>
+          <div class="film-section-heading">
+            <h3>Awards</h3>
+            <button class="film-edit-button" data-edit="awards" type="button">Suggest edit</button>
+          </div>
           ${renderAwards(awards)}
         </div>
 
         <div class="film-tab-content" id="tab-soundtrack" hidden>
+          <div class="film-section-heading">
+            <h3>Soundtrack</h3>
+            <button class="film-edit-button" data-edit="soundtrack" type="button">Suggest edit</button>
+          </div>
           ${renderSoundtrack(soundtrack)}
         </div>
 
@@ -964,6 +1219,27 @@ button{font:inherit;cursor:pointer}
       ` : ""}
 
     `;
+
+    document.querySelectorAll("[data-edit]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        const key = button.dataset.edit;
+
+        const labels = {
+          overview:"Overview",
+          cast:"Cast",
+          crew:"Crew",
+          box_office:"Box office",
+          studios:"Studios",
+          additional_crew:"Additional crew",
+          theatrical_releases:"Theatrical releases",
+          digital_releases:"Digital releases",
+          awards:"Awards",
+          soundtrack:"Soundtrack"
+        };
+
+        openSectionEditor(key,labels[key] || key);
+      });
+    });
 
     document.querySelectorAll(".film-tab").forEach(button=>{
       button.addEventListener("click",()=>{
@@ -1019,6 +1295,17 @@ button{font:inherit;cursor:pointer}
     });
   }
 
+  $("closeEdit").addEventListener("click",closeSectionEditor);
+  $("cancelEdit").addEventListener("click",closeSectionEditor);
+
+  $("submitEdit").addEventListener("click",submitSectionEdit);
+
+  $("editBackdrop").addEventListener("click",event=>{
+    if(event.target === $("editBackdrop")){
+      closeSectionEditor();
+    }
+  });
+
   $("closeInfo").addEventListener("click",()=>{
     $("infoBackdrop").classList.remove("open");
   });
@@ -1061,6 +1348,7 @@ button{font:inherit;cursor:pointer}
 
   }catch(error){
     console.error(error);
+
     host.innerHTML = `
       <div class="film-error">
         Could not load this film article.<br>
