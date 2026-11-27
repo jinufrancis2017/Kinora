@@ -326,13 +326,58 @@ function getSongContributions(film,article){
 }
 
 function renderSongs(songs){
+  function renderSongs(songs){
+  const section=$("musicSection");
   const host=$("songsContent");
   const count=$("songsCount");
+
+  // Hide the entire section when there are no contributions.
+  if(!songs.length){
+    section.style.display="none";
+    host.innerHTML="";
+    return;
+  }
+
+  // Show only when actual contributions exist.
+  section.style.display="";
   count.textContent=`${songs.length} ${songs.length===1?"song":"songs"}`;
 
-  if(!songs.length){
-    host.innerHTML=`<div class="person-empty">No published soundtrack contributions yet.</div>`;
-    return;
+  host.innerHTML=`
+    <details class="songs-dropdown">
+      <summary>
+        <div class="songs-summary-left">
+          <div class="songs-icon">♫</div>
+          <div>
+            <div class="songs-summary-title">Songs</div>
+            <div class="songs-summary-count">${songs.length} ${songs.length===1?"song":"songs"} credited to this person</div>
+          </div>
+        </div>
+        <span class="songs-chevron">⌄</span>
+      </summary>
+      <div class="songs-content">
+        ${songs.map(song=>{
+          const cover=safeImage(song.albumCover);
+          return `
+            <article class="song-entry">
+              ${cover
+                ?`<img class="song-cover" src="${esc(cover)}" alt="${esc(song.filmTitle)} soundtrack cover" loading="lazy">`
+                :`<div class="song-cover-placeholder">♫</div>`}
+              <div class="song-entry-info">
+                <div class="song-entry-title">${esc(song.title)}</div>
+                <a class="song-entry-film" href="film.html?id=${encodeURIComponent(song.filmId)}">
+                  ${esc(song.filmTitle)}${song.year?" · "+esc(song.year):""}
+                </a>
+                <div class="song-entry-meta">
+                  ${song.roles.map(role=>`<span class="song-role-tag">${esc(role)}</span>`).join("")}
+                  ${song.duration?`<span class="song-duration">${esc(song.duration)}</span>`:""}
+                </div>
+              </div>
+            </article>
+          `;
+        }).join("")}
+      </div>
+    </details>
+  `;
   }
 
   host.innerHTML=`
