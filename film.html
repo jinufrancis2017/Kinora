@@ -1221,25 +1221,36 @@ button{font:inherit;cursor:pointer}
     `;
 
     document.querySelectorAll("[data-edit]").forEach(button=>{
-      button.addEventListener("click",()=>{
-        const key = button.dataset.edit;
+  button.addEventListener("click",()=>{
+    const key = button.dataset.edit;
 
-        const labels = {
-          overview:"Overview",
-          cast:"Cast",
-          crew:"Crew",
-          box_office:"Box office",
-          studios:"Studios",
-          additional_crew:"Additional crew",
-          theatrical_releases:"Theatrical releases",
-          digital_releases:"Digital releases",
-          awards:"Awards",
-          soundtrack:"Soundtrack"
-        };
+    const dedicatedSections = [
+      "cast",
+      "crew",
+      "additional_crew"
+    ];
 
-        openSectionEditor(key,labels[key] || key);
-      });
-    });
+    if(dedicatedSections.includes(key)){
+      const url = new URL("film-editor.html",location.href);
+      url.searchParams.set("id",currentArticle.id);
+      url.searchParams.set("section",key);
+      location.href = url.href;
+      return;
+    }
+
+    const labels = {
+      overview:"Overview",
+      box_office:"Box office",
+      studios:"Studios",
+      theatrical_releases:"Theatrical releases",
+      digital_releases:"Digital releases",
+      awards:"Awards",
+      soundtrack:"Soundtrack"
+    };
+
+    openSectionEditor(key,labels[key] || key);
+  });
+});
 
     document.querySelectorAll(".film-tab").forEach(button=>{
       button.addEventListener("click",()=>{
