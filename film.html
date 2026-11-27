@@ -182,6 +182,68 @@ button{font:inherit;cursor:pointer}
 }
 .film-list-item strong{font-size:13px;display:block}
 .film-list-item small{color:var(--film-muted);display:block;margin-top:5px;font-size:11px;line-height:1.5}
+
+/* Soundtrack layout */
+.soundtrack-cover-area{
+  display:flex;align-items:center;gap:13px;
+  margin-bottom:15px;padding:12px;
+  border:1px solid var(--film-border);
+  border-radius:12px;
+  background:rgba(255,255,255,.025)
+}
+.soundtrack-cover{
+  width:76px;height:76px;flex-shrink:0;
+  object-fit:cover;border-radius:9px;
+  background:#202633;border:1px solid var(--film-border)
+}
+.soundtrack-cover-placeholder{
+  width:76px;height:76px;flex-shrink:0;
+  display:grid;place-items:center;border-radius:9px;
+  background:linear-gradient(145deg,#202633,#141923);
+  color:var(--film-muted);font-size:25px
+}
+.soundtrack-cover-caption{
+  color:var(--film-muted);font-size:11px;line-height:1.5
+}
+.soundtrack-track{
+  padding:13px 14px;
+  border:1px solid var(--film-border);
+  border-radius:11px;
+  background:linear-gradient(120deg,rgba(255,255,255,.05),rgba(255,255,255,.015))
+}
+.soundtrack-track-top{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:12px
+}
+.soundtrack-track-title{
+  font-size:13px;font-weight:700;line-height:1.5;
+  overflow-wrap:anywhere
+}
+.soundtrack-duration{
+  flex-shrink:0;color:var(--film-muted);font-size:11px;
+  padding:3px 8px;border-radius:20px;
+  background:rgba(255,255,255,.055);
+  border:1px solid var(--film-border)
+}
+.soundtrack-credits{
+  display:flex;flex-direction:column;gap:5px;margin-top:9px
+}
+.soundtrack-credit-line{
+  display:flex;align-items:flex-start;gap:7px;
+  font-size:11px;line-height:1.55
+}
+.soundtrack-credit-label{
+  flex:0 0 105px;color:var(--film-muted)
+}
+.soundtrack-credit-names{
+  min-width:0;color:#d5dbea;overflow-wrap:anywhere
+}
+.soundtrack-credit-names a{
+  color:var(--film-text);text-decoration:none
+}
+.soundtrack-credit-names a:hover{color:var(--film-accent)}
+.soundtrack-credit-separator{color:var(--film-muted)}
+
 .film-award{
   background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.018));
   border:1px solid var(--film-border);border-radius:12px;padding:16px;
@@ -234,6 +296,7 @@ button{font:inherit;cursor:pointer}
 @media(max-width:380px){
   .film-hero{grid-template-columns:1fr}
   .film-poster,.film-poster-placeholder{width:min(190px,100%);margin:auto}
+  .soundtrack-credit-label{flex-basis:90px}
 }
 </style>
 </head>
@@ -522,28 +585,104 @@ button{font:inherit;cursor:pointer}
     `;
   }
 
-  function renderSoundtrack(items){
+  // Supports the new multi-person credit arrays and older single-person fields.
+  function getSoundtrackCredits(song,key,legacyKey){
+    const value=song[key];
+
+    if(Array.isArray(value)){
+      return value.map(person=>{
+        if(typeof person==="string"){
+          return {name:person.trim(),person_id:""};
+        }
+        return {
+          name:String(person?.name||"").trim(),
+          person_id:person?.person_id||""
+        };
+      }).filter(person=>person.name);
+    }
+
+    const legacy=String(song[legacyKey]||"").trim();
+    if(!legacy) return [];
+
+    return legacy.split(",").map(name=>({
+      name:name.trim(),
+      person_id:""
+    })).filter(person=>person.name);
+  }
+
+  function renderSoundtrackCredits(song){
+    const roles=[
+      ["music_directors","music_director","Music Director"],
+      ["composers","composer","Composer"],
+      ["singers","singer","Singer"],
+      ["lyricists","lyricist","Lyricist"]
+    ];
+
+    const lines=roles.map(([key,legacy,label])=>{
+      const people=getSoundtrackCredits(song,key,legacy);
+      if(!people.length) return "";
+
+      const names=people.map(person=>{
+        const name=esc(person.name);
+        return person.person_id
+          ? `<a href="person.html?id=${encodeURIComponent(person.person_id)}">${name}</a>`
+          : name;
+      }).join('<span class="soundtrack-credit-separator">, </span>');
+
+      return `
+        <div class="soundtrack-credit-line">
+          <span class="soundtrack-credit-label">${label}</span>
+          <span class="soundtrack-credit-names">${names}</span>
+        </div>
+      `;
+    }).filter(Boolean);
+
+    return lines.join("");
+  }
+
+  function renderSoundtrack(items,film){
     if(!items.length) return showEmpty("No music or soundtrack information available.");
 
+    const coverUrl=safeImage(
+      film.soundtrack_cover ||
+      items.find(song=>song.album_cover)?.album_cover ||
+      ""
+    );
+
+    const cover=coverUrl
+      ? `
+        <div class="soundtrack-cover-area">
+          <img class="soundtrack-cover" src="${esc(coverUrl)}" alt="Soundtrack album cover" loading="lazy">
+          <div class="soundtrack-cover-caption">
+            <strong>Music &amp; Soundtrack</strong><br>
+            Official soundtrack / album artwork
+          </div>
+        </div>
+      `
+      : "";
+
     return `
+      ${cover}
       <div class="film-list">
-        ${items.map(song=>{
-          const details=[
-            song.music_director?"Music: "+song.music_director:"",
-            song.composer?"Composer: "+song.composer:"",
-            song.singer?"Singer: "+song.singer:"",
-            song.lyricist?"Lyrics: "+song.lyricist:"",
-            song.duration||""
-          ].filter(Boolean);
+        ${items.map((song,index)=>{
+          const title=song.title||song.name||"Untitled track";
+          const credits=renderSoundtrackCredits(song);
 
           return `
-            <div class="film-list-item">
-              <div class="film-list-icon">♫</div>
-              <div>
-                <strong>${esc(song.title||song.name||"Untitled track")}</strong>
-                <small>${details.map(esc).join(" · ")}</small>
+            <article class="soundtrack-track">
+              <div class="soundtrack-track-top">
+                <div class="soundtrack-track-title">
+                  ${String(index+1).padStart(2,"0")}. ${esc(title)}
+                </div>
+                ${song.duration
+                  ? `<span class="soundtrack-duration">${esc(song.duration)}</span>`
+                  : ""}
               </div>
-            </div>
+
+              ${credits
+                ? `<div class="soundtrack-credits">${credits}</div>`
+                : ""}
+            </article>
           `;
         }).join("")}
       </div>
@@ -784,7 +923,7 @@ button{font:inherit;cursor:pointer}
           <h3>Music &amp; Soundtrack</h3>
           <button class="film-edit-button" data-edit="soundtrack" type="button">Suggest edit</button>
         </div>
-        ${renderSoundtrack(soundtrack)}
+        ${renderSoundtrack(soundtrack,film)}
       </div>
 
       ${hasArticle?`
