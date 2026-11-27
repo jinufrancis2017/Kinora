@@ -445,6 +445,7 @@ function formatDate(value) {
   return String(value);
 }
 
+
 function getRoleEntries(film, personId) {
   const entries = [];
 
@@ -464,22 +465,27 @@ function getRoleEntries(film, personId) {
         return;
       }
 
-      let role = "";
+      let roles = [];
 
       if (section.key === "cast") {
-        role = "Actor";
+        roles = ["Actor"];
       } else {
-        role = person.position || person.role || section.fallback;
+        const role = String(
+          person.position || person.role || section.fallback
+        );
+
+        roles = role.split(",")
+          .map(item => item.trim())
+          .filter(Boolean);
       }
 
-      role = String(role).trim() || section.fallback;
-
-      entries.push(role);
+      entries.push(...roles);
     });
   });
 
   return [...new Set(entries)];
 }
+
 
 function renderFilmCard(film) {
   const poster = safeImage(film.poster);
