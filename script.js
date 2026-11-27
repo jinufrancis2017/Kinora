@@ -290,7 +290,9 @@ function getPersonImage(article) {
 
       <div class="search-result-list">
         ${matches.map(article => {
-          const poster = isFilmOrSeries(article) ? getPoster(article) : "";
+          const poster = isPerson(article)
+  ? getPersonImage(article)
+  : getPoster(article);
 
           return `
             <a class="search-result" href="${articleURL(article)}">
