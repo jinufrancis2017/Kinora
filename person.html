@@ -1,0 +1,678 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0d12">
+<title>Person | KINORA</title>
+
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<style>
+:root {
+  --person-accent: #a78bfa;
+  --person-bg: #0b0d12;
+  --person-card: #12151d;
+  --person-muted: #9298a7;
+  --person-border: rgba(255,255,255,.09);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--person-bg);
+  color: #f5f5f7;
+  font-family: Arial, sans-serif;
+}
+
+a { color: inherit; text-decoration: none; }
+
+.person-page {
+  width: min(1120px, 92%);
+  margin: auto;
+  padding: 30px 0 80px;
+}
+
+.person-back {
+  display: inline-block;
+  color: var(--person-muted);
+  font-size: 13px;
+  margin-bottom: 28px;
+}
+
+.person-back:hover { color: var(--person-accent); }
+
+.person-hero {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 34px;
+  align-items: center;
+  padding: 28px;
+  background: linear-gradient(135deg, #171b25, #10131a);
+  border: 1px solid var(--person-border);
+  border-radius: 22px;
+}
+
+.person-photo-wrap {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 15px;
+  overflow: hidden;
+  background: #202431;
+}
+
+.person-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.person-photo-placeholder {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--person-muted);
+  font-size: 54px;
+}
+
+.person-label {
+  color: var(--person-accent);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.person-name {
+  font-size: clamp(32px, 5vw, 54px);
+  line-height: 1.05;
+  margin: 0 0 12px;
+  letter-spacing: -1.5px;
+}
+
+.person-occupation {
+  color: var(--person-muted);
+  font-size: 15px;
+  margin-bottom: 22px;
+}
+
+.person-bio {
+  color: #c5c9d3;
+  font-size: 15px;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+.person-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.person-fact {
+  padding: 14px;
+  background: rgba(255,255,255,.035);
+  border: 1px solid var(--person-border);
+  border-radius: 12px;
+}
+
+.person-fact-label {
+  color: var(--person-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 7px;
+}
+
+.person-fact-value {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.person-section {
+  margin-top: 48px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.section-heading h2 {
+  font-size: 23px;
+  margin: 0;
+  letter-spacing: -.5px;
+}
+
+.section-count {
+  color: var(--person-muted);
+  font-size: 12px;
+}
+
+.role-section {
+  margin-top: 28px;
+}
+
+.role-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.role-heading h3 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.role-line {
+  flex: 1;
+  height: 1px;
+  background: var(--person-border);
+}
+
+.film-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: 17px;
+}
+
+.film-card {
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 13px;
+  background: var(--person-card);
+  border: 1px solid var(--person-border);
+  transition: transform .2s, border-color .2s;
+}
+
+.film-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--person-accent);
+}
+
+.film-poster {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  display: block;
+  background: #202431;
+}
+
+.film-poster-placeholder {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  display: grid;
+  place-items: center;
+  color: var(--person-muted);
+  background: #202431;
+  font-size: 30px;
+}
+
+.film-info { padding: 12px; }
+
+.film-title {
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.film-year {
+  color: var(--person-muted);
+  font-size: 11px;
+  margin-top: 6px;
+}
+
+.show-all {
+  display: block;
+  margin: 16px auto 0;
+  padding: 10px 17px;
+  background: transparent;
+  color: var(--person-accent);
+  border: 1px solid var(--person-accent);
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.show-all:hover {
+  background: var(--person-accent);
+  color: #090b10;
+}
+
+.person-empty {
+  padding: 30px;
+  text-align: center;
+  color: var(--person-muted);
+  border: 1px dashed var(--person-border);
+  border-radius: 15px;
+  font-size: 13px;
+}
+
+.person-error {
+  text-align: center;
+  padding: 100px 20px;
+}
+
+.person-error h1 { font-size: 28px; }
+.person-error p { color: var(--person-muted); }
+
+.person-footer {
+  border-top: 1px solid var(--person-border);
+  margin-top: 60px;
+  padding-top: 20px;
+  color: var(--person-muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+@media(max-width:650px) {
+  .person-page { padding-top: 20px; }
+
+  .person-hero {
+    grid-template-columns: 1fr;
+    gap: 22px;
+    padding: 18px;
+  }
+
+  .person-photo-wrap {
+    width: min(220px, 75%);
+    margin: auto;
+  }
+
+  .person-name { font-size: 36px; }
+
+  .person-facts { grid-template-columns: 1fr 1fr; }
+
+  .film-grid {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 12px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<main class="person-page" id="personPage">
+  <a class="person-back" href="index.html">← Back to KINORA</a>
+
+  <div class="person-empty">Loading profile...</div>
+</main>
+
+<script>
+const db = window.supabase.createClient(
+  window.KINORA_CONFIG.SUPABASE_URL,
+  window.KINORA_CONFIG.SUPABASE_ANON_KEY
+);
+
+const params = new URLSearchParams(location.search);
+const personId = params.get("id");
+
+const $ = id => document.getElementById(id);
+
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+function safeImage(url) {
+  if (!url) return "";
+  try {
+    const parsed = new URL(url);
+    return ["https:", "http:"].includes(parsed.protocol) ? parsed.href : "";
+  } catch {
+    return "";
+  }
+}
+
+function getBlocks(article) {
+  if (Array.isArray(article.content_blocks)) {
+    return article.content_blocks;
+  }
+
+  if (article.content_blocks && typeof article.content_blocks === "object") {
+    return [article.content_blocks];
+  }
+
+  return [];
+}
+
+function getPersonBlock(article) {
+  return getBlocks(article).find(block => block.kind === "person")
+    || getBlocks(article)[0]
+    || {};
+}
+
+function getFilmBlock(article) {
+  return getBlocks(article).find(block => block.kind === "film")
+    || getBlocks(article)[0]
+    || {};
+}
+
+function formatDate(value) {
+  if (!value) return "";
+  return String(value);
+}
+
+function getRoleEntries(film, personId) {
+  const entries = [];
+
+  const sections = [
+    { key: "crew", fallback: "Crew" },
+    { key: "cast", fallback: "Actor" },
+    { key: "additional_crew", fallback: "Additional Crew" }
+  ];
+
+  sections.forEach(section => {
+    const people = Array.isArray(film[section.key])
+      ? film[section.key]
+      : [];
+
+    people.forEach(person => {
+      if (String(person.person_id || "") !== String(personId)) return;
+
+      let role = "";
+
+      if (section.key === "cast") {
+        role = "Actor";
+      } else {
+        role = person.position || person.role || section.fallback;
+      }
+
+      role = String(role).trim() || section.fallback;
+
+      entries.push(role);
+    });
+  });
+
+  return [...new Set(entries)];
+}
+
+function renderFilmCard(film) {
+  const poster = safeImage(film.poster);
+  const posterHTML = poster
+    ? `<img class="film-poster" src="${esc(poster)}" alt="${esc(film.title)}" loading="lazy">`
+    : `<div class="film-poster-placeholder">🎬</div>`;
+
+  return `
+    <a class="film-card" href="film.html?id=${encodeURIComponent(film.id)}">
+      ${posterHTML}
+      <div class="film-info">
+        <div class="film-title">${esc(film.title)}</div>
+        ${film.year ? `<div class="film-year">${esc(film.year)}</div>` : ""}
+      </div>
+    </a>
+  `;
+}
+
+function renderRoleGroups(entries) {
+  const host = document.getElementById("filmographyContent");
+
+  if (!entries.length) {
+    host.innerHTML = `
+      <div class="person-empty">
+        No linked published films yet.
+      </div>
+    `;
+    return;
+  }
+
+  const groups = {};
+
+  entries.forEach(entry => {
+    entry.roles.forEach(role => {
+      const key = role.trim().toLowerCase();
+
+      if (!groups[key]) {
+        groups[key] = {
+          name: role,
+          films: []
+        };
+      }
+
+      if (!groups[key].films.some(film => film.id === entry.id)) {
+        groups[key].films.push(entry);
+      }
+    });
+  });
+
+  const sortedGroups = Object.values(groups).sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+
+  host.innerHTML = sortedGroups.map((group, index) => {
+    group.films.sort((a, b) =>
+      String(b.year || "").localeCompare(String(a.year || ""))
+    );
+
+    const visible = group.films.slice(0, 5);
+
+    return `
+      <section class="role-section">
+        <div class="role-heading">
+          <h3>${esc(group.name)}</h3>
+          <div class="role-line"></div>
+          <span class="section-count">${group.films.length} films</span>
+        </div>
+
+        <div class="film-grid" id="roleGrid${index}">
+          ${visible.map(renderFilmCard).join("")}
+        </div>
+
+        ${group.films.length > 5 ? `
+          <button class="show-all" type="button"
+            onclick="toggleRoleFilms(${index})"
+            id="roleButton${index}">
+            Show all ${group.films.length} films
+          </button>
+        ` : ""}
+      </section>
+    `;
+  }).join("");
+
+  window.__kinoraRoleGroups = sortedGroups;
+}
+
+window.toggleRoleFilms = function(index) {
+  const group = window.__kinoraRoleGroups[index];
+  const grid = document.getElementById("roleGrid" + index);
+  const button = document.getElementById("roleButton" + index);
+
+  if (!group || !grid || !button) return;
+
+  const expanded = button.dataset.expanded === "true";
+
+  grid.innerHTML = (expanded
+    ? group.films.slice(0, 5)
+    : group.films
+  ).map(renderFilmCard).join("");
+
+  button.dataset.expanded = String(!expanded);
+  button.textContent = expanded
+    ? `Show all ${group.films.length} films`
+    : "Show less";
+};
+
+function renderProfile(article, person) {
+  const photo = safeImage(person.photo_url || person.person_photo || "");
+  const occupation = person.occupation || person.subtitle || "";
+
+  const facts = [
+    ["Date of birth", formatDate(person.date_of_birth)],
+    ["Date of death", formatDate(person.date_of_death)],
+    ["Birthplace", person.birthplace],
+    ["Place of death", person.deathplace]
+  ].filter(item => item[1]);
+
+  $("personPage").innerHTML = `
+    <a class="person-back" href="index.html">← Back to KINORA</a>
+
+    <section class="person-hero">
+      <div class="person-photo-wrap">
+        ${photo
+          ? `<img class="person-photo" src="${esc(photo)}" alt="${esc(article.title)}">`
+          : `<div class="person-photo-placeholder">👤</div>`
+        }
+      </div>
+
+      <div class="person-details">
+        <div class="person-label">KINORA · PEOPLE</div>
+        <h1 class="person-name">${esc(article.title)}</h1>
+        ${occupation
+          ? `<div class="person-occupation">${esc(occupation)}</div>`
+          : ""
+        }
+
+        ${person.bio || person.biography
+          ? `<div class="person-bio">${esc(person.bio || person.biography)}</div>`
+          : ""
+        }
+
+        ${facts.length ? `
+          <div class="person-facts">
+            ${facts.map(fact => `
+              <div class="person-fact">
+                <div class="person-fact-label">${esc(fact[0])}</div>
+                <div class="person-fact-value">${esc(fact[1])}</div>
+              </div>
+            `).join("")}
+          </div>
+        ` : ""}
+      </div>
+    </section>
+
+    <section class="person-section">
+      <div class="section-heading">
+        <h2>Filmography</h2>
+        <span class="section-count" id="filmCount">Loading...</span>
+      </div>
+
+      <div id="filmographyContent">
+        <div class="person-empty">Finding linked films...</div>
+      </div>
+    </section>
+
+    <footer class="person-footer">
+      KINORA · An independent encyclopedia of cinema
+    </footer>
+  `;
+}
+
+async function loadFilmography() {
+  const { data, error } = await db
+    .from("articles")
+    .select("id,title,content_blocks")
+    .eq("category", "Film")
+    .eq("status", "published")
+    .limit(1000);
+
+  if (error) throw error;
+
+  const entries = [];
+
+  (data || []).forEach(article => {
+    const film = getFilmBlock(article);
+    const roles = getRoleEntries(film, personId);
+
+    if (!roles.length) return;
+
+    entries.push({
+      id: article.id,
+      title: article.title,
+      year: film.year || "",
+      poster: film.poster_url || "",
+      roles
+    });
+  });
+
+  $("filmCount").textContent =
+    `${entries.length} ${entries.length === 1 ? "film" : "films"}`;
+
+  renderRoleGroups(entries);
+}
+
+async function loadPerson() {
+  if (!personId) {
+    $("personPage").innerHTML = `
+      <div class="person-error">
+        <h1>Profile not found</h1>
+        <p>No person ID was provided.</p>
+        <a class="person-back" href="index.html">← Back to KINORA</a>
+      </div>
+    `;
+    return;
+  }
+
+  try {
+    const { data: article, error } = await db
+      .from("articles")
+      .select("id,title,summary,content_blocks,category,status")
+      .eq("id", personId)
+      .eq("category", "People")
+      .eq("status", "published")
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!article) {
+      $("personPage").innerHTML = `
+        <div class="person-error">
+          <h1>Profile unavailable</h1>
+          <p>This People article may not be published or may not exist.</p>
+          <a class="person-back" href="index.html">← Back to KINORA</a>
+        </div>
+      `;
+      return;
+    }
+
+    const person = getPersonBlock(article);
+
+    renderProfile(article, person);
+
+    try {
+      await loadFilmography();
+    } catch (error) {
+      console.error(error);
+      $("filmographyContent").innerHTML = `
+        <div class="person-empty">
+          Could not load filmography. ${esc(error.message)}
+        </div>
+      `;
+      $("filmCount").textContent = "";
+    }
+
+    document.title = `${article.title} | KINORA`;
+
+  } catch (error) {
+    console.error(error);
+
+    $("personPage").innerHTML = `
+      <div class="person-error">
+        <h1>Something went wrong</h1>
+        <p>${esc(error.message)}</p>
+        <a class="person-back" href="index.html">← Back to KINORA</a>
+      </div>
+    `;
+  }
+}
+
+loadPerson();
+</script>
+
+</body>
+</html>
