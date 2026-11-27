@@ -1014,7 +1014,17 @@ button{font:inherit;cursor:pointer}
       host.innerHTML='<div class="film-error">This article does not contain valid film information.</div>';
       return;
     }
+// Record one visit to this published film page.
+const {error:viewError} = await db
+  .from("page_views")
+  .insert({
+    article_id: article.id,
+    category: "Film"
+  });
 
+if(viewError){
+  console.warn("Could not record film page view:", viewError);
+}
     await refreshPeoplePhotos(film);
     render(article,film);
 
