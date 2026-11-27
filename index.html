@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101014">
 
   <title>KINORA — Film & Series Encyclopedia</title>
@@ -11,18 +11,14 @@
 
   <link rel="stylesheet" href="style.css">
 
-  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
-
-  <!-- KINORA scripts -->
   <script src="script.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 
 <body>
 
-  <!-- HEADER -->
   <header class="navbar">
     <a href="index.html" class="logo">KINORA<span>.</span></a>
 
@@ -43,36 +39,51 @@
     </div>
   </header>
 
-  <!-- SEARCH -->
   <div class="search-panel" id="searchPanel">
-    <input type="search" id="searchInput"
-      placeholder="Search films, series and people...">
-    <button id="closeSearch">✕</button>
+    <div class="search-inner">
+      <div class="search-input-wrap">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m16 16 5 5"></path>
+        </svg>
+
+        <input
+          type="search"
+          id="searchInput"
+          placeholder="Search films, actors, directors, crew..."
+          autocomplete="off"
+        >
+
+        <button id="closeSearch" aria-label="Close search">✕</button>
+      </div>
+
+      <div id="searchResults" class="search-results" aria-live="polite">
+        <p class="search-hint">
+          Search across films, series, actors and crew members.
+        </p>
+      </div>
+    </div>
   </div>
 
-  <!-- MENU -->
   <nav class="menu-panel" id="menuPanel">
-
-    <!-- Logged-in users -->
     <a href="profile.html" id="profileLink" hidden>My Profile</a>
     <a href="#" id="watchlistLink" hidden>My Watchlist</a>
     <button id="logoutBtn" class="menu-action" hidden>Log out</button>
 
-    <a href="#">Films</a>
-    <a href="#">Series</a>
-    <a href="#">People</a>
-    <a href="#">Recently Added</a>
-    <a href="#">About KINORA</a>
+    <a href="#films">Films & Series</a>
+    <a href="#people">People</a>
+    <a href="#recent">Recently Added</a>
+    <a href="#cinemas">Currently in Cinemas</a>
+    <a href="#about">About KINORA</a>
 
-    <!-- Guests -->
     <a href="login.html" id="accountLink">Sign In / Register</a>
-
   </nav>
 
   <main>
 
-    <!-- CINEMAS -->
-    <section class="section cinema-section">
+    <!-- CINEMA / BIG SCREEN -->
+    <section class="section cinema-section" id="cinemas">
+
       <div class="section-heading">
         <div>
           <p class="eyebrow">ON THE BIG SCREEN</p>
@@ -82,26 +93,54 @@
           </p>
         </div>
 
-        <button class="text-btn" id="locationBtn">
+        <button class="text-btn location-button" id="locationBtn">
           <span>⌖</span> Location
         </button>
       </div>
 
+      <div class="cinema-feature">
+        <div class="cinema-glow"></div>
+
+        <div class="cinema-feature-content">
+          <span class="cinema-label">THE CINEMA EXPERIENCE</span>
+          <h3>Stories made for the big screen.</h3>
+          <p>
+            Discover theatrical releases and explore the films
+            making their way to cinemas.
+          </p>
+
+          <span class="cinema-status">
+            <span class="status-dot"></span>
+            Live cinema listings coming soon
+          </span>
+        </div>
+
+        <div class="cinema-decoration" aria-hidden="true">
+          <span> K </span>
+        </div>
+      </div>
+
       <div class="horizontal-list" id="cinemaList">
-        <div class="loading-card">Loading cinema listings...</div>
+        <div class="loading-card">
+          Cinema listings are not connected yet.
+        </div>
       </div>
 
       <p class="small-note">
-        Recently released films will remain here for up to one month.
+        Cinema listings will be connected in a future update.
       </p>
     </section>
 
     <!-- FEATURED -->
-    <section class="section featured-section">
+    <section class="section featured-section" id="featured">
+
       <div class="section-heading">
         <div>
-          <p class="eyebrow">HANDPICKED FOR YOU</p>
+          <p class="eyebrow">THE KINORA SELECTION</p>
           <h2>Featured on KINORA</h2>
+          <p class="subheading">
+            Discover productions from our growing archive.
+          </p>
         </div>
       </div>
 
@@ -121,35 +160,80 @@
       <div class="carousel-indicators" id="carouselIndicators"></div>
     </section>
 
-    <!-- RECENTLY ADDED -->
-    <section class="section">
+    <!-- FILMS AND SERIES -->
+    <section class="section discovery-section" id="films">
+
       <div class="section-heading">
         <div>
           <p class="eyebrow">EXPLORE THE ARCHIVE</p>
-          <h2>Recently added</h2>
+          <h2>Films & Series</h2>
+          <p class="subheading">
+            Discover productions and the stories behind them.
+          </p>
         </div>
-        <a href="#" class="text-btn">View all →</a>
       </div>
 
-      <div class="horizontal-list" id="recentList">
-        <div class="empty-state">
-          New additions will appear here.
+      <div class="horizontal-list" id="filmList">
+        <div class="loading-card">Loading films and series...</div>
+      </div>
+
+    </section>
+
+    <!-- PEOPLE -->
+    <section class="section people-section" id="people">
+
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">BEHIND EVERY PRODUCTION</p>
+          <h2>People of KINORA</h2>
+          <p class="subheading">
+            Meet the actors and creative minds behind the screen.
+          </p>
         </div>
       </div>
+
+      <div class="people-grid" id="peopleList">
+        <div class="loading-card">Loading people...</div>
+      </div>
+
+    </section>
+
+    <!-- RECENTLY ADDED -->
+    <section class="section recent-section" id="recent">
+
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">FRESH FROM THE ARCHIVE</p>
+          <h2>Recently added</h2>
+          <p class="subheading">
+            The latest additions to the KINORA encyclopedia.
+          </p>
+        </div>
+      </div>
+
+      <div class="recent-grid" id="recentList">
+        <div class="loading-card">Loading recent additions...</div>
+      </div>
+
     </section>
 
     <!-- FOOTER -->
-    <footer class="footer">
+    <footer class="footer" id="about">
+
       <a href="index.html" class="logo">KINORA<span>.</span></a>
+
       <p>Every film has a story. Every person has a credit.</p>
 
       <div class="footer-links">
-        <a href="#">About</a>
+        <a href="#about">About</a>
         <a href="#">Privacy</a>
         <a href="#">Contact</a>
       </div>
 
-      <p class="copyright">© 2026 KINORA. All rights reserved.</p>
+      <p class="copyright">
+        © 2026 KINORA. All rights reserved.
+      </p>
+
     </footer>
 
   </main>
