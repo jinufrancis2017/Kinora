@@ -10,23 +10,16 @@
 <script src="config.js"></script>
 <style>
 :root{
-  --bg:#090b12;
-  --panel:rgba(25,31,46,.76);
-  --inner:rgba(10,15,26,.78);
-  --border:rgba(180,195,225,.14);
-  --text:#f3f5fb;
-  --muted:#9ba7bd;
-  --accent:var(--kinora-accent,#c7f36b);
-  --danger:#ff8997;
+  --bg:#090b12;--panel:rgba(25,31,46,.76);--inner:rgba(10,15,26,.78);
+  --border:rgba(180,195,225,.14);--text:#f3f5fb;--muted:#9ba7bd;
+  --accent:var(--kinora-accent,#c7f36b);--danger:#ff8997;
 }
 *{box-sizing:border-box}
 body{
-  margin:0;min-height:100vh;color:var(--text);
-  font-family:Arial,sans-serif;
-  background:
-    radial-gradient(ellipse at 15% 0%,rgba(110,105,255,.15),transparent 38%),
-    radial-gradient(ellipse at 90% 25%,rgba(80,190,170,.09),transparent 35%),
-    linear-gradient(145deg,#090b12,#101522 55%,#090b12);
+  margin:0;min-height:100vh;color:var(--text);font-family:Arial,sans-serif;
+  background:radial-gradient(ellipse at 15% 0%,rgba(110,105,255,.15),transparent 38%),
+  radial-gradient(ellipse at 90% 25%,rgba(80,190,170,.09),transparent 35%),
+  linear-gradient(145deg,#090b12,#101522 55%,#090b12);
 }
 button,input,textarea,select{font:inherit}
 button{cursor:pointer}
@@ -54,20 +47,20 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
 .panel-heading h2{font-size:21px;margin:0}
 .count{font-size:12px;color:var(--muted)}
 .help{margin:12px 0 24px}
-.field{margin:18px 0}
+.field{margin:18px 0;position:relative}
 .field label,.field-label{
   display:block;color:var(--muted);font-size:10px;font-weight:900;
   letter-spacing:1.2px;margin-bottom:9px
 }
 .field input,.field textarea,.field select,.role-input{
   width:100%;background:var(--inner);color:var(--text);
-  border:1px solid var(--border);border-radius:12px;
-  padding:14px;outline:none;transition:.2s;
-  box-shadow:inset 0 1px 5px #0003
+  border:1px solid var(--border);border-radius:12px;padding:14px;
+  outline:none;transition:.2s;box-shadow:inset 0 1px 5px #0003
 }
 .field textarea{min-height:115px;resize:vertical;line-height:1.7}
 .field input:focus,.field textarea:focus,.field select:focus,.role-input:focus{
-  border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 13%,transparent)
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 13%,transparent)
 }
 .search-results{
   display:none;margin-top:8px;background:#111827;
@@ -79,6 +72,7 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
   border:0;border-bottom:1px solid var(--border);
   background:transparent;color:var(--text);text-align:left
 }
+.result-item:last-child{border-bottom:0}
 .result-item:hover{background:#ffffff09}
 .result-item img,.result-placeholder{
   width:45px;height:55px;object-fit:cover;border-radius:8px;
@@ -105,15 +99,13 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
 .role-input{min-height:50px;resize:vertical}
 .remove-button{
   background:#ff657510;color:var(--danger);
-  border:1px solid #ff65752c;border-radius:9px;
-  padding:8px 12px;font-size:12px
+  border:1px solid #ff65752c;border-radius:9px;padding:8px 12px;font-size:12px
 }
 .add-button{
   width:100%;margin-top:20px;min-height:56px;
   border:1px dashed color-mix(in srgb,var(--accent) 55%,transparent);
   border-radius:14px;background:color-mix(in srgb,var(--accent) 8%,transparent);
-  color:var(--accent);font-weight:800;font-size:14px;
-  transition:.2s
+  color:var(--accent);font-weight:800;font-size:14px;transition:.2s
 }
 .add-button:hover{background:color-mix(in srgb,var(--accent) 14%,transparent)}
 .footer-actions{display:flex;justify-content:space-between;gap:10px;margin-top:26px;flex-wrap:wrap}
@@ -121,7 +113,8 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
 .cancel-button{background:#ffffff08;color:var(--muted)}
 .submit-button{
   background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 75%,white));
-  color:#10150a;border-color:transparent;box-shadow:0 5px 22px color-mix(in srgb,var(--accent) 18%,transparent)
+  color:#10150a;border-color:transparent;
+  box-shadow:0 5px 22px color-mix(in srgb,var(--accent) 18%,transparent)
 }
 .submit-button:disabled{opacity:.5;cursor:wait}
 .status{margin-top:15px;font-size:12px;line-height:1.7;color:var(--muted);white-space:pre-wrap}
@@ -192,7 +185,10 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
   const articleId=params.get("id");
   const section=params.get("section")||"cast";
   const $=id=>document.getElementById(id);
-  const peopleSections=["cast","crew","additional_crew"];
+
+  const musicPersonFields=["music_director","composer","singer","lyricist"];
+  const musicSearchTimers={};
+  const musicSearchSequences={};
 
   const definitions={
     overview:{
@@ -228,7 +224,7 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
     },
     soundtrack:{
       title:"Music & Soundtrack",type:"list",
-      help:"Add soundtrack tracks and their music credits.",
+      help:"Add soundtrack tracks and select published People profiles for music director, composer, singer and lyricist.",
       fields:[
         ["title","Song / track title","text"],
         ["music_director","Music director","text"],
@@ -333,6 +329,23 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
     return `<div class="field"><label for="${id}">${esc(label)}</label><input id="${id}" data-field="${key}" type="${type}" value="${safe}"></div>`;
   }
 
+  function musicPersonFieldHTML(index,key,label,value){
+    const inputId=`music-${index}-${key}`;
+    const resultsId=`music-results-${index}-${key}`;
+    const selectedId=entries[index]?.[key+"_person_id"];
+    const subtitle=selectedId?"Selected from published People articles":"Search and select a published People profile";
+
+    return `
+      <div class="field">
+        <label for="${inputId}">${esc(label)} · PEOPLE SEARCH</label>
+        <input id="${inputId}" data-field="${key}" data-music-search="${key}"
+          data-music-entry="${index}" type="search" autocomplete="off"
+          placeholder="Type a person's name..." value="${esc(value||"")}">
+        <div class="search-results" id="${resultsId}"></div>
+        <div class="result-subtitle" id="music-hint-${index}-${key}">${subtitle}</div>
+      </div>`;
+  }
+
   function renderObject(){
     $("formArea").innerHTML=config.fields.map(f=>
       fieldHTML(f[0],f[1],f[2],entries[0]?.[f[0]],"object")
@@ -345,13 +358,19 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
   function renderList(){
     $("formArea").innerHTML="";
     $("addButton").hidden=false;
+
     $("memberList").innerHTML=entries.map((entry,index)=>`
       <article class="member-card" data-entry="${index}">
         <div class="member-top">
           <strong>Entry ${index+1}</strong>
           <button class="remove-button" type="button" data-remove="${index}">Remove</button>
         </div>
-        ${config.fields.map(f=>fieldHTML(f[0],f[1],f[2],entry[f[0]],"entry-"+index)).join("")}
+        ${config.fields.map(f=>{
+          if(section==="soundtrack"&&musicPersonFields.includes(f[0])){
+            return musicPersonFieldHTML(index,f[0],f[1],entry[f[0]]);
+          }
+          return fieldHTML(f[0],f[1],f[2],entry[f[0]],"entry-"+index);
+        }).join("")}
       </article>
     `).join("");
 
@@ -362,7 +381,114 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
         renderList();
       });
     });
+
+    if(section==="soundtrack"){
+      attachMusicSearch();
+    }
+
     updateCount();
+  }
+
+  function attachMusicSearch(){
+    $("memberList").querySelectorAll("[data-music-search]").forEach(input=>{
+      input.addEventListener("input",()=>{
+        const index=Number(input.dataset.musicEntry);
+        const key=input.dataset.musicSearch;
+        const query=input.value.trim();
+
+        // Typing a different name clears the previously selected profile.
+        entries[index][key]=input.value;
+        entries[index][key+"_person_id"]="";
+        entries[index][key+"_person_photo"]="";
+
+        const hint=$(`music-hint-${index}-${key}`);
+        if(hint)hint.textContent="Select a matching published People profile.";
+
+        const results=$(`music-results-${index}-${key}`);
+        clearTimeout(musicSearchTimers[index+"-"+key]);
+
+        const seq=(musicSearchSequences[index+"-"+key]||0)+1;
+        musicSearchSequences[index+"-"+key]=seq;
+
+        if(query.length<2){
+          results.classList.remove("show");
+          results.innerHTML="";
+          return;
+        }
+
+        results.innerHTML='<div style="padding:13px;color:var(--muted)">Searching People...</div>';
+        results.classList.add("show");
+
+        musicSearchTimers[index+"-"+key]=setTimeout(()=>{
+          searchMusicPeople(index,key,query,seq);
+        },350);
+      });
+    });
+  }
+
+  async function searchMusicPeople(index,key,query,seq){
+    const {data,error}=await db.from("articles")
+      .select("id,title,content_blocks")
+      .eq("category","People")
+      .eq("status","published")
+      .ilike("title","%"+query+"%")
+      .limit(10);
+
+    const results=$(`music-results-${index}-${key}`);
+    if(!results)return;
+    if(seq!==musicSearchSequences[index+"-"+key])return;
+
+    if(error){
+      results.innerHTML=`<div style="padding:13px;color:var(--danger)">Search failed: ${esc(error.message)}</div>`;
+      return;
+    }
+
+    if(!data?.length){
+      results.innerHTML='<div style="padding:13px;color:var(--muted)">No published People articles found.</div>';
+      return;
+    }
+
+    const people=data.map(a=>{
+      const p=getPersonBlock(a);
+      return {
+        person_id:a.id,
+        name:a.title,
+        person_photo:p.photo_url||p.person_photo||p.profile_photo||p.photo||""
+      };
+    });
+
+    results.innerHTML=people.map((person,i)=>{
+      const photo=imageURL(person.person_photo);
+      return `
+        <button type="button" class="result-item" data-music-result="${i}">
+          ${photo?`<img src="${esc(photo)}" alt="">`:`<span class="result-placeholder">👤</span>`}
+          <span>
+            <span class="result-name">${esc(person.name)}</span>
+            <span class="result-subtitle">Published People article</span>
+          </span>
+        </button>`;
+    }).join("");
+
+    results.querySelectorAll("[data-music-result]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        const person=people[Number(button.dataset.musicResult)];
+        const entry=entries[index];
+        if(!entry)return;
+
+        entry[key]=person.name;
+        entry[key+"_person_id"]=person.person_id;
+        entry[key+"_person_photo"]=person.person_photo||"";
+
+        const input=$(`music-${index}-${key}`);
+        if(input)input.value=person.name;
+
+        const hint=$(`music-hint-${index}-${key}`);
+        if(hint)hint.textContent="✓ Selected: "+person.name;
+
+        results.classList.remove("show");
+        results.innerHTML="";
+      });
+    });
   }
 
   function renderPeople(){
@@ -374,6 +500,7 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
       </div>`;
     $("addButton").hidden=true;
     renderPeopleList();
+
     $("peopleSearch").addEventListener("input",()=>{
       clearTimeout(searchTimer);
       const q=$("peopleSearch").value.trim();
@@ -498,6 +625,14 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
       readListFields();
       const blank={};
       config.fields.forEach(f=>blank[f[0]]="");
+
+      if(section==="soundtrack"){
+        musicPersonFields.forEach(key=>{
+          blank[key+"_person_id"]="";
+          blank[key+"_person_photo"]="";
+        });
+      }
+
       entries.push(blank);
       renderList();
     }
@@ -513,6 +648,7 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
     status.classList.remove("error");
 
     let proposed;
+
     if(config.type==="object"){
       proposed=readObjectFields();
     }else if(config.type==="people"){
@@ -530,6 +666,20 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
     }else{
       readListFields();
       proposed=entries;
+
+      if(section==="soundtrack"){
+        const missingProfile=proposed.some(entry=>
+          musicPersonFields.some(key=>
+            String(entry[key]||"").trim()&&!entry[key+"_person_id"]
+          )
+        );
+
+        if(missingProfile){
+          status.textContent="Please select a matching published People profile for every music credit you have entered.";
+          status.classList.add("error");return;
+        }
+      }
+
       if(proposed.some(entry=>config.fields.some(f=>!String(entry[f[0]]||"").trim()))){
         status.textContent="Please complete all required fields in each entry.";
         status.classList.add("error");return;
@@ -592,8 +742,6 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
     $("sectionHelp").textContent=config.help;
 
     if(config.type==="object"){
-      // Overview fields are stored directly in the film block.
-      // Box office fields are stored inside film.box_office.
       entries=[section==="overview" ? {...film} : {...(film[section]||{})}];
     }else{
       entries=Array.isArray(film[section])?film[section].map(x=>({...x})):[];
