@@ -421,13 +421,13 @@ function renderProfile(article,person){
       <div id="filmographyContent"><div class="person-empty">Finding linked films...</div></div>
     </section>
 
-    <section class="person-section">
-      <div class="section-heading">
-        <h2>Music contributions</h2>
-        <span class="section-count" id="songsCount">Loading...</span>
-      </div>
-      <div id="songsContent"><div class="person-empty">Finding soundtrack contributions...</div></div>
-    </section>
+    <section class="person-section" id="musicSection" style="display:none">
+  <div class="section-heading">
+    <h2>Music contributions</h2>
+    <span class="section-count" id="songsCount"></span>
+  </div>
+  <div id="songsContent"></div>
+</section>
 
     <footer class="person-footer">KINORA · An independent encyclopedia of cinema</footer>
   `;
