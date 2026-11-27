@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-  <script src="header.js" defer></script>
+<script src="header.js" defer></script>
 <script src="app.js" defer></script>
 
 <style>
@@ -135,6 +135,8 @@ a{color:inherit;text-decoration:none}
 </main>
 
 <script>
+"use strict";
+
 const db=window.supabase.createClient(
   window.KINORA_CONFIG.SUPABASE_URL,
   window.KINORA_CONFIG.SUPABASE_ANON_KEY
@@ -178,6 +180,8 @@ function formatDate(value){
   return String(value);
 }
 
+/* FILMOGRAPHY */
+
 function getRoleEntries(film,personId){
   const entries=[];
   const sections=[
@@ -188,24 +192,29 @@ function getRoleEntries(film,personId){
 
   sections.forEach(section=>{
     const people=Array.isArray(film[section.key])?film[section.key]:[];
+
     people.forEach(person=>{
       if(String(person.person_id||"")!==String(personId))return;
 
       let roles=[];
+
       if(section.key==="cast"){
         roles=["Actor"];
       }else{
         const role=String(person.position||person.role||section.fallback);
         roles=role.split(",").map(item=>item.trim()).filter(Boolean);
       }
+
       entries.push(...roles);
     });
   });
+
   return [...new Set(entries)];
 }
 
 function renderFilmCard(film){
   const poster=safeImage(film.poster);
+
   const posterHTML=poster
     ?`<img class="film-poster" src="${esc(poster)}" alt="${esc(film.title)}" loading="lazy">`
     :`<div class="film-poster-placeholder">🎬</div>`;
@@ -221,84 +230,41 @@ function renderFilmCard(film){
   `;
 }
 
-
 function renderRoleGroups(entries){
-  const host = $("filmographyContent");
+  const host=$("filmographyContent");
 
-  if(!host) return;
+  if(!host)return;
 
   if(!entries.length){
-    host.innerHTML = `<div class="person-empty">No linked published films yet.</div>`;
+    host.innerHTML=`<div class="person-empty">No linked published films yet.</div>`;
     return;
   }
 
-  const groups = {};
+  const groups={};
 
-  entries.forEach(entry => {
-    entry.roles.forEach(role => {
-      const key = role.trim().toLowerCase();
+  entries.forEach(entry=>{
+    entry.roles.forEach(role=>{
+      const key=role.trim().toLowerCase();
 
       if(!groups[key]){
-        groups[key] = {name:role, films:[]};
+        groups[key]={name:role,films:[]};
       }
 
-      if(!groups[key].films.some(film => film.id === entry.id)){
+      if(!groups[key].films.some(film=>film.id===entry.id)){
         groups[key].films.push(entry);
       }
     });
   });
 
-  const sortedGroups = Object.values(groups).sort(
-    (a,b) => a.name.localeCompare(b.name)
+  const sortedGroups=Object.values(groups).sort(
+    (a,b)=>a.name.localeCompare(b.name)
   );
 
-  host.innerHTML = sortedGroups.map((group,index) => {
-    group.films.sort((a,b) =>
-      String(b.year || "").localeCompare(String(a.year || ""))
+  host.innerHTML=sortedGroups.map((group,index)=>{
+    group.films.sort((a,b)=>
+      String(b.year||"").localeCompare(String(a.year||""))
     );
 
-    const visible = group.films.slice(0,5);
-
-    return `
-      <section class="role-section">
-        <div class="role-heading">
-          <h3>${esc(group.name)}</h3>
-          <div class="role-line"></div>
-          <span class="section-count">${group.films.length} films</span>
-        </div>
-
-        <div class="film-grid" id="roleGrid${index}">
-          ${visible.map(renderFilmCard).join("")}
-        </div>
-
-        ${group.films.length > 5 ? `
-          <button class="show-all" type="button"
-            onclick="toggleRoleFilms(${index})"
-            id="roleButton${index}">
-            Show all ${group.films.length} films
-          </button>
-        ` : ""}
-      </section>
-    `;
-  }).join("");
-
-  window.__kinoraRoleGroups = sortedGroups;
-}
-
-
-  const groups={};
-  entries.forEach(entry=>{
-    entry.roles.forEach(role=>{
-      const key=role.trim().toLowerCase();
-      if(!groups[key])groups[key]={name:role,films:[]};
-      if(!groups[key].films.some(film=>film.id===entry.id))groups[key].films.push(entry);
-    });
-  });
-
-  const sortedGroups=Object.values(groups).sort((a,b)=>a.name.localeCompare(b.name));
-
-  host.innerHTML=sortedGroups.map((group,index)=>{
-    group.films.sort((a,b)=>String(b.year||"").localeCompare(String(a.year||"")));
     const visible=group.films.slice(0,5);
 
     return `
@@ -308,11 +274,15 @@ function renderRoleGroups(entries){
           <div class="role-line"></div>
           <span class="section-count">${group.films.length} films</span>
         </div>
+
         <div class="film-grid" id="roleGrid${index}">
           ${visible.map(renderFilmCard).join("")}
         </div>
+
         ${group.films.length>5?`
-          <button class="show-all" type="button" onclick="toggleRoleFilms(${index})" id="roleButton${index}">
+          <button class="show-all" type="button"
+            onclick="toggleRoleFilms(${index})"
+            id="roleButton${index}">
             Show all ${group.films.length} films
           </button>
         `:""}
@@ -324,36 +294,53 @@ function renderRoleGroups(entries){
 }
 
 window.toggleRoleFilms=function(index){
-  const group=window.__kinoraRoleGroups[index];
+  const group=window.__kinoraRoleGroups?.[index];
   const grid=document.getElementById("roleGrid"+index);
   const button=document.getElementById("roleButton"+index);
+
   if(!group||!grid||!button)return;
 
   const expanded=button.dataset.expanded==="true";
-  grid.innerHTML=(expanded?group.films.slice(0,5):group.films).map(renderFilmCard).join("");
+
+  grid.innerHTML=(expanded?group.films.slice(0,5):group.films)
+    .map(renderFilmCard).join("");
+
   button.dataset.expanded=String(!expanded);
-  button.textContent=expanded?`Show all ${group.films.length} films`:"Show less";
+  button.textContent=expanded
+    ?`Show all ${group.films.length} films`
+    :"Show less";
 };
 
 /* SONG CONTRIBUTIONS */
+
 function getTrackCredits(song,arrayKey,legacyKey){
   const value=song[arrayKey];
+
   if(Array.isArray(value)){
     return value.map(person=>{
-      if(typeof person==="string")return {name:person.trim(),person_id:""};
-      return {name:String(person?.name||"").trim(),person_id:String(person?.person_id||"")};
+      if(typeof person==="string"){
+        return {name:person.trim(),person_id:""};
+      }
+
+      return {
+        name:String(person?.name||"").trim(),
+        person_id:String(person?.person_id||"")
+      };
     }).filter(person=>person.name);
   }
 
   const legacyName=String(song[legacyKey]||"").trim();
   const legacyId=String(song[legacyKey+"_person_id"]||"");
+
   if(!legacyName||!legacyId)return [];
+
   return [{name:legacyName,person_id:legacyId}];
 }
 
 function getSongContributions(film,article){
   const songs=[];
   const tracks=Array.isArray(film.soundtrack)?film.soundtrack:[];
+
   const roles=[
     {arrayKey:"singers",legacyKey:"singer",label:"Singer"},
     {arrayKey:"lyricists",legacyKey:"lyricist",label:"Lyricist"}
@@ -361,14 +348,19 @@ function getSongContributions(film,article){
 
   tracks.forEach((track,index)=>{
     const matchedRoles=[];
+
     roles.forEach(role=>{
       const people=getTrackCredits(track,role.arrayKey,role.legacyKey);
-      if(people.some(person=>String(person.person_id)===String(personId))){
+
+      if(people.some(person=>
+        String(person.person_id)===String(personId)
+      )){
         matchedRoles.push(role.label);
       }
     });
 
     if(!matchedRoles.length)return;
+
     songs.push({
       id:article.id+"-"+index,
       title:track.title||track.name||"Untitled track",
@@ -380,23 +372,26 @@ function getSongContributions(film,article){
       roles:matchedRoles
     });
   });
+
   return songs;
 }
 
 function renderSongs(songs){
-  function renderSongs(songs){
   const section=$("musicSection");
   const host=$("songsContent");
   const count=$("songsCount");
 
-  // Hide the entire section when there are no contributions.
+  if(!section||!host||!count)return;
+
+  // Hide the entire section if there are no linked song credits.
   if(!songs.length){
     section.style.display="none";
     host.innerHTML="";
+    count.textContent="";
     return;
   }
 
-  // Show only when actual contributions exist.
+  // Only show the section when contributions actually exist.
   section.style.display="";
   count.textContent=`${songs.length} ${songs.length===1?"song":"songs"}`;
 
@@ -407,65 +402,39 @@ function renderSongs(songs){
           <div class="songs-icon">♫</div>
           <div>
             <div class="songs-summary-title">Songs</div>
-            <div class="songs-summary-count">${songs.length} ${songs.length===1?"song":"songs"} credited to this person</div>
+            <div class="songs-summary-count">
+              ${songs.length} ${songs.length===1?"song":"songs"} credited to this person
+            </div>
           </div>
         </div>
         <span class="songs-chevron">⌄</span>
       </summary>
-      <div class="songs-content">
-        ${songs.map(song=>{
-          const cover=safeImage(song.albumCover);
-          return `
-            <article class="song-entry">
-              ${cover
-                ?`<img class="song-cover" src="${esc(cover)}" alt="${esc(song.filmTitle)} soundtrack cover" loading="lazy">`
-                :`<div class="song-cover-placeholder">♫</div>`}
-              <div class="song-entry-info">
-                <div class="song-entry-title">${esc(song.title)}</div>
-                <a class="song-entry-film" href="film.html?id=${encodeURIComponent(song.filmId)}">
-                  ${esc(song.filmTitle)}${song.year?" · "+esc(song.year):""}
-                </a>
-                <div class="song-entry-meta">
-                  ${song.roles.map(role=>`<span class="song-role-tag">${esc(role)}</span>`).join("")}
-                  ${song.duration?`<span class="song-duration">${esc(song.duration)}</span>`:""}
-                </div>
-              </div>
-            </article>
-          `;
-        }).join("")}
-      </div>
-    </details>
-  `;
-  }
 
-  host.innerHTML=`
-    <details class="songs-dropdown">
-      <summary>
-        <div class="songs-summary-left">
-          <div class="songs-icon">♫</div>
-          <div>
-            <div class="songs-summary-title">Songs</div>
-            <div class="songs-summary-count">${songs.length} ${songs.length===1?"song":"songs"} credited to this person</div>
-          </div>
-        </div>
-        <span class="songs-chevron">⌄</span>
-      </summary>
       <div class="songs-content">
         ${songs.map(song=>{
           const cover=safeImage(song.albumCover);
+
           return `
             <article class="song-entry">
               ${cover
                 ?`<img class="song-cover" src="${esc(cover)}" alt="${esc(song.filmTitle)} soundtrack cover" loading="lazy">`
                 :`<div class="song-cover-placeholder">♫</div>`}
+
               <div class="song-entry-info">
                 <div class="song-entry-title">${esc(song.title)}</div>
+
                 <a class="song-entry-film" href="film.html?id=${encodeURIComponent(song.filmId)}">
                   ${esc(song.filmTitle)}${song.year?" · "+esc(song.year):""}
                 </a>
+
                 <div class="song-entry-meta">
-                  ${song.roles.map(role=>`<span class="song-role-tag">${esc(role)}</span>`).join("")}
-                  ${song.duration?`<span class="song-duration">${esc(song.duration)}</span>`:""}
+                  ${song.roles.map(role=>
+                    `<span class="song-role-tag">${esc(role)}</span>`
+                  ).join("")}
+
+                  ${song.duration
+                    ?`<span class="song-duration">${esc(song.duration)}</span>`
+                    :""}
                 </div>
               </div>
             </article>
@@ -475,6 +444,8 @@ function renderSongs(songs){
     </details>
   `;
 }
+
+/* PERSON PROFILE */
 
 function renderProfile(article,person){
   const photo=safeImage(person.photo_url||person.person_photo||"");
@@ -489,17 +460,26 @@ function renderProfile(article,person){
 
   $("personPage").innerHTML=`
     <a class="person-back" href="index.html">← Back to KINORA</a>
+
     <section class="person-hero">
       <div class="person-photo-wrap">
         ${photo
           ?`<img class="person-photo" src="${esc(photo)}" alt="${esc(article.title)}">`
           :`<div class="person-photo-placeholder">👤</div>`}
       </div>
+
       <div class="person-details">
         <div class="person-label">KINORA · PEOPLE</div>
         <h1 class="person-name">${esc(article.title)}</h1>
-        ${occupation?`<div class="person-occupation">${esc(occupation)}</div>`:""}
-        ${person.bio||person.biography?`<div class="person-bio">${esc(person.bio||person.biography)}</div>`:""}
+
+        ${occupation
+          ?`<div class="person-occupation">${esc(occupation)}</div>`
+          :""}
+
+        ${person.bio||person.biography
+          ?`<div class="person-bio">${esc(person.bio||person.biography)}</div>`
+          :""}
+
         ${facts.length?`
           <div class="person-facts">
             ${facts.map(fact=>`
@@ -510,8 +490,11 @@ function renderProfile(article,person){
             `).join("")}
           </div>
         `:""}
+
         <div class="person-actions">
-          <a class="edit-profile-btn" href="person-editor.html?id=${encodeURIComponent(article.id)}">✎ Edit profile</a>
+          <a class="edit-profile-btn" href="person-editor.html?id=${encodeURIComponent(article.id)}">
+            ✎ Edit profile
+          </a>
         </div>
       </div>
     </section>
@@ -521,20 +504,28 @@ function renderProfile(article,person){
         <h2>Filmography</h2>
         <span class="section-count" id="filmCount">Loading...</span>
       </div>
-      <div id="filmographyContent"><div class="person-empty">Finding linked films...</div></div>
+
+      <div id="filmographyContent">
+        <div class="person-empty">Finding linked films...</div>
+      </div>
     </section>
 
     <section class="person-section" id="musicSection" style="display:none">
-  <div class="section-heading">
-    <h2>Music contributions</h2>
-    <span class="section-count" id="songsCount"></span>
-  </div>
-  <div id="songsContent"></div>
-</section>
+      <div class="section-heading">
+        <h2>Music contributions</h2>
+        <span class="section-count" id="songsCount"></span>
+      </div>
 
-    <footer class="person-footer">KINORA · An independent encyclopedia of cinema</footer>
+      <div id="songsContent"></div>
+    </section>
+
+    <footer class="person-footer">
+      KINORA · An independent encyclopedia of cinema
+    </footer>
   `;
 }
+
+/* LOAD FILMOGRAPHY AND MUSIC */
 
 async function loadFilmography(){
   const {data,error}=await db
@@ -566,10 +557,14 @@ async function loadFilmography(){
     songEntries.push(...getSongContributions(film,article));
   });
 
-  $("filmCount").textContent=`${entries.length} ${entries.length===1?"film":"films"}`;
+  $("filmCount").textContent=
+    `${entries.length} ${entries.length===1?"film":"films"}`;
+
   renderRoleGroups(entries);
   renderSongs(songEntries);
 }
+
+/* LOAD PERSON */
 
 async function loadPerson(){
   if(!personId){
@@ -624,23 +619,32 @@ async function loadPerson(){
     try{
       await loadFilmography();
     }catch(error){
-      console.error(error);
-      $("filmographyContent").innerHTML=`
-        <div class="person-empty">
-          Could not load filmography. ${esc(error.message)}
-        </div>
-      `;
+      console.error("Could not load filmography:",error);
+
+      const filmHost=$("filmographyContent");
+      const musicSection=$("musicSection");
+
+      if(filmHost){
+        filmHost.innerHTML=`
+          <div class="person-empty">
+            Could not load filmography. ${esc(error.message)}
+          </div>
+        `;
+      }
+
       $("filmCount").textContent="";
-      $("songsContent").innerHTML=`
-        <div class="person-empty">Could not load soundtrack contributions.</div>
-      `;
-      $("songsCount").textContent="";
+
+      // Avoid showing an empty music section after a loading failure.
+      if(musicSection){
+        musicSection.style.display="none";
+      }
     }
 
     document.title=`${article.title} | KINORA`;
 
   }catch(error){
-    console.error(error);
+    console.error("Could not load person profile:",error);
+
     $("personPage").innerHTML=`
       <div class="person-error">
         <h1>Something went wrong</h1>
