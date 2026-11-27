@@ -221,12 +221,70 @@ function renderFilmCard(film){
   `;
 }
 
+
 function renderRoleGroups(entries){
-  const host=$("filmographyContent");
+  const host = $("filmographyContent");
+
+  if(!host) return;
+
   if(!entries.length){
-    host.innerHTML=`<div class="person-empty">No linked published films yet.</div>`;
+    host.innerHTML = `<div class="person-empty">No linked published films yet.</div>`;
     return;
   }
+
+  const groups = {};
+
+  entries.forEach(entry => {
+    entry.roles.forEach(role => {
+      const key = role.trim().toLowerCase();
+
+      if(!groups[key]){
+        groups[key] = {name:role, films:[]};
+      }
+
+      if(!groups[key].films.some(film => film.id === entry.id)){
+        groups[key].films.push(entry);
+      }
+    });
+  });
+
+  const sortedGroups = Object.values(groups).sort(
+    (a,b) => a.name.localeCompare(b.name)
+  );
+
+  host.innerHTML = sortedGroups.map((group,index) => {
+    group.films.sort((a,b) =>
+      String(b.year || "").localeCompare(String(a.year || ""))
+    );
+
+    const visible = group.films.slice(0,5);
+
+    return `
+      <section class="role-section">
+        <div class="role-heading">
+          <h3>${esc(group.name)}</h3>
+          <div class="role-line"></div>
+          <span class="section-count">${group.films.length} films</span>
+        </div>
+
+        <div class="film-grid" id="roleGrid${index}">
+          ${visible.map(renderFilmCard).join("")}
+        </div>
+
+        ${group.films.length > 5 ? `
+          <button class="show-all" type="button"
+            onclick="toggleRoleFilms(${index})"
+            id="roleButton${index}">
+            Show all ${group.films.length} films
+          </button>
+        ` : ""}
+      </section>
+    `;
+  }).join("");
+
+  window.__kinoraRoleGroups = sortedGroups;
+}
+
 
   const groups={};
   entries.forEach(entry=>{
