@@ -101,11 +101,30 @@
   }
 
   function getPoster(article) {
-    return findContentValue(
-      article.content_blocks,
-      ["poster_url", "poster"]
-    );
-  }
+  return findContentValue(
+    article.content_blocks,
+    ["poster_url", "poster"]
+  );
+}
+
+function getPersonImage(article) {
+  return findContentValue(
+    article.content_blocks,
+    [
+      "profile_image",
+      "profile_image_url",
+      "profile_photo",
+      "profile_photo_url",
+      "photo_url",
+      "image_url",
+      "avatar_url",
+      "portrait_url",
+      "headshot",
+      "photo",
+      "image"
+    ]
+  );
+}
 
   function getOccupation(article) {
     return findContentValue(
