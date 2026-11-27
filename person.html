@@ -180,23 +180,25 @@ a { color: inherit; text-decoration: none; }
   background: var(--person-border);
 }
 
+/* COMPACT FILMOGRAPHY */
+
 .film-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
-  gap: 17px;
+  grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+  gap: 12px;
 }
 
 .film-card {
   min-width: 0;
   overflow: hidden;
-  border-radius: 13px;
+  border-radius: 10px;
   background: var(--person-card);
   border: 1px solid var(--person-border);
   transition: transform .2s, border-color .2s;
 }
 
 .film-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-3px);
   border-color: var(--person-accent);
 }
 
@@ -215,21 +217,23 @@ a { color: inherit; text-decoration: none; }
   place-items: center;
   color: var(--person-muted);
   background: #202431;
-  font-size: 30px;
+  font-size: 25px;
 }
 
-.film-info { padding: 12px; }
+.film-info {
+  padding: 8px;
+}
 
 .film-title {
-  font-size: 13px;
-  line-height: 1.4;
+  font-size: 11px;
+  line-height: 1.35;
   font-weight: 700;
 }
 
 .film-year {
   color: var(--person-muted);
-  font-size: 11px;
-  margin-top: 6px;
+  font-size: 10px;
+  margin-top: 4px;
 }
 
 .show-all {
@@ -291,12 +295,18 @@ a { color: inherit; text-decoration: none; }
 
   .person-name { font-size: 36px; }
 
-  .person-facts { grid-template-columns: 1fr 1fr; }
+  .person-facts {
+    grid-template-columns: 1fr 1fr;
+  }
 
   .film-grid {
-    grid-template-columns: repeat(2, minmax(0,1fr));
-    gap: 12px;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 9px;
   }
+
+  .film-info { padding: 7px; }
+  .film-title { font-size: 10px; }
+  .film-year { font-size: 9px; }
 }
 </style>
 </head>
@@ -332,9 +342,12 @@ function esc(value) {
 
 function safeImage(url) {
   if (!url) return "";
+
   try {
     const parsed = new URL(url);
-    return ["https:", "http:"].includes(parsed.protocol) ? parsed.href : "";
+    return ["https:", "http:"].includes(parsed.protocol)
+      ? parsed.href
+      : "";
   } catch {
     return "";
   }
@@ -345,7 +358,8 @@ function getBlocks(article) {
     return article.content_blocks;
   }
 
-  if (article.content_blocks && typeof article.content_blocks === "object") {
+  if (article.content_blocks &&
+      typeof article.content_blocks === "object") {
     return [article.content_blocks];
   }
 
@@ -384,7 +398,9 @@ function getRoleEntries(film, personId) {
       : [];
 
     people.forEach(person => {
-      if (String(person.person_id || "") !== String(personId)) return;
+      if (String(person.person_id || "") !== String(personId)) {
+        return;
+      }
 
       let role = "";
 
@@ -405,16 +421,25 @@ function getRoleEntries(film, personId) {
 
 function renderFilmCard(film) {
   const poster = safeImage(film.poster);
+
   const posterHTML = poster
-    ? `<img class="film-poster" src="${esc(poster)}" alt="${esc(film.title)}" loading="lazy">`
+    ? `<img class="film-poster"
+        src="${esc(poster)}"
+        alt="${esc(film.title)}"
+        loading="lazy">`
     : `<div class="film-poster-placeholder">🎬</div>`;
 
   return `
-    <a class="film-card" href="film.html?id=${encodeURIComponent(film.id)}">
+    <a class="film-card"
+       href="film.html?id=${encodeURIComponent(film.id)}">
+
       ${posterHTML}
+
       <div class="film-info">
         <div class="film-title">${esc(film.title)}</div>
-        ${film.year ? `<div class="film-year">${esc(film.year)}</div>` : ""}
+        ${film.year
+          ? `<div class="film-year">${esc(film.year)}</div>`
+          : ""}
       </div>
     </a>
   `;
@@ -464,10 +489,13 @@ function renderRoleGroups(entries) {
 
     return `
       <section class="role-section">
+
         <div class="role-heading">
           <h3>${esc(group.name)}</h3>
           <div class="role-line"></div>
-          <span class="section-count">${group.films.length} films</span>
+          <span class="section-count">
+            ${group.films.length} films
+          </span>
         </div>
 
         <div class="film-grid" id="roleGrid${index}">
@@ -475,12 +503,14 @@ function renderRoleGroups(entries) {
         </div>
 
         ${group.films.length > 5 ? `
-          <button class="show-all" type="button"
+          <button class="show-all"
+            type="button"
             onclick="toggleRoleFilms(${index})"
             id="roleButton${index}">
             Show all ${group.films.length} films
           </button>
         ` : ""}
+
       </section>
     `;
   }).join("");
@@ -503,13 +533,17 @@ window.toggleRoleFilms = function(index) {
   ).map(renderFilmCard).join("");
 
   button.dataset.expanded = String(!expanded);
+
   button.textContent = expanded
     ? `Show all ${group.films.length} films`
     : "Show less";
 };
 
 function renderProfile(article, person) {
-  const photo = safeImage(person.photo_url || person.person_photo || "");
+  const photo = safeImage(
+    person.photo_url || person.person_photo || ""
+  );
+
   const occupation = person.occupation || person.subtitle || "";
 
   const facts = [
@@ -520,26 +554,40 @@ function renderProfile(article, person) {
   ].filter(item => item[1]);
 
   $("personPage").innerHTML = `
-    <a class="person-back" href="index.html">← Back to KINORA</a>
+    <a class="person-back" href="index.html">
+      ← Back to KINORA
+    </a>
 
     <section class="person-hero">
+
       <div class="person-photo-wrap">
         ${photo
-          ? `<img class="person-photo" src="${esc(photo)}" alt="${esc(article.title)}">`
+          ? `<img class="person-photo"
+              src="${esc(photo)}"
+              alt="${esc(article.title)}">`
           : `<div class="person-photo-placeholder">👤</div>`
         }
       </div>
 
       <div class="person-details">
+
         <div class="person-label">KINORA · PEOPLE</div>
-        <h1 class="person-name">${esc(article.title)}</h1>
+
+        <h1 class="person-name">
+          ${esc(article.title)}
+        </h1>
+
         ${occupation
-          ? `<div class="person-occupation">${esc(occupation)}</div>`
+          ? `<div class="person-occupation">
+              ${esc(occupation)}
+            </div>`
           : ""
         }
 
         ${person.bio || person.biography
-          ? `<div class="person-bio">${esc(person.bio || person.biography)}</div>`
+          ? `<div class="person-bio">
+              ${esc(person.bio || person.biography)}
+            </div>`
           : ""
         }
 
@@ -547,24 +595,36 @@ function renderProfile(article, person) {
           <div class="person-facts">
             ${facts.map(fact => `
               <div class="person-fact">
-                <div class="person-fact-label">${esc(fact[0])}</div>
-                <div class="person-fact-value">${esc(fact[1])}</div>
+                <div class="person-fact-label">
+                  ${esc(fact[0])}
+                </div>
+
+                <div class="person-fact-value">
+                  ${esc(fact[1])}
+                </div>
               </div>
             `).join("")}
           </div>
         ` : ""}
+
       </div>
     </section>
 
     <section class="person-section">
+
       <div class="section-heading">
         <h2>Filmography</h2>
-        <span class="section-count" id="filmCount">Loading...</span>
+        <span class="section-count" id="filmCount">
+          Loading...
+        </span>
       </div>
 
       <div id="filmographyContent">
-        <div class="person-empty">Finding linked films...</div>
+        <div class="person-empty">
+          Finding linked films...
+        </div>
       </div>
+
     </section>
 
     <footer class="person-footer">
@@ -612,7 +672,9 @@ async function loadPerson() {
       <div class="person-error">
         <h1>Profile not found</h1>
         <p>No person ID was provided.</p>
-        <a class="person-back" href="index.html">← Back to KINORA</a>
+        <a class="person-back" href="index.html">
+          ← Back to KINORA
+        </a>
       </div>
     `;
     return;
@@ -634,7 +696,9 @@ async function loadPerson() {
         <div class="person-error">
           <h1>Profile unavailable</h1>
           <p>This People article may not be published or may not exist.</p>
-          <a class="person-back" href="index.html">← Back to KINORA</a>
+          <a class="person-back" href="index.html">
+            ← Back to KINORA
+          </a>
         </div>
       `;
       return;
@@ -648,11 +712,14 @@ async function loadPerson() {
       await loadFilmography();
     } catch (error) {
       console.error(error);
+
       $("filmographyContent").innerHTML = `
         <div class="person-empty">
-          Could not load filmography. ${esc(error.message)}
+          Could not load filmography.
+          ${esc(error.message)}
         </div>
       `;
+
       $("filmCount").textContent = "";
     }
 
@@ -665,7 +732,9 @@ async function loadPerson() {
       <div class="person-error">
         <h1>Something went wrong</h1>
         <p>${esc(error.message)}</p>
-        <a class="person-back" href="index.html">← Back to KINORA</a>
+        <a class="person-back" href="index.html">
+          ← Back to KINORA
+        </a>
       </div>
     `;
   }
