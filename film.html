@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +9,7 @@
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-  <script src="header.js" defer></script>
+<script src="header.js" defer></script>
 <script src="app.js" defer></script>
 
 <style>
@@ -394,6 +393,103 @@ button{font:inherit;cursor:pointer}
     }catch(e){return ""}
   }
 
+  // Convert country names or ISO country codes into flag emoji automatically.
+  const countryCodes={
+    "india":"IN","united states":"US","united states of america":"US",
+    "usa":"US","united kingdom":"GB","uk":"GB","great britain":"GB",
+    "south korea":"KR","korea, republic of":"KR","republic of korea":"KR",
+    "north korea":"KP","china":"CN","japan":"JP","canada":"CA",
+    "australia":"AU","new zealand":"NZ","france":"FR","germany":"DE",
+    "italy":"IT","spain":"ES","portugal":"PT","netherlands":"NL",
+    " belgium":"BE","switzerland":"CH","sweden":"SE","norway":"NO",
+    "denmark":"DK","finland":"FI","ireland":"IE","iceland":"IS",
+    "russia":"RU","ukraine":"UA","poland":"PL","turkey":"TR",
+    "united arab emirates":"AE","uae":"AE","saudi arabia":"SA",
+    "qatar":"QA","kuwait":"KW","oman":"OM","bahrain":"BH",
+    "pakistan":"PK","bangladesh":"BD","sri lanka":"LK","nepal":"NP",
+    "indonesia":"ID","malaysia":"MY","singapore":"SG","thailand":"TH",
+    "vietnam":"VN","philippines":"PH","taiwan":"TW","hong kong":"HK",
+    "south africa":"ZA","nigeria":"NG","kenya":"KE","egypt":"EG",
+    "morocco":"MA","brazil":"BR","mexico":"MX","argentina":"AR",
+    "colombia":"CO","chile":"CL","peru":"PE","jamaica":"JM",
+    "greece":"GR","austria":"AT","czech republic":"CZ","czechia":"CZ",
+    "romania":"RO","hungary":"HU","israel":"IL","iran":"IR",
+    "iraq":"IQ","afghanistan":"AF","bhutan":"BT","maldives":"MV"
+  };
+
+  function countryFlag(country){
+    const raw=String(country||"").trim();
+    if(!raw) return "🌍";
+    let code=raw.toUpperCase();
+    if(!/^[A-Z]{2}$/.test(code)){
+      code=countryCodes[raw.toLowerCase()]||"";
+    }
+    if(!code) return "🌍";
+    return String.fromCodePoint(
+      ...[...code].map(char=>127397+char.charCodeAt(0))
+    );
+  }
+
+  // Streaming service marks are loaded from Simple Icons using the platform name.
+  const platformSlugs={
+    "netflix":"netflix",
+    "amazon prime video":"primevideo",
+    "prime video":"primevideo",
+    "amazon prime":"primevideo",
+    "disney+":"disneyplus",
+    "disney plus":"disneyplus",
+    "disney+ hotstar":"hotstar",
+    "hotstar":"hotstar",
+    "jiohotstar":"hotstar",
+    "jio cinema":"jiocinema",
+    "jiocinema":"jiocinema",
+    "zee5":"zee5",
+    "sonyliv":"sonyliv",
+    "sony liv":"sonyliv",
+    "aha":"aha",
+    "sunnxt":"sunnxt",
+    "sun nxt":"sunnxt",
+    "apple tv+":"appletv",
+    "apple tv plus":"appletv",
+    "apple tv":"appletv",
+    "hbo max":"hbomax",
+    "max":"max",
+    "paramount+":"paramountplus",
+    "paramount plus":"paramountplus",
+    "peacock":"peacock",
+    "mubi":"mubi",
+    "youtube":"youtube",
+    "youtube movies":"youtubemusic"
+  };
+
+  function platformIcon(platform){
+    const name=String(platform||"").trim();
+    const slug=platformSlugs[name.toLowerCase()];
+    return slug ? "https://cdn.simpleicons.org/"+slug : "";
+  }
+
+  function renderStudioDetails(studios){
+    if(studios && typeof studios==="object" && !Array.isArray(studios)){
+      const production=studios.production_house||
+        studios.production_companies||studios.production_company||
+        studios.studios||"";
+      const distribution=studios.distribution||studios.distributor||"";
+      return dataRows([
+        ["Production House",Array.isArray(production)?production.join(", "):production],
+        ["Distribution",Array.isArray(distribution)?distribution.join(", "):distribution]
+      ]);
+    }
+
+    if(Array.isArray(studios)){
+      return dataRows(studios.map((studio,index)=>[
+        "Studio "+(index+1),
+        typeof studio==="string"?studio:studio?.name
+      ]));
+    }
+
+    return dataRows([["Production House",studios]]);
+  }
+
   // Fetch current profile photos so Film articles don't keep displaying old cached URLs.
   async function refreshPeoplePhotos(film){
     const sections=["cast","crew","additional_crew"];
@@ -449,6 +545,8 @@ button{font:inherit;cursor:pointer}
     return film;
   }
 
+  // Arrays are rendered in their saved order. The Film Editor's move controls
+  // reorder these arrays before submission, so the public page reflects that order.
   function renderPeople(items,type){
     if(!items.length) return showEmpty("No "+type.toLowerCase()+" information available yet.");
 
@@ -529,7 +627,7 @@ button{font:inherit;cursor:pointer}
       <div class="film-list">
         ${items.map(item=>`
           <div class="film-list-item">
-            <div class="film-list-icon">${esc(item.flag||"🌍")}</div>
+            <div class="film-list-icon">${esc(countryFlag(item.country))}</div>
             <div>
               <strong>${esc(item.country||"Unknown country")}</strong>
               <small>${esc(item.date||"Date unavailable")}${item.certification?" · "+esc(item.certification):""}</small>
@@ -546,11 +644,11 @@ button{font:inherit;cursor:pointer}
     return `
       <div class="film-list">
         ${items.map(item=>{
-          const icon=safeImage(item.icon||"");
+          const icon=platformIcon(item.platform);
           return `
             <div class="film-list-item">
               ${icon
-                ? `<img src="${esc(icon)}" alt="" style="width:43px;height:43px;border-radius:50%" loading="lazy">`
+                ? `<img src="${esc(icon)}" alt="" style="width:43px;height:43px;object-fit:contain;padding:8px;border-radius:50%;background:#fff" loading="lazy" onerror="this.outerHTML='<div class=&quot;film-list-icon&quot;>${esc((item.platform||"?").charAt(0).toUpperCase())}</div>'">`
                 : `<div class="film-list-icon">${esc((item.platform||"?").charAt(0).toUpperCase())}</div>`}
               <div>
                 <strong>${esc(item.platform||"Platform")}</strong>
@@ -869,12 +967,10 @@ button{font:inherit;cursor:pointer}
 
       <section class="film-section">
         <div class="film-section-heading">
-          <h2>Production companies / Studios</h2>
+          <h2>Production &amp; Distribution</h2>
           <button class="film-edit-button" data-edit="studios" type="button">Suggest edit</button>
         </div>
-        ${Array.isArray(studios)
-          ? dataRows(studios.map((s,i)=>["Studio "+(i+1),typeof s==="string"?s:s.name]))
-          : dataRows([["Studios",studios]])}
+        ${renderStudioDetails(studios)}
       </section>
 
       <nav class="film-tabs" role="tablist" aria-label="More film information">
@@ -1007,17 +1103,19 @@ button{font:inherit;cursor:pointer}
       host.innerHTML='<div class="film-error">This article does not contain valid film information.</div>';
       return;
     }
-// Record one visit to this published film page.
-const {error:viewError} = await db
-  .from("page_views")
-  .insert({
-    article_id: article.id,
-    category: "Film"
-  });
 
-if(viewError){
-  console.warn("Could not record film page view:", viewError);
-}
+    // Record one visit to this published film page.
+    const {error:viewError} = await db
+      .from("page_views")
+      .insert({
+        article_id: article.id,
+        category: "Film"
+      });
+
+    if(viewError){
+      console.warn("Could not record film page view:",viewError);
+    }
+
     await refreshPeoplePhotos(film);
     render(article,film);
 
