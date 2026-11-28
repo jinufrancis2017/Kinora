@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -101,6 +100,14 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
   background:#ff657510;color:var(--danger);
   border:1px solid #ff65752c;border-radius:9px;padding:8px 12px;font-size:12px
 }
+.entry-actions{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.move-button{
+  min-width:34px;height:32px;padding:0 9px;border:1px solid var(--border);
+  border-radius:8px;background:#ffffff08;color:var(--text);font-size:15px;font-weight:800
+}
+.move-button:hover:not(:disabled){border-color:var(--accent);color:var(--accent);background:#ffffff10}
+.move-button:disabled{opacity:.25;cursor:not-allowed}
+.member-top{flex-wrap:wrap}
 .add-button{
   width:100%;margin-top:20px;min-height:56px;
   border:1px dashed color-mix(in srgb,var(--accent) 55%,transparent);
@@ -279,9 +286,12 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
       help:"Search for published People articles and select an existing crew position, or add a new one."
     },
     studios:{
-      title:"Studios",type:"list",
-      help:"Add or remove production companies and studios.",
-      fields:[["name","Studio / production company","text"]]
+      title:"Production & Distribution",type:"object",
+      help:"Enter the production house and the film's distribution company. You do not need to provide logos or icons.",
+      fields:[
+        ["production_house","Production House","text"],
+        ["distribution","Distribution","text"]
+      ]
     },
     soundtrack:{
       title:"Music & Soundtrack",type:"list",
@@ -297,8 +307,7 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
       fields:[
         ["country","Country","text"],
         ["date","Theatrical release date","date"],
-        ["certification","Certification","text"],
-        ["flag","Flag (optional emoji)","text"]
+        ["certification","Certification","text"]
       ]
     },
     digital_releases:{
@@ -306,8 +315,7 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
       help:"Add streaming platforms and their digital release dates.",
       fields:[
         ["platform","Platform","text"],
-        ["date","Digital release date","date"],
-        ["icon","Platform icon URL (optional)","url"]
+        ["date","Digital release date","date"]
       ]
     },
     awards:{
@@ -497,7 +505,11 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
       <article class="member-card track-card" data-entry="${index}">
         <div class="member-top">
           <strong>Track ${String(index+1).padStart(2,"0")}</strong>
-          <button class="remove-button" type="button" data-remove="${index}">Remove</button>
+          <div class="entry-actions">
+            <button class="move-button" type="button" data-move-up="${index}" aria-label="Move track up" ${index===0?"disabled":""}>↑</button>
+            <button class="move-button" type="button" data-move-down="${index}" aria-label="Move track down" ${index===entries.length-1?"disabled":""}>↓</button>
+            <button class="remove-button" type="button" data-remove="${index}">Remove</button>
+          </div>
         </div>
         <div class="track-fields">
           <div class="field">
@@ -512,6 +524,8 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
         ${Object.keys(creditFields).map(key=>renderCreditGroup(index,key)).join("")}
       </article>
     `).join("");
+
+    attachReorderButtons(renderSoundtrack,readListFields);
 
     $("memberList").querySelectorAll("[data-remove]").forEach(button=>{
       button.addEventListener("click",()=>{
@@ -656,11 +670,17 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
       <article class="member-card" data-entry="${index}">
         <div class="member-top">
           <strong>Entry ${index+1}</strong>
-          <button class="remove-button" type="button" data-remove="${index}">Remove</button>
+          <div class="entry-actions">
+            <button class="move-button" type="button" data-move-up="${index}" aria-label="Move entry up" ${index===0?"disabled":""}>↑</button>
+            <button class="move-button" type="button" data-move-down="${index}" aria-label="Move entry down" ${index===entries.length-1?"disabled":""}>↓</button>
+            <button class="remove-button" type="button" data-remove="${index}">Remove</button>
+          </div>
         </div>
         ${config.fields.map(f=>fieldHTML(f[0],f[1],f[2],entry[f[0]],"entry-"+index)).join("")}
       </article>
     `).join("");
+
+    attachReorderButtons(renderList,readListFields);
 
     $("memberList").querySelectorAll("[data-remove]").forEach(button=>{
       button.addEventListener("click",()=>{
@@ -704,7 +724,11 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
         <article class="member-card">
           <div class="member-top">
             <strong>Entry ${index+1}</strong>
-            <button class="remove-button" type="button" data-remove="${index}">Remove</button>
+            <div class="entry-actions">
+              <button class="move-button" type="button" data-move-up="${index}" aria-label="Move entry up" ${index===0?"disabled":""}>↑</button>
+              <button class="move-button" type="button" data-move-down="${index}" aria-label="Move entry down" ${index===entries.length-1?"disabled":""}>↓</button>
+              <button class="remove-button" type="button" data-remove="${index}">Remove</button>
+            </div>
           </div>
           <div class="member-person">
             ${photo?`<img src="${esc(photo)}" alt="">`:`<div class="member-placeholder">👤</div>`}
@@ -728,6 +752,8 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
           </div>
         </article>`;
     }).join("");
+
+    attachReorderButtons(renderPeopleList,readPeopleFields);
 
     $("memberList").querySelectorAll("[data-remove]").forEach(button=>{
       button.addEventListener("click",()=>{
@@ -871,6 +897,22 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
     });
   }
 
+  /* Reorder entries without losing any unsaved field or credit changes. */
+  function attachReorderButtons(renderFunction,readFunction){
+    $("memberList").querySelectorAll("[data-move-up],[data-move-down]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        readFunction();
+        const movingUp=button.hasAttribute("data-move-up");
+        const index=Number(movingUp?button.dataset.moveUp:button.dataset.moveDown);
+        const target=index+(movingUp?-1:1);
+        if(target<0||target>=entries.length)return;
+        [entries[index],entries[target]]=[entries[target],entries[index]];
+        renderFunction();
+        updateCount();
+      });
+    });
+  }
+
   function readObjectFields(){
     const obj={};
     $("formArea").querySelectorAll("[data-field]").forEach(input=>{
@@ -956,6 +998,12 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
 
     if(config.type==="object"){
       proposed=readObjectFields();
+      if(section==="studios"){
+        proposed={
+          production_house:String(proposed.production_house||"").trim(),
+          distribution:String(proposed.distribution||"").trim()
+        };
+      }
     }else if(config.type==="people"){
       readPeopleFields();
       proposed=entries.map(p=>({
@@ -1058,7 +1106,19 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
     $("sectionHelp").textContent=config.help;
 
     if(config.type==="object"){
-      entries=[section==="overview" ? {...film} : {...(film[section]||{})}];
+      if(section==="overview"){
+        entries=[{...film}];
+      }else if(section==="studios"){
+        const oldStudios=film.studios||film.production_companies||film.production_company||[];
+        const studioObject=Array.isArray(oldStudios)
+          ? {production_house:oldStudios.map(item=>typeof item==="string"?item:(item?.name||"")).filter(Boolean).join(", "),distribution:film.distribution||film.distributor||""}
+          : (oldStudios&&typeof oldStudios==="object"?{...oldStudios}:{production_house:String(oldStudios||""),distribution:film.distribution||film.distributor||""});
+        studioObject.production_house=studioObject.production_house||studioObject.production_company||"";
+        studioObject.distribution=studioObject.distribution||studioObject.distributor||"";
+        entries=[studioObject];
+      }else{
+        entries=[{...(film[section]||{})}];
+      }
     }else{
       entries=Array.isArray(film[section])?film[section].map(x=>({...x})):[];
     }
