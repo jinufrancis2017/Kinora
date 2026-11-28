@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -171,8 +172,6 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
   border-radius:13px;margin-bottom:17px
 }
 .album-area .field{flex:1;margin:0}
-
-/* Crew role autocomplete */
 .role-field{position:relative}
 .role-suggestions{
   display:none;margin-top:7px;background:#111827;
@@ -190,7 +189,6 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
 .role-suggestion strong{color:var(--accent)}
 .role-suggestion.new-role{color:var(--accent)}
 .role-hint{font-size:10px;color:var(--muted);margin-top:7px;line-height:1.5}
-
 @media(max-width:550px){
   .topbar{padding:0 14px}
   main{margin:25px auto;padding:0 12px 50px}
@@ -399,7 +397,6 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
     return `<div class="field"><label for="${id}">${esc(label)}</label><input id="${id}" data-field="${key}" type="${type}" value="${safe}"></div>`;
   }
 
-  /* Load existing crew positions from published films. */
   async function loadKnownRoles(){
     const {data,error}=await db.from("articles")
       .select("content_blocks")
@@ -417,7 +414,6 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
     function addRole(value){
       const role=String(value||"").trim();
       if(!role)return;
-
       const key=role.toLowerCase();
       if(!roleMap.has(key))roleMap.set(key,role);
     }
@@ -428,16 +424,11 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
 
       ["crew","additional_crew"].forEach(sectionKey=>{
         const people=Array.isArray(filmBlock[sectionKey])?filmBlock[sectionKey]:[];
-
         people.forEach(person=>{
           const position=String(person.position||person.role||"").trim();
           if(!position)return;
-
           addRole(position);
-
-          position.split(",").forEach(part=>{
-            addRole(part);
-          });
+          position.split(",").forEach(part=>addRole(part));
         });
       });
     });
@@ -767,10 +758,7 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
       input.addEventListener("input",()=>{
         const index=Number(input.dataset.role);
         entries[index][config.roleKey]=input.value;
-
-        if(isCrewRoleField()){
-          showRoleSuggestions(index,input.value);
-        }
+        if(isCrewRoleField())showRoleSuggestions(index,input.value);
       });
 
       if(isCrewRoleField()){
@@ -806,7 +794,6 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
     clearTimeout(roleTimers[index]);
     const seq=(roleSequences[index]||0)+1;
     roleSequences[index]=seq;
-
     const value=String(query||"").trim();
 
     if(!value){
@@ -854,7 +841,7 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
 
       box.querySelectorAll("[data-role-new]").forEach(button=>{
         button.addEventListener("click",()=>{
-          const input=$(`role-input-${index}`)||$("memberList").querySelector(`[data-role="${index}"]`);
+          const input=$("memberList").querySelector(`[data-role="${index}"]`);
           const current=input?.value.trim()||value;
           chooseRole(index,current);
         });
@@ -897,7 +884,6 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
     });
   }
 
-  /* Reorder entries without losing any unsaved field or credit changes. */
   function attachReorderButtons(renderFunction,readFunction){
     $("memberList").querySelectorAll("[data-move-up],[data-move-down]").forEach(button=>{
       button.addEventListener("click",()=>{
@@ -929,10 +915,12 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
 
     if(seq!==searchSequence)return;
     const results=$("searchResults");
+
     if(error){
       results.innerHTML=`<div style="padding:13px;color:var(--danger)">Search failed: ${esc(error.message)}</div>`;
       return;
     }
+
     if(!data?.length){
       results.innerHTML='<div style="padding:13px;color:var(--muted)">No published People articles found.</div>';
       return;
@@ -989,15 +977,18 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
     location.href="film.html?id="+encodeURIComponent(articleId);
   });
 
+  // SUBMISSION: admins publish directly; normal users submit proposals.
   $("submitButton").addEventListener("click",async()=>{
     const status=$("status");
     const button=$("submitButton");
     status.classList.remove("error");
+    status.textContent="";
 
     let proposed;
 
     if(config.type==="object"){
       proposed=readObjectFields();
+
       if(section==="studios"){
         proposed={
           production_house:String(proposed.production_house||"").trim(),
@@ -1006,15 +997,18 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
       }
     }else if(config.type==="people"){
       readPeopleFields();
+
       proposed=entries.map(p=>({
         name:p.name,
         person_id:p.person_id,
         person_photo:p.person_photo||"",
         [config.roleKey]:String(p[config.roleKey]||"").trim()
       }));
+
       if(proposed.some(p=>!p.name||!p.person_id||!p[config.roleKey])){
         status.textContent="Please complete every member's role or position.";
-        status.classList.add("error");return;
+        status.classList.add("error");
+        return;
       }
     }else{
       readListFields();
@@ -1023,7 +1017,8 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
       if(section==="soundtrack"){
         if(proposed.some(entry=>!String(entry.title||"").trim())){
           status.textContent="Please enter a title for every track.";
-          status.classList.add("error");return;
+          status.classList.add("error");
+          return;
         }
 
         proposed=proposed.map(entry=>{
@@ -1046,38 +1041,114 @@ h1{font-size:clamp(26px,5vw,35px);margin:11px 0}
         config.fields.some(f=>!String(entry[f[0]]||"").trim())
       )){
         status.textContent="Please complete all required fields in each entry.";
-        status.classList.add("error");return;
+        status.classList.add("error");
+        return;
       }
     }
 
     const {data:{user},error:userError}=await db.auth.getUser();
+
     if(userError||!user){
       status.textContent="Please log in before submitting an edit.";
-      status.classList.add("error");return;
+      status.classList.add("error");
+      return;
     }
 
     button.disabled=true;
-    button.textContent="Submitting...";
+    button.textContent="Processing...";
 
-    const {error}=await db.from("film_section_edits").insert({
-      article_id:article.id,
-      section_key:section,
-      proposed_data:proposed,
-      status:"pending",
-      submitted_by:user.id
-    });
+    try{
+      const {data:profile,error:profileError}=await db
+        .from("profiles")
+        .select("role")
+        .eq("id",user.id)
+        .maybeSingle();
 
-    button.disabled=false;
-    button.textContent="Submit for review →";
+      if(profileError){
+        throw new Error("Could not verify account permissions: "+profileError.message);
+      }
 
-    if(error){
-      status.textContent="Submission failed: "+error.message;
-      status.classList.add("error");return;
+      const isAdmin=profile?.role==="admin";
+
+      if(isAdmin){
+        // Admins update the published film immediately.
+        const updatedBlocks=getBlocks(article).map(block=>({...block}));
+        const filmIndex=updatedBlocks.findIndex(block=>block.kind==="film");
+
+        if(filmIndex===-1){
+          throw new Error("Film data block could not be found.");
+        }
+
+        const updatedFilm={...updatedBlocks[filmIndex]};
+
+        if(section==="overview"){
+          Object.assign(updatedFilm,proposed);
+        }else if(section==="studios"){
+          updatedFilm.studios=proposed.production_house;
+          updatedFilm.production_house=proposed.production_house;
+          updatedFilm.distribution=proposed.distribution;
+        }else{
+          updatedFilm[section]=proposed;
+        }
+
+        updatedBlocks[filmIndex]=updatedFilm;
+
+        const contentToSave=Array.isArray(article.content_blocks)
+          ?updatedBlocks
+          :(article.content_blocks&&typeof article.content_blocks==="object"
+            ?updatedBlocks[0]
+            :updatedBlocks);
+
+        const {error:updateError}=await db
+          .from("articles")
+          .update({content_blocks:contentToSave})
+          .eq("id",article.id)
+          .eq("status","published");
+
+        if(updateError){
+          throw new Error("Could not publish changes: "+updateError.message);
+        }
+
+        $("editorForm").hidden=true;
+        $("successPanel").classList.add("show");
+        $("successPanel").querySelector("h2").textContent="Changes published!";
+        $("successPanel").querySelector("p").textContent=
+          "Your admin changes have been published directly to the film article.";
+        $("returnLink").href="film.html?id="+encodeURIComponent(articleId);
+
+      }else{
+        // Normal users submit a pending moderation proposal.
+        const {error:insertError}=await db
+          .from("film_section_edits")
+          .insert({
+            article_id:article.id,
+            section_key:section,
+            proposed_data:proposed,
+            status:"pending",
+            submitted_by:user.id
+          });
+
+        if(insertError){
+          throw new Error("Submission failed: "+insertError.message);
+        }
+
+        $("editorForm").hidden=true;
+        $("successPanel").classList.add("show");
+        $("successPanel").querySelector("h2").textContent="Suggestion submitted!";
+        $("successPanel").querySelector("p").textContent=
+          "Your proposed changes have been sent for moderator review. The public film page will only change after approval.";
+        $("returnLink").href="film.html?id="+encodeURIComponent(articleId);
+      }
+
+    }catch(error){
+      status.textContent=error.message||"Something went wrong.";
+      status.classList.add("error");
+      button.disabled=false;
+      button.textContent="Submit for review →";
+      return;
     }
 
-    $("editorForm").hidden=true;
-    $("successPanel").classList.add("show");
-    $("returnLink").href="film.html?id="+encodeURIComponent(articleId);
+    button.disabled=false;
   });
 
   async function init(){
